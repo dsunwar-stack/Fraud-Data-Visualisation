@@ -10,6 +10,15 @@ export type CaseType =
   | 'Money mule'
   | 'Synthetic identity'
 
+export type Category = 'impersonation' | 'falseApplication' | 'accountMisuse' | 'falseIdentity'
+export const CATEGORIES: { id: Category; name: string }[] = [
+  { id: 'impersonation', name: 'Impersonation' },
+  { id: 'falseApplication', name: 'False application' },
+  { id: 'accountMisuse', name: 'Account misuse' },
+  { id: 'falseIdentity', name: 'False identity' },
+]
+export const categoryName = (c: Category) => CATEGORIES.find(x => x.id === c)!.name
+
 export type SourceId = 'device' | 'identity' | 'consortium' | 'monitoring' | 'contact'
 
 export interface Source {
@@ -30,12 +39,15 @@ export interface Factor {
   label: string
   detail: string
   source: SourceId
+  category: Category
   points: number // contribution to the 0–100 risk score
 }
 
 export interface Finding {
+  id: string
   text: string
   source: SourceId
+  category?: Category
 }
 
 export interface Signal {
@@ -52,7 +64,14 @@ export interface CaseEvent {
 
 export interface FraudCase {
   id: string
-  customer: { name: string; email: string; phone: string; country: string; accountAgeDays: number }
+  customer: {
+    name: string; email: string; phone: string; country: string; accountAgeDays: number
+    dob: Date; age: number; addresses: string[]; electoralRoll: boolean
+    device: string; sourceOfFunds: string; income: number; accountUsage: string; creditScore: number
+  }
+  appliedAt: Date
+  categories: Record<Category, number>
+  glance: string
   type: CaseType
   score: number
   band: Band
@@ -106,6 +125,7 @@ const TYPES: CaseType[] = ['Onboarding exception', 'Account takeover', 'Payment 
 
 interface FactorTemplate {
   source: SourceId
+  category: Category
   label: string
   detail: () => string
   points: [number, number]
@@ -116,52 +136,52 @@ interface FactorTemplate {
 // Every detail states an exact count and window. The research asked for this in place of "recent" or "longstanding".
 const FACTORS: FactorTemplate[] = [
   {
-    source: 'consortium', label: 'Indirect database matches', points: [14, 22], types: 'all',
+    source: 'consortium', label: 'Indirect database matches', category: 'impersonation', points: [14, 22], types: 'all',
     detail: () => `${int(2, 4)} indirect matches to Category 01 (impersonation) filed in the last ${int(7, 30)} days.`,
     finding: () => `${int(2, 3)} Category 01 matches on the customer's email address in the last 30 days, filed by other members.`,
   },
   {
-    source: 'contact', label: 'Email does not match name', points: [6, 12], types: 'all',
+    source: 'contact', label: 'Email does not match name', category: 'impersonation', points: [6, 12], types: 'all',
     detail: () => `Email local part shares 0 of ${int(2, 3)} name tokens. Domain first seen ${int(3, 40)} days ago.`,
     finding: () => `Email address does not contain the customer's first or last name.`,
   },
   {
-    source: 'consortium', label: 'Inconsistent contact details', points: [10, 18], types: ['Onboarding exception', 'Synthetic identity', 'Money mule'],
+    source: 'consortium', label: 'Inconsistent contact details', category: 'impersonation', points: [10, 18], types: ['Onboarding exception', 'Synthetic identity', 'Money mule'],
     detail: () => `${int(2, 5)} direct clear loadings list different phone numbers. Oldest is ${int(13, 36)} months old, newest ${int(4, 20)} days old.`,
     finding: () => `${int(2, 4)} direct clear loadings (${int(13, 30)}–${int(31, 60)} months old) show contact details that differ from the application.`,
   },
   {
-    source: 'device', label: 'Jailbroken or rooted device', points: [12, 20], types: 'all',
+    source: 'device', label: 'Jailbroken or rooted device', category: 'falseIdentity', points: [12, 20], types: 'all',
     detail: () => `Device integrity check failed with ${int(2, 3)} root indicators. Device seen on ${int(1, 6)} other customer profiles.`,
     finding: () => `The customer's device is jailbroken.`,
   },
   {
-    source: 'device', label: 'New device and location', points: [8, 15], types: ['Account takeover', 'Payment fraud'],
+    source: 'device', label: 'New device and location', category: 'accountMisuse', points: [8, 15], types: ['Account takeover', 'Payment fraud'],
     detail: () => `First login from this device ${int(5, 90)} minutes before the event, ${int(300, 1900)} km from the last session.`,
     finding: () => `Login from a new device ${int(400, 1800)} km from usual location within 2 hours of a password reset.`,
   },
   {
-    source: 'identity', label: 'Document check passed manually', points: [8, 14], types: ['Onboarding exception', 'Synthetic identity'],
+    source: 'identity', label: 'Document check passed manually', category: 'falseApplication', points: [8, 14], types: ['Onboarding exception', 'Synthetic identity'],
     detail: () => `A document submission was passed manually with an authenticity score of ${int(62, 86)}/100 (auto-pass is 90).`,
     finding: () => `One document submission was manually passed with a score of ${int(70, 88)}.`,
   },
   {
-    source: 'monitoring', label: 'Rapid movement of funds', points: [12, 22], types: ['Money mule', 'Payment fraud'],
+    source: 'monitoring', label: 'Rapid movement of funds', category: 'accountMisuse', points: [12, 22], types: ['Money mule', 'Payment fraud'],
     detail: () => `£${int(2, 18)},${int(100, 999)} received and ${int(85, 99)}% moved out within ${int(6, 55)} minutes, to ${int(3, 9)} new payees.`,
     finding: () => `${int(85, 99)}% of incoming funds left the account within one hour, to new payees.`,
   },
   {
-    source: 'monitoring', label: 'Payee added after password reset', points: [10, 16], types: ['Account takeover'],
+    source: 'monitoring', label: 'Payee added after password reset', category: 'accountMisuse', points: [10, 16], types: ['Account takeover'],
     detail: () => `New payee added ${int(3, 25)} minutes after a password reset done through the self-service flow.`,
     finding: () => `New payee created within 30 minutes of a credential change.`,
   },
   {
-    source: 'contact', label: 'Recently ported phone number', points: [6, 12], types: ['Account takeover', 'Synthetic identity'],
+    source: 'contact', label: 'Recently ported phone number', category: 'falseIdentity', points: [6, 12], types: ['Account takeover', 'Synthetic identity'],
     detail: () => `Mobile number ported to a new network ${int(1, 9)} days ago. SIM age ${int(1, 9)} days.`,
     finding: () => `Mobile number was ported ${int(2, 8)} days before the event.`,
   },
   {
-    source: 'identity', label: 'Thin credit file', points: [6, 12], types: ['Synthetic identity', 'Onboarding exception'],
+    source: 'identity', label: 'Thin credit file', category: 'falseApplication', points: [6, 12], types: ['Synthetic identity', 'Onboarding exception'],
     detail: () => `Credit footprint starts ${int(4, 14)} months ago, with ${int(1, 3)} accounts opened in the last 90 days.`,
     finding: () => `Credit history is less than 12 months old.`,
   },
@@ -181,7 +201,7 @@ const UNALIGNED: { source: SourceId; text: () => string }[] = [
   { source: 'contact', text: () => `Email domain is a privacy relay. This is common and not in itself suspicious.` },
 ]
 
-const signalsFor = (c: Pick<FraudCase, 'band' | 'customer'>): Record<SourceId, Signal[]> => {
+const signalsFor = (c: { band: Band; customer: { accountAgeDays: number; email: string; phone: string } }): Record<SourceId, Signal[]> => {
   const hi = c.band === 'high'
   const md = c.band === 'medium'
   return {
@@ -231,6 +251,21 @@ function makeCase(i: number): FraudCase {
     country: pick(COUNTRIES),
     accountAgeDays: type === 'Onboarding exception' ? 0 : int(3, 2400),
   }
+  const age = int(21, 72)
+  const dob = new Date(Date.UTC(2026 - age, int(0, 11), int(1, 28)))
+  const streets = ['Harbour Row', 'Mill Lane', 'Ashgrove Road', 'Kingfisher Way', 'Station Approach', 'Elm Terrace', 'Canal Street']
+  const towns = ['Leeds LS2', 'Bristol BS1', 'Glasgow G2', 'Norwich NR1', 'Cardiff CF10', 'York YO1', 'Hull HU1']
+  const nAddr = int(1, 3)
+  const profile = {
+    ...customer, dob, age,
+    addresses: Array.from({ length: nAddr }, () => `${int(2, 180)} ${pick(streets)}, ${pick(towns)} ${int(1, 9)}${pick(['AB', 'QT', 'XR', 'DN', 'LP'])}`),
+    electoralRoll: false,
+    device: pick(['iPhone 15', 'iPhone 12', 'Pixel 8', 'Galaxy S23', 'Galaxy A14', 'Desktop · Chrome', 'Desktop · Safari']),
+    sourceOfFunds: pick(['Salary', 'Salary', 'Self-employed income', 'Investments', 'Savings', 'Gift or inheritance']),
+    income: int(14, 140) * 1000,
+    accountUsage: pick(['Everyday spending', 'Savings', 'Travel', 'Business payments', 'Receiving salary']),
+    creditScore: 0,
+  }
   const candidates = shuffle(FACTORS.filter(f => f.types === 'all' || f.types.includes(type)))
   // skew the population toward medium and low
   const r = rnd()
@@ -240,11 +275,18 @@ function makeCase(i: number): FraudCase {
   for (const f of candidates) {
     if (score >= target) break
     const p = int(f.points[0], f.points[1])
-    factors.push({ label: f.label, detail: f.detail(), source: f.source, points: p })
+    factors.push({ label: f.label, detail: f.detail(), source: f.source, category: f.category, points: p })
     score += p
   }
   score = Math.min(99, score)
   const band = bandOf(score)
+  profile.electoralRoll = band === 'high' ? rnd() < 0.3 : rnd() < 0.85
+  profile.creditScore = band === 'high' ? int(380, 620) : int(560, 960)
+  const categories = Object.fromEntries(CATEGORIES.map(k => {
+    const pts = factors.filter(f => f.category === k.id).reduce((s, f) => s + f.points, 0)
+    return [k.id, Math.min(97, Math.round(pts * 2.4 + int(3, 12)))]
+  })) as Record<Category, number>
+  const topCat = CATEGORIES.slice().sort((a, b) => categories[b.id] - categories[a.id])[0]
   const slaHours = band === 'high' ? 4 : band === 'medium' ? 24 : 48
   const status: Status = rnd() < 0.18 ? 'Decided' : pick(['New', 'New', 'In review', 'Awaiting info'] as const)
   // Open cases mostly sit inside their SLA; about 1 in 12 has slipped past it.
@@ -254,21 +296,27 @@ function makeCase(i: number): FraudCase {
   const recommended: Outcome = band === 'high' ? 'Decline' : band === 'medium' ? (rnd() < 0.5 ? 'Refer' : 'Decline') : 'Accept'
   const c: FraudCase = {
     id: `FR-${(104200 + i * 7 + int(0, 6)).toString()}`,
-    customer, type, score, band,
+    customer: profile, type, score, band, categories,
+    appliedAt: new Date(createdAt.getTime() - int(5, 90) * 60_000),
+    glance: '',
     confidence: Math.round((0.62 + rnd() * 0.35) * 100) / 100,
     createdAt, slaDueAt, status, recommended,
     owner: OWNERS[type],
     amount: type === 'Payment fraud' || type === 'Money mule' ? int(180, 24000) : null,
     factors,
     findings: {
-      substantiation: factors.map(f => ({ text: FACTORS.find(t => t.label === f.label)!.finding(), source: f.source })),
-      mitigation: shuffle([...MITIGATIONS]).slice(0, band === 'low' ? 3 : int(1, 2)).map(m => ({ text: m.text(), source: m.source })),
-      unaligned: shuffle([...UNALIGNED]).slice(0, int(0, 2)).map(m => ({ text: m.text(), source: m.source })),
+      substantiation: factors.map((f, k) => ({ id: `s${k}`, text: FACTORS.find(t => t.label === f.label)!.finding(), source: f.source, category: f.category })),
+      mitigation: shuffle([...MITIGATIONS]).slice(0, band === 'low' ? 3 : int(1, 2)).map((m, k) => ({ id: `m${k}`, text: m.text(), source: m.source })),
+      unaligned: shuffle([...UNALIGNED]).slice(0, int(0, 2)).map((m, k) => ({ id: `u${k}`, text: m.text(), source: m.source })),
     },
     signals: {} as Record<SourceId, Signal[]>,
     events: [],
   }
   c.signals = signalsFor(c)
+  const top2 = factors.slice().sort((a, b) => b.points - a.points).slice(0, 2).map(f => f.label.toLowerCase())
+  c.glance = band === 'low'
+    ? `Few adverse signals and ${c.findings.mitigation.length} mitigating checks suggest a low risk of fraud.`
+    : `${top2.join(' and ')[0].toUpperCase() + top2.join(' and ').slice(1)} suggest a ${band} risk of ${topCat.name.toLowerCase()}.`
   const t0 = createdAt.getTime()
   c.events = [
     { at: new Date(t0 - int(1, 9) * 60_000), label: `${type === 'Onboarding exception' ? 'Application' : 'Event'} received`, actor: 'Intake' },
@@ -285,18 +333,33 @@ function makeCase(i: number): FraudCase {
 
 export const CASES: FraudCase[] = Array.from({ length: 148 }, (_, i) => makeCase(i)).sort((a, b) => b.score - a.score)
 
-// ---------- time series (alerts per hour, last 48h) ----------
-export interface HourBucket { t: Date; high: number; medium: number; low: number; autoDeclined: number }
+// ---------- time series (alerts per hour, last 48h, by case type) ----------
+export interface BandCounts { high: number; medium: number; low: number; autoDeclined: number }
+export interface HourBucket { t: Date; byType: Record<CaseType, BandCounts> }
+export const CASE_TYPES = TYPES
+const TYPE_MIX: Record<CaseType, [number, number]> = {
+  // [share of volume, share that is high risk]
+  'Onboarding exception': [0.3, 0.14],
+  'Account takeover': [0.22, 0.22],
+  'Payment fraud': [0.26, 0.16],
+  'Money mule': [0.1, 0.24],
+  'Synthetic identity': [0.12, 0.18],
+}
 export const ALERTS: HourBucket[] = Array.from({ length: 48 }, (_, i) => {
   const t = new Date(NOW.getTime() - (47 - i) * 3600_000)
   const h = t.getUTCHours()
   const diurnal = 0.45 + 0.55 * Math.sin(((h - 6) / 24) * Math.PI * 2 - Math.PI / 2 + Math.PI) ** 2
   const base = 38 * diurnal + 8
-  const spike = i === 39 || i === 40 ? 2.4 : 1 // a burst of account takeover yesterday evening
-  const high = Math.round((base * 0.16 + rnd() * 3) * spike)
-  const medium = Math.round(base * 0.34 + rnd() * 5)
-  const low = Math.round(base * 0.5 + rnd() * 6)
-  return { t, high, medium, low, autoDeclined: Math.round(high * (0.55 + rnd() * 0.2)) }
+  const byType = Object.fromEntries(TYPES.map(ty => {
+    const [share, hiShare] = TYPE_MIX[ty]
+    const spike = ty === 'Account takeover' && (i === 39 || i === 40) ? 4.5 : 1 // device-cluster burst
+    const vol = base * share
+    const high = Math.round((vol * hiShare + rnd() * 1.2) * spike)
+    const medium = Math.round(vol * 0.34 + rnd() * 2)
+    const low = Math.round(vol * (0.66 - hiShare) + rnd() * 2.5)
+    return [ty, { high, medium, low, autoDeclined: Math.round(high * (0.55 + rnd() * 0.2)) }]
+  })) as Record<CaseType, BandCounts>
+  return { t, byType }
 })
 
 // ---------- source health ----------

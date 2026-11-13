@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
 import {
-  CASES, NOW, SOURCES, bandOf, fmtDateTime, fmtDur, fmtMoney, fmtTime, sourceName, sourceShort,
-  type FraudCase, type Finding, type Outcome, type SourceId,
+  CASES, CATEGORIES, NOW, SOURCES, bandOf, categoryName, fmtDateTime, fmtDur, fmtMoney, fmtTime, sourceName, sourceShort,
+  type Category, type FraudCase, type Finding, type Outcome, type SourceId,
 } from '../data'
 import { RiskGauge, bandVar } from '../components/charts'
+import { Switch } from '../components/Filters'
 
 const STEPS = ['Triage', 'Evidence', 'Review', 'Decision', 'Closed']
 
@@ -22,7 +23,14 @@ export function CaseView({ id, onBack }: { id: string; onBack: () => void }) {
 function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const [excluded, setExcluded] = useState<Set<string>>(new Set())
   const [editing, setEditing] = useState(false)
+  const [cat, setCat] = useState<Category | 'all'>('all')
+  const [srcFilter, setSrcFilter] = useState<SourceId | 'all'>('all')
   const [tab, setTab] = useState<SourceId>(c.factors[0]?.source ?? 'device')
+  const [flaggedOnly, setFlaggedOnly] = useState(false)
+  const [hideZero, setHideZero] = useState(false)
+  const [examining, setExamining] = useState<string | null>(null)
+  const [mitigated, setMitigated] = useState<Set<string>>(new Set())
+  const [feedback, setFeedback] = useState<null | 'correct' | 'incorrect'>(null)
   const [choice, setChoice] = useState<Outcome>(c.recommended)
   const [note, setNote] = useState(() => noteTemplate(c))
   const [recorded, setRecorded] = useState<null | { outcome: Outcome; at: Date }>(c.status === 'Decided' ? { outcome: c.recommended, at: c.events[c.events.length - 1].at } : null)
@@ -31,8 +39,17 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const adjBand = bandOf(adjScore)
   const base = c.score - c.factors.reduce((s, f) => s + f.points, 0)
   const left = c.slaDueAt.getTime() - NOW.getTime()
-  const stepIdx = recorded ? 4 : c.status === 'New' ? 1 : c.status === 'Awaiting info' ? 2 : 2
+  const stepIdx = recorded ? 4 : c.status === 'New' ? 1 : 2
   const usedSources = new Set(c.factors.map(f => f.source))
+  const cats = CATEGORIES.slice().sort((a, b) => c.categories[b.id] - c.categories[a.id])
+  const shownCats = hideZero ? cats.filter(k => c.factors.some(f => f.category === k.id)) : cats
+
+  const factorsShown = c.factors.filter(f => (cat === 'all' || f.category === cat) && (srcFilter === 'all' || f.source === srcFilter))
+  const inScope = (f: Finding) => (srcFilter === 'all' || f.source === srcFilter) && (cat === 'all' || !f.category || f.category === cat)
+  const subst = c.findings.substantiation.filter(f => !mitigated.has(f.id) && inScope(f))
+  const mitig = [...c.findings.mitigation.filter(inScope), ...c.findings.substantiation.filter(f => mitigated.has(f.id) && inScope(f)).map(f => ({ ...f, byAnalyst: true }))]
+  const unal = c.findings.unaligned.filter(inScope)
+  const filtering = cat !== 'all' || srcFilter !== 'all'
 
   return (
     <div className="stack">
@@ -55,6 +72,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
         </div>
       </div>
 
+      <div className={`glance glance-${c.band}`} role="note">
+        <span className="kpi-label">At a glance</span>
+        <p>{c.glance}</p>
+      </div>
+
       <ol className="stepper" aria-label="Case progress">
         {STEPS.map((s, i) => (
           <li key={s} className={i < stepIdx ? 'done' : i === stepIdx ? 'current' : ''} aria-current={i === stepIdx ? 'step' : undefined}>
@@ -65,8 +87,49 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
       </ol>
 
       <div className="case-grid">
-        {/* ---- main column ---- */}
         <div className="stack">
+          {/* ---- Risk hub ---- */}
+          <section className="card">
+            <header className="card-h">
+              <div>
+                <h2>Risk hub</h2>
+                <p className="sub">Score for each fraud type. Click <b>Go</b> to focus the summary and findings on that type.</p>
+              </div>
+              <Switch id="hub-zero" checked={hideZero} onChange={setHideZero} label="Hide types with no signals" />
+            </header>
+            <div className="hub">
+              <div className="hub-bars">
+                {shownCats.map(k => {
+                  const v = c.categories[k.id], b = bandOf(v)
+                  return (
+                    <div key={k.id} className={`hub-row ${cat === k.id ? 'active' : ''}`}>
+                      <span>{k.name}</span>
+                      <span className="barlist-track"><span className="barlist-fill" style={{ width: `${v}%`, background: bandVar(b) }} /></span>
+                      <span className="num hub-v" style={{ color: bandVar(b) }}>{v}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="hub-rings">
+                {shownCats.map(k => {
+                  const v = c.categories[k.id], b = bandOf(v), active = cat === k.id
+                  const n = c.factors.filter(f => f.category === k.id).length
+                  return (
+                    <div key={k.id} className={`ring-card ${active ? 'active' : ''}`}>
+                      <Ring value={v} color={bandVar(b)} />
+                      <div className="ring-meta">
+                        <b>{k.name}</b>
+                        <span className="muted small">{n} factor{n === 1 ? '' : 's'}</span>
+                      </div>
+                      <button className={`btn go ${active ? 'on' : ''}`} aria-pressed={active} onClick={() => setCat(active ? 'all' : k.id)}>{active ? 'Clear' : 'Go'}</button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* ---- AI summary ---- */}
           <section className="card">
             <header className="card-h">
               <div>
@@ -76,6 +139,13 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <button className="btn ghost" aria-pressed={editing} onClick={() => setEditing(e => !e)}>{editing ? 'Done editing' : 'Edit'}</button>
             </header>
 
+            {filtering && (
+              <div className="focus-bar">
+                Showing {cat !== 'all' && <b>{categoryName(cat)}</b>}{cat !== 'all' && srcFilter !== 'all' && ' from '}{srcFilter !== 'all' && <b>{sourceName(srcFilter)}</b>} only
+                <button className="link small" onClick={() => { setCat('all'); setSrcFilter('all') }}>Show everything</button>
+              </div>
+            )}
+
             <div className="summary">
               <div className="summary-score">
                 <RiskGauge score={adjScore} band={adjBand} />
@@ -84,11 +154,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               </div>
               <div className="summary-body">
                 <p className="lede">
-                  {c.factors.length} factors point to <b>{c.type === 'Onboarding exception' || c.type === 'Synthetic identity' ? 'possible impersonation' : c.type === 'Money mule' ? 'possible mule activity' : c.type === 'Account takeover' ? 'possible account takeover' : 'possible payment fraud'}</b>.
+                  {factorsShown.length} of {c.factors.length} factors shown.
                   {editing && ' Untick a factor to leave it out of the score.'}
                 </p>
                 <ul className="factors">
-                  {c.factors.map(f => {
+                  {factorsShown.map(f => {
                     const off = excluded.has(f.label)
                     return (
                       <li key={f.label} className={off ? 'off' : ''}>
@@ -97,12 +167,13 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                             onChange={() => setExcluded(s => { const n = new Set(s); if (n.has(f.label)) n.delete(f.label); else n.add(f.label); return n })} />
                         )}
                         <div>
-                          <div className="factor-h"><b>{f.label}</b><span className="tag src">{sourceShort(f.source)}</span><span className="pts num">+{f.points}</span></div>
+                          <div className="factor-h"><b>{f.label}</b><span className="tag src">{sourceShort(f.source)}</span><span className="tag">{categoryName(f.category)}</span><span className="pts num">+{f.points}</span></div>
                           <div className="factor-d">{f.detail}</div>
                         </div>
                       </li>
                     )
                   })}
+                  {!factorsShown.length && <li className="muted small">No factors for this filter.</li>}
                 </ul>
               </div>
             </div>
@@ -112,29 +183,99 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <div className="wf-bar">
                 <span style={{ width: `${base}%`, background: 'var(--track-strong)' }} title={`Baseline ${base}`} />
                 {c.factors.filter(f => !excluded.has(f.label)).map(f => (
-                  <span key={f.label} style={{ width: `${f.points}%`, background: bandVar(adjBand) }} title={`${f.label} +${f.points}`} />
+                  <span key={f.label} style={{ width: `${f.points}%`, background: bandVar(adjBand), opacity: filtering && !factorsShown.includes(f) ? 0.3 : 1 }} title={`${f.label} +${f.points}`} />
                 ))}
                 <i style={{ left: '40%' }} /><i style={{ left: '70%' }} />
               </div>
               <div className="wf-scale num"><span>0</span><span style={{ left: '40%' }}>40</span><span style={{ left: '70%' }}>70</span><span>100</span></div>
               <p className="muted small">Baseline {base} for every case, plus the points from each factor. Bands: low 0–39, medium 40–69, high 70–100.</p>
             </div>
-          </section>
 
-          <section className="card">
-            <header className="card-h"><div><h2>Findings</h2><p className="sub">Evidence for and against the fraud hypothesis</p></div></header>
-            <div className="findings">
-              <FindingCol title="Substantiation" tone="high" items={c.findings.substantiation} empty="No supporting evidence." />
-              <FindingCol title="Mitigation" tone="low" items={c.findings.mitigation} empty="Nothing found that lowers risk." />
-              <FindingCol title="Unaligned" tone="neutral" items={c.findings.unaligned} empty="No conflicting evidence." />
+            <div className="feedback">
+              <span className="small">Is this summary accurate?</span>
+              {feedback ? (
+                <span className={`small ${feedback === 'correct' ? 'txt-accept' : 'txt-refer'}`} role="status">
+                  {feedback === 'correct' ? 'Marked as correct. Thanks, this helps train the summary.' : 'Flagged for review. Add what was wrong in your note.'}
+                  <button className="link small" onClick={() => setFeedback(null)}>Undo</button>
+                </span>
+              ) : (
+                <>
+                  <button className="btn fb-yes" onClick={() => setFeedback('correct')}>This is correct</button>
+                  <button className="btn" onClick={() => setFeedback('incorrect')}>Something's wrong</button>
+                </>
+              )}
             </div>
           </section>
 
+          {/* ---- Findings ---- */}
           <section className="card">
-            <header className="card-h"><div><h2>Source evidence</h2><p className="sub">Raw signals behind the summary, so you can check them without switching systems</p></div></header>
+            <header className="card-h">
+              <div><h2>Findings</h2><p className="sub">Evidence for and against fraud. Examine an item to see its raw signals, or mitigate it once you've cleared it.</p></div>
+            </header>
+            <div className="seg" role="group" aria-label="Filter findings by source">
+              <button className="chip" aria-pressed={srcFilter === 'all'} onClick={() => setSrcFilter('all')}>All sources</button>
+              {SOURCES.map(s => (
+                <button key={s.id} className="chip" aria-pressed={srcFilter === s.id} onClick={() => setSrcFilter(srcFilter === s.id ? 'all' : s.id)}>{s.short}</button>
+              ))}
+            </div>
+            <div className="findings">
+              <div className="fcol fcol-high">
+                <div className="fcol-h">Substantiation <span className="num muted">{subst.length}</span></div>
+                {subst.length ? (
+                  <ul>
+                    {subst.map(f => (
+                      <li key={f.id}>
+                        {f.text}<span className="tag src">{sourceShort(f.source)}</span>
+                        <div className="f-actions">
+                          <button className="link small" aria-expanded={examining === f.id} onClick={() => setExamining(examining === f.id ? null : f.id)}>{examining === f.id ? 'Close' : 'Examine'}</button>
+                          <button className="link small" onClick={() => { setMitigated(s => new Set(s).add(f.id)); setExamining(null) }}>Mitigate</button>
+                        </div>
+                        {examining === f.id && (
+                          <dl className="kv compact examine">
+                            {c.signals[f.source].filter(s => s.flag).concat(c.signals[f.source].filter(s => !s.flag).slice(0, 1)).map(s => (
+                              <div key={s.key} className={s.flag ? `flag-${s.flag}` : ''}><dt>{s.key}</dt><dd className="mono">{s.value}</dd></div>
+                            ))}
+                          </dl>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p className="muted small">No supporting evidence{filtering ? ' for this filter' : ''}.</p>}
+              </div>
+              <div className="fcol fcol-low">
+                <div className="fcol-h">Mitigation <span className="num muted">{mitig.length}</span></div>
+                {mitig.length ? (
+                  <ul>
+                    {mitig.map(f => (
+                      <li key={f.id}>
+                        {f.text}<span className="tag src">{sourceShort(f.source)}</span>
+                        {'byAnalyst' in f && (
+                          <div className="f-actions"><span className="tag mitig">Mitigated by you</span>
+                            <button className="link small" onClick={() => setMitigated(s => { const n = new Set(s); n.delete(f.id); return n })}>Undo</button></div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p className="muted small">Nothing found that lowers risk.</p>}
+              </div>
+              <div className="fcol fcol-neutral">
+                <div className="fcol-h">Unaligned <span className="num muted">{unal.length}</span></div>
+                {unal.length ? (
+                  <ul>{unal.map(f => <li key={f.id}>{f.text}<span className="tag src">{sourceShort(f.source)}</span></li>)}</ul>
+                ) : <p className="muted small">No conflicting evidence.</p>}
+              </div>
+            </div>
+          </section>
+
+          {/* ---- Source evidence ---- */}
+          <section className="card">
+            <header className="card-h">
+              <div><h2>Source evidence</h2><p className="sub">Raw signals behind the summary, so you can check them without switching systems</p></div>
+              <Switch id="ev-flagged" checked={flaggedOnly} onChange={setFlaggedOnly} label="Flagged signals only" />
+            </header>
             <div className="tabs" role="tablist">
               {SOURCES.map(s => (
-                <button key={s.id} role="tab" aria-selected={tab === s.id} className={usedSources.has(s.id) ? 'has' : ''} onClick={() => setTab(s.id)}>
+                <button key={s.id} role="tab" aria-selected={tab === s.id} onClick={() => setTab(s.id)}>
                   {s.short}{usedSources.has(s.id) && <i className="dot" style={{ background: bandVar(c.band) }} />}
                 </button>
               ))}
@@ -142,18 +283,18 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             <div role="tabpanel" className="signals-panel">
               <div className="muted small">{sourceName(tab)}</div>
               <dl className="kv">
-                {c.signals[tab].map(s => (
+                {c.signals[tab].filter(s => !flaggedOnly || s.flag).map(s => (
                   <div key={s.key} className={s.flag ? `flag-${s.flag}` : ''}>
                     <dt>{s.key}</dt>
                     <dd className="mono">{s.flag && <i className="dot" style={{ background: bandVar(s.flag) }} />}{s.value}</dd>
                   </div>
                 ))}
               </dl>
+              {flaggedOnly && !c.signals[tab].some(s => s.flag) && <p className="muted small">No flagged signals from this source.</p>}
             </div>
           </section>
         </div>
 
-        {/* ---- side column ---- */}
         <aside className="stack">
           <section className="card decision">
             <h2>Decision</h2>
@@ -183,11 +324,26 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           </section>
 
           <section className="card">
-            <h2>Customer</h2>
+            <h2>Customer profile</h2>
             <dl className="kv compact">
+              <div><dt>Name</dt><dd>{c.customer.name}</dd></div>
+              <div><dt>Date of birth</dt><dd className="num">{c.customer.dob.toLocaleDateString('en-GB', { timeZone: 'UTC' })} · {c.customer.age} years</dd></div>
+              <div><dt>Address</dt><dd>
+                <ol className="addr">
+                  {c.customer.addresses.map((a, i) => (
+                    <li key={i}><span>{a}</span>{i === 0 && <span className={`tag ${c.customer.electoralRoll ? 'ok' : 'no'}`}>{c.customer.electoralRoll ? 'On electoral roll' : 'Not on electoral roll'}</span>}{i > 0 && <span className="muted small">Previous</span>}</li>
+                  ))}
+                </ol>
+              </dd></div>
+              <div><dt>Applied</dt><dd><span className="num">{fmtDateTime(c.appliedAt)} UTC</span><br /><span className={NOW.getTime() - c.appliedAt.getTime() > 24 * 3600_000 ? 'bad small' : 'muted small'}>Waiting {fmtDur(NOW.getTime() - c.appliedAt.getTime())}</span></dd></div>
               <div><dt>Email</dt><dd className="mono">{c.customer.email}</dd></div>
-              <div><dt>Phone</dt><dd className="mono">{c.customer.phone}</dd></div>
-              <div><dt>Country</dt><dd>{c.customer.country}</dd></div>
+              <div><dt>Mobile</dt><dd className="mono">{c.customer.phone}</dd></div>
+              <div><dt>Device</dt><dd>{c.customer.device}</dd></div>
+              <div><dt>Source of funds</dt><dd>{c.customer.sourceOfFunds}</dd></div>
+              <div><dt>Income</dt><dd className="num">{fmtMoney(c.customer.income)} a year</dd></div>
+              <div><dt>Account usage</dt><dd>{c.customer.accountUsage}</dd></div>
+              <div><dt>Credit score</dt><dd><span className="num">{c.customer.creditScore}</span> <span className="muted small">/ 999</span>
+                <span className="mini-track" style={{ marginLeft: 8 }}><span style={{ width: `${(c.customer.creditScore / 999) * 100}%`, background: c.customer.creditScore < 560 ? bandVar('high') : c.customer.creditScore < 720 ? bandVar('medium') : bandVar('low') }} /></span></dd></div>
               <div><dt>Account age</dt><dd className="num">{c.customer.accountAgeDays ? `${c.customer.accountAgeDays} days` : 'New application'}</dd></div>
             </dl>
           </section>
@@ -195,10 +351,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           <section className="card">
             <h2>Timeline</h2>
             <ol className="timeline">
+              {recorded && c.status !== 'Decided' && <li className="new"><span className="num t">{fmtTime(recorded.at)}</span><div><div>Outcome recorded: {recorded.outcome}</div><div className="muted small">You</div></div></li>}
+              {feedback && <li className="new"><span className="num t">{fmtTime(NOW)}</span><div><div>Summary marked {feedback === 'correct' ? 'correct' : 'for review'}</div><div className="muted small">You</div></div></li>}
               {[...c.events].reverse().map((e, i) => (
                 <li key={i}><span className="num t">{fmtTime(e.at)}</span><div><div>{e.label}</div><div className="muted small">{e.actor}</div></div></li>
               ))}
-              {recorded && c.status !== 'Decided' && <li className="new"><span className="num t">{fmtTime(recorded.at)}</span><div><div>Outcome recorded: {recorded.outcome}</div><div className="muted small">You</div></div></li>}
             </ol>
           </section>
         </aside>
@@ -207,14 +364,15 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   )
 }
 
-function FindingCol({ title, tone, items, empty }: { title: string; tone: 'high' | 'low' | 'neutral'; items: Finding[]; empty: string }) {
+function Ring({ value, color }: { value: number; color: string }) {
+  const r = 22, C = 2 * Math.PI * r
   return (
-    <div className={`fcol fcol-${tone}`}>
-      <div className="fcol-h">{title} <span className="num muted">{items.length}</span></div>
-      {items.length ? (
-        <ul>{items.map((f, i) => <li key={i}>{f.text}<span className="tag src">{sourceShort(f.source)}</span></li>)}</ul>
-      ) : <p className="muted small">{empty}</p>}
-    </div>
+    <svg width="56" height="56" viewBox="0 0 56 56" role="img" aria-label={`${value} out of 100`}>
+      <circle cx="28" cy="28" r={r} fill="none" stroke="var(--track)" strokeWidth="6" />
+      <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round"
+        strokeDasharray={`${(C * value) / 100} ${C}`} transform="rotate(-90 28 28)" />
+      <text x="28" y="32.5" textAnchor="middle" className="ring-num" fill={color}>{value}</text>
+    </svg>
   )
 }
 
@@ -222,6 +380,7 @@ function noteTemplate(c: FraudCase) {
   return [
     `Case ${c.id}, ${c.type}`,
     `Score: ${c.score}/100 (${c.band}). Recommended: ${c.recommended}.`,
+    `At a glance: ${c.glance}`,
     '',
     'Checks completed:',
     ...SOURCES.map(s => `- ${s.name}: ${c.factors.some(f => f.source === s.id) ? 'adverse, see summary' : 'reviewed, no adverse findings'}`),

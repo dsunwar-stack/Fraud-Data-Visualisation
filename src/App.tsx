@@ -3,6 +3,7 @@ import { CASES, NOW, fmtDateTime } from './data'
 import { Overview } from './views/Overview'
 import { Queue } from './views/Queue'
 import { CaseView } from './views/CaseView'
+import { DEFAULT_FILTERS, type Filters } from './components/Filters'
 
 type Route = { view: 'overview' } | { view: 'queue' } | { view: 'case'; id: string }
 
@@ -17,6 +18,7 @@ type Theme = 'light' | 'dark' | 'system'
 
 export default function App() {
   const [route, setRoute] = useState<Route>(() => parse(location.hash))
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
   const [theme, setTheme] = useState<Theme>(() => {
     try { return (localStorage.getItem('theme') as Theme) || 'system' } catch { return 'system' }
   })
@@ -76,8 +78,8 @@ export default function App() {
             <span className="live"><i />Live · updated {fmtDateTime(NOW)} UTC</span>
           </div>
         </header>
-        {route.view === 'overview' && <Overview onOpen={id => go(`case-${id}`)} />}
-        {route.view === 'queue' && <Queue onOpen={id => go(`case-${id}`)} />}
+        {route.view === 'overview' && <Overview onOpen={id => go(`case-${id}`)} filters={filters} setFilters={setFilters} />}
+        {route.view === 'queue' && <Queue onOpen={id => go(`case-${id}`)} filters={filters} setFilters={setFilters} />}
         {route.view === 'case' && <CaseView id={route.id} onBack={() => go('queue')} />}
       </main>
     </div>

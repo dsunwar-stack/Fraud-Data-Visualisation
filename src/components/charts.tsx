@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import type { Band, HourBucket } from '../data'
+import type { Band } from '../data'
+
+export interface HourPoint { t: Date; high: number; medium: number; low: number; autoDeclined: number }
 import { fmtTime } from '../data'
 
 export function useWidth<T extends HTMLElement>() {
@@ -37,11 +39,11 @@ export function Sparkline({ values, color = 'var(--primary)', height = 32 }: { v
 }
 
 // ---------- Stacked alert volume (bars per hour) ----------
-export function AlertVolume({ data }: { data: HourBucket[] }) {
+export function AlertVolume({ data, showAuto = false }: { data: HourPoint[]; showAuto?: boolean }) {
   const [ref, w] = useWidth<HTMLDivElement>()
   const [hover, setHover] = useState<number | null>(null)
   const H = 220, padL = 32, padB = 22, padT = 8
-  const max = Math.ceil(Math.max(...data.map(d => d.high + d.medium + d.low)) / 20) * 20
+  const max = Math.max(10, Math.ceil(Math.max(...data.map(d => d.high + d.medium + d.low)) / 10) * 10)
   const iw = Math.max(0, w - padL), ih = H - padB - padT
   const bw = iw / data.length
   const y = (v: number) => padT + ih - (v / max) * ih
@@ -72,8 +74,12 @@ export function AlertVolume({ data }: { data: HourBucket[] }) {
               </g>
             )
           })}
+          {showAuto && (
+            <path d={data.map((d, i) => `${i ? 'L' : 'M'}${padL + i * bw + bw / 2} ${y(d.autoDeclined)}`).join('')}
+              fill="none" stroke="var(--text)" strokeWidth={1.5} strokeDasharray="4 3" pointerEvents="none" />
+          )}
           {data.map((d, i) =>
-            d.t.getUTCHours() % 6 === 0 ? (
+            (data.length <= 12 ? d.t.getUTCHours() % 3 === 0 : d.t.getUTCHours() % 6 === 0) ? (
               <text key={'x' + i} x={padL + i * bw + bw / 2} y={H - 6} textAnchor="middle" className="axis">
                 {d.t.getUTCHours() === 0 ? d.t.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', timeZone: 'UTC' }) : fmtTime(d.t)}
               </text>

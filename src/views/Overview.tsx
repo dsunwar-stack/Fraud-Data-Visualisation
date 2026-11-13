@@ -1,52 +1,82 @@
-import { useMemo } from 'react'
-import { ALERTS, CASES, NOW, SOURCE_HEALTH, fmtDur, fmtTime, sourceName, type FraudCase } from '../data'
-import { AlertVolume, BarList, ScoreCell, ScoreHistogram, Sparkline, bandVar } from '../components/charts'
+import { useMemo, useState } from 'react'
+import { ALERTS, CASES, CASE_TYPES, NOW, SOURCE_HEALTH, fmtDur, fmtTime, sourceName, type CaseType, type FraudCase } from '../data'
+import { AlertVolume, BarList, ScoreCell, ScoreHistogram, Sparkline, bandVar, type HourPoint } from '../components/charts'
+import { FilterBar, Switch, matchCase, type Filters } from '../components/Filters'
 
 const AUTO_DECLINE = 85
 
-export function Overview({ onOpen }: { onOpen: (id: string) => void }) {
-  const open = CASES.filter(c => c.status !== 'Decided')
-  const last24 = ALERTS.slice(24)
-  const prev24 = ALERTS.slice(0, 24)
-  const sum = (a: typeof ALERTS, f: (h: (typeof ALERTS)[number]) => number) => a.reduce((s, h) => s + f(h), 0)
-  const alerts24 = sum(last24, h => h.high + h.medium + h.low)
-  const alertsPrev = sum(prev24, h => h.high + h.medium + h.low)
-  const high24 = sum(last24, h => h.high)
-  const auto24 = sum(last24, h => h.autoDeclined)
-  const slaRisk = open.filter(c => c.slaDueAt.getTime() - NOW.getTime() < 60 * 60_000)
-  const avgScore = Math.round(open.reduce((s, c) => s + c.score, 0) / open.length)
+// Flatten the per-type hourly buckets into one series that respects the type and band filters.
+function series(f: Filters): HourPoint[] {
+  const types: CaseType[] = f.type === 'all' ? CASE_TYPES : [f.type]
+  return ALERTS.map(h => {
+    const p: HourPoint = { t: h.t, high: 0, medium: 0, low: 0, autoDeclined: 0 }
+    types.forEach(t => {
+      const b = h.byType[t]
+      if (f.bands.has('high')) { p.high += b.high; p.autoDeclined += b.autoDeclined }
+      if (f.bands.has('medium')) p.medium += b.medium
+      if (f.bands.has('low')) p.low += b.low
+    })
+    return p
+  })
+}
 
-  const factorCounts = useMemo(() => {
+export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string) => void; filters: Filters; setFilters: (f: Filters) => void }) {
+  const [showAuto, setShowAuto] = useState(true)
+  const [factorMode, setFactorMode] = useState<'count' | 'points'>('count')
+  const f = filters
+  const cases = useMemo(() => CASES.filter(c => matchCase(c, f)), [f])
+  const all = useMemo(() => series(f), [f])
+  const cur = all.slice(48 - f.range)
+  const prev = f.range <= 24 ? all.slice(48 - 2 * f.range, 48 - f.range) : null
+
+  const total = (a: HourPoint[]) => a.reduce((s, h) => s + h.high + h.medium + h.low, 0)
+  const alerts = total(cur)
+  const delta = prev && total(prev) ? Math.round(((alerts - total(prev)) / total(prev)) * 100) : null
+  const high = cur.reduce((s, h) => s + h.high, 0)
+  const auto = cur.reduce((s, h) => s + h.autoDeclined, 0)
+  const open = cases.filter(c => c.status !== 'Decided')
+  const slaRisk = open.filter(c => c.slaDueAt.getTime() - NOW.getTime() < 60 * 60_000)
+  const avgScore = cases.length ? Math.round(cases.reduce((s, c) => s + c.score, 0) / cases.length) : 0
+
+  const factorRows = useMemo(() => {
     const m = new Map<string, { n: number; pts: number }>()
-    open.forEach(c => c.factors.forEach(f => {
-      const e = m.get(f.label) ?? { n: 0, pts: 0 }
-      e.n++; e.pts += f.points; m.set(f.label, e)
+    cases.forEach(c => c.factors.forEach(x => {
+      if (f.source !== 'all' && x.source !== f.source) return
+      const e = m.get(x.label) ?? { n: 0, pts: 0 }
+      e.n++; e.pts += x.points; m.set(x.label, e)
     }))
-    return [...m.entries()].sort((a, b) => b[1].n - a[1].n).slice(0, 7)
-  }, [open])
+    return [...m.entries()]
+      .map(([label, v]) => ({ label, n: v.n, avg: Math.round(v.pts / v.n) }))
+      .sort((a, b) => (factorMode === 'count' ? b.n - a.n : b.avg - a.avg))
+      .slice(0, 7)
+  }, [cases, f.source, factorMode])
 
   const byType = useMemo(() => {
     const m = new Map<string, FraudCase[]>()
-    open.forEach(c => m.set(c.type, [...(m.get(c.type) ?? []), c]))
+    cases.forEach(c => m.set(c.type, [...(m.get(c.type) ?? []), c]))
     return [...m.entries()].sort((a, b) => b[1].length - a[1].length)
-  }, [open])
+  }, [cases])
 
-  const urgent = open.filter(c => c.band === 'high').sort((a, b) => a.slaDueAt.getTime() - b.slaDueAt.getTime()).slice(0, 6)
-  const delta = Math.round(((alerts24 - alertsPrev) / alertsPrev) * 100)
+  const urgent = open.filter(c => c.band === 'high' || !f.bands.has('high')).sort((a, b) => a.slaDueAt.getTime() - b.slaDueAt.getTime()).slice(0, 6)
+  const spikeVisible = f.range >= 12 && (f.type === 'all' || f.type === 'Account takeover') && f.bands.has('high')
+  const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0)
+  const counts = { high: 0, medium: 0, low: 0 }
+  CASES.filter(c => matchCase(c, { ...f, bands: new Set(['high', 'medium', 'low']) })).forEach(c => counts[c.band]++)
 
   return (
     <div className="stack">
-      <section className="kpis" aria-label="Key metrics, last 24 hours">
-        <Kpi label="Alerts (24h)" value={alerts24.toLocaleString()} delta={`${delta > 0 ? '+' : ''}${delta}% vs prior 24h`} tone={delta > 10 ? 'bad' : 'neutral'}
-          spark={ALERTS.map(h => h.high + h.medium + h.low)} />
-        <Kpi label="High-risk alerts" value={String(high24)} delta={`${Math.round((high24 / alerts24) * 100)}% of volume`} tone="bad"
-          spark={ALERTS.map(h => h.high)} color={bandVar('high')} />
-        <Kpi label="Auto-declined" value={String(auto24)} delta={`Score ≥ ${AUTO_DECLINE}`} tone="neutral"
-          spark={ALERTS.map(h => h.autoDeclined)} />
-        <Kpi label="Open cases" value={String(open.length)} delta={`Average score ${avgScore}`} tone="neutral"
-          spark={ALERTS.map((_, i) => 120 + Math.round(Math.sin(i / 5) * 12 + i * 0.6))} />
-        <Kpi label="SLA due < 1h" value={String(slaRisk.length)} delta={`${open.filter(c => c.slaDueAt < NOW).length} already breached`} tone={slaRisk.length ? 'bad' : 'good'}
-          spark={ALERTS.map((_, i) => 4 + Math.round(Math.cos(i / 4) * 3 + (i > 36 ? 4 : 0)))} color={bandVar('medium')} />
+      <FilterBar f={f} set={setFilters} showRange counts={counts} />
+
+      <section className="kpis" aria-label={`Key metrics, last ${f.range} hours`}>
+        <Kpi label={`Alerts (${f.range}h)`} value={alerts.toLocaleString()} tone={delta != null && delta > 10 ? 'bad' : 'neutral'}
+          delta={delta == null ? 'No prior period in range' : `${delta > 0 ? '+' : ''}${delta}% vs prior ${f.range}h`} spark={cur.map(h => h.high + h.medium + h.low)} />
+        <Kpi label="High-risk alerts" value={String(high)} delta={f.bands.has('high') ? `${pct(high, alerts)}% of volume` : 'High band hidden'} tone="bad"
+          spark={cur.map(h => h.high)} color={bandVar('high')} />
+        <Kpi label="Auto-declined" value={String(auto)} delta={`Score ≥ ${AUTO_DECLINE}`} tone="neutral" spark={cur.map(h => h.autoDeclined)} />
+        <Kpi label={f.includeDecided ? 'Cases' : 'Open cases'} value={String(cases.length)} delta={cases.length ? `Average score ${avgScore}` : 'None match filters'} tone="neutral"
+          spark={cur.map((_, i) => cases.length + Math.round(Math.sin(i / 3) * Math.max(2, cases.length / 12)))} />
+        <Kpi label="SLA due < 1h" value={String(slaRisk.length)} delta={`${open.filter(c => c.slaDueAt < NOW).length} already breached`}
+          tone={slaRisk.length ? 'bad' : 'good'} spark={cur.map((_, i) => 3 + Math.round(Math.cos(i / 3) * 2))} color={bandVar('medium')} />
       </section>
 
       <section className="grid-2-1">
@@ -54,21 +84,20 @@ export function Overview({ onOpen }: { onOpen: (id: string) => void }) {
           <header className="card-h">
             <div>
               <h2>Alert volume</h2>
-              <p className="sub">Alerts per hour by risk band, last 48 hours (UTC). Hover a bar for counts.</p>
+              <p className="sub">Alerts per hour by risk band, last {f.range} hours (UTC){f.type !== 'all' ? ` · ${f.type}` : ''}. Hover a bar for counts.</p>
             </div>
-            <Legend />
+            <Switch id="ov-auto" checked={showAuto} onChange={setShowAuto} label="Auto-declined line" />
           </header>
-          <AlertVolume data={ALERTS} />
-          <p className="annotation"><span className="dot" style={{ background: bandVar('high') }} />Spike on {ALERTS[39].t.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}, {fmtTime(ALERTS[39].t)}–{fmtTime(new Date(ALERTS[40].t.getTime() + 3600_000))} UTC: {ALERTS[39].high + ALERTS[40].high} high-risk alerts, mostly account takeover from one device cluster.</p>
+          <AlertVolume data={cur} showAuto={showAuto} />
+          {spikeVisible && (
+            <p className="annotation"><span className="dot" style={{ background: bandVar('high') }} />
+              Spike on {ALERTS[39].t.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}, {fmtTime(ALERTS[39].t)}–{fmtTime(new Date(ALERTS[40].t.getTime() + 3600_000))} UTC: {ALERTS[39].byType['Account takeover'].high + ALERTS[40].byType['Account takeover'].high} high-risk account takeover alerts from one device cluster.
+            </p>
+          )}
         </div>
         <div className="card">
-          <header className="card-h">
-            <div>
-              <h2>Risk score distribution</h2>
-              <p className="sub">{open.length} open cases, scored 0–100</p>
-            </div>
-          </header>
-          <ScoreHistogram scores={open.map(c => c.score)} threshold={AUTO_DECLINE} />
+          <header className="card-h"><div><h2>Risk score distribution</h2><p className="sub">{cases.length} cases, scored 0–100</p></div></header>
+          {cases.length ? <ScoreHistogram scores={cases.map(c => c.score)} threshold={AUTO_DECLINE} /> : <Empty />}
           <dl className="bands">
             <div><dt><i className="dot" style={{ background: bandVar('high') }} />High</dt><dd>70–100 · SLA 4h</dd></div>
             <div><dt><i className="dot" style={{ background: bandVar('medium') }} />Medium</dt><dd>40–69 · SLA 24h</dd></div>
@@ -79,29 +108,55 @@ export function Overview({ onOpen }: { onOpen: (id: string) => void }) {
 
       <section className="grid-3">
         <div className="card">
-          <header className="card-h"><div><h2>Top risk factors</h2><p className="sub">How many open cases each factor appears in</p></div></header>
-          <BarList rows={factorCounts.map(([label, v]) => ({ label, value: v.n, display: `${v.n}` }))} />
+          <header className="card-h">
+            <div><h2>Top risk factors</h2><p className="sub">{factorMode === 'count' ? 'Number of cases each factor appears in' : 'Average points each factor adds to the score'}</p></div>
+            <div className="segmented sm" role="group" aria-label="Rank factors by">
+              <button aria-pressed={factorMode === 'count'} onClick={() => setFactorMode('count')}>Cases</button>
+              <button aria-pressed={factorMode === 'points'} onClick={() => setFactorMode('points')}>Points</button>
+            </div>
+          </header>
+          {factorRows.length
+            ? <BarList rows={factorRows.map(r => ({ label: r.label, value: factorMode === 'count' ? r.n : r.avg, display: factorMode === 'count' ? String(r.n) : `+${r.avg}` }))} />
+            : <Empty />}
         </div>
         <div className="card">
-          <header className="card-h"><div><h2>Cases by type</h2><p className="sub">Open cases, coloured by share of high risk</p></div></header>
-          <BarList rows={byType.map(([label, cs]) => {
-            const hi = cs.filter(c => c.band === 'high').length / cs.length
-            return { label, value: cs.length, display: `${cs.length} · ${Math.round(hi * 100)}% high`, color: hi > 0.3 ? bandVar('high') : hi > 0.15 ? bandVar('medium') : 'var(--primary)' }
-          })} />
+          <header className="card-h"><div><h2>Cases by type</h2><p className="sub">Click a type to filter the dashboard</p></div></header>
+          {byType.length ? (
+            <div className="barlist">
+              {byType.map(([label, cs]) => {
+                const hi = cs.filter(c => c.band === 'high').length / cs.length
+                const max = Math.max(...byType.map(b => b[1].length))
+                const active = f.type === label
+                return (
+                  <button key={label} className={`barlist-row as-btn ${active ? 'active' : ''}`} aria-pressed={active}
+                    onClick={() => setFilters({ ...f, type: active ? 'all' : (label as CaseType) })}>
+                    <span className="barlist-label">{label}</span>
+                    <span className="barlist-track"><span className="barlist-fill" style={{ width: `${(cs.length / max) * 100}%`, background: hi > 0.3 ? bandVar('high') : hi > 0.15 ? bandVar('medium') : 'var(--primary)' }} /></span>
+                    <span className="barlist-val num">{cs.length} · {Math.round(hi * 100)}% high</span>
+                  </button>
+                )
+              })}
+            </div>
+          ) : <Empty />}
         </div>
         <div className="card">
-          <header className="card-h"><div><h2>Data source health</h2><p className="sub">Hits, precision and p95 latency, last 24h</p></div></header>
+          <header className="card-h"><div><h2>Data source health</h2><p className="sub">Click a source to filter cases that cite it</p></div></header>
           <table className="mini">
             <thead><tr><th>Source</th><th className="r">Hits</th><th className="r">Precision</th><th className="r">p95</th></tr></thead>
             <tbody>
-              {SOURCE_HEALTH.map(s => (
-                <tr key={s.id}>
-                  <td><span className={`status-dot ${s.status}`} title={s.status === 'ok' ? 'Healthy' : 'Degraded'} />{sourceName(s.id)}</td>
-                  <td className="r num">{s.hits24h.toLocaleString()}</td>
-                  <td className="r num">{Math.round(s.precision * 100)}%</td>
-                  <td className={`r num ${s.status === 'degraded' ? 'warn' : ''}`}>{s.latencyP95.toLocaleString()} ms</td>
-                </tr>
-              ))}
+              {SOURCE_HEALTH.map(s => {
+                const active = f.source === s.id
+                return (
+                  <tr key={s.id} className={`clickable ${active ? 'selected' : ''}`} tabIndex={0} aria-selected={active}
+                    onClick={() => setFilters({ ...f, source: active ? 'all' : s.id })}
+                    onKeyDown={e => e.key === 'Enter' && setFilters({ ...f, source: active ? 'all' : s.id })}>
+                    <td><span className={`status-dot ${s.status}`} title={s.status === 'ok' ? 'Healthy' : 'Degraded'} />{sourceName(s.id)}</td>
+                    <td className="r num">{Math.round((s.hits24h * f.range) / 24).toLocaleString()}</td>
+                    <td className="r num">{Math.round(s.precision * 100)}%</td>
+                    <td className={`r num ${s.status === 'degraded' ? 'warn' : ''}`}>{s.latencyP95.toLocaleString()} ms</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
           <p className="annotation"><span className="status-dot degraded" />ID document verification is degraded: 98.2% uptime, slower responses since 09:40.</p>
@@ -109,34 +164,36 @@ export function Overview({ onOpen }: { onOpen: (id: string) => void }) {
       </section>
 
       <section className="card">
-        <header className="card-h">
-          <div><h2>Needs attention</h2><p className="sub">High-risk cases closest to their SLA</p></div>
-        </header>
-        <div className="table-wrap">
-          <table className="data">
-            <thead><tr><th>Case</th><th>Customer</th><th>Type</th><th>Risk</th><th>Top factor</th><th className="r">SLA</th><th>Recommended</th></tr></thead>
-            <tbody>
-              {urgent.map(c => {
-                const left = c.slaDueAt.getTime() - NOW.getTime()
-                return (
-                  <tr key={c.id} className="clickable" onClick={() => onOpen(c.id)} tabIndex={0} onKeyDown={e => e.key === 'Enter' && onOpen(c.id)}>
-                    <td className="mono">{c.id}</td>
-                    <td>{c.customer.name}</td>
-                    <td>{c.type}</td>
-                    <td><ScoreCell score={c.score} band={c.band} /></td>
-                    <td className="muted">{c.factors[0]?.label}</td>
-                    <td className={`r num ${left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>{left < 0 ? `Breached ${fmtDur(-left)}` : fmtDur(left)}</td>
-                    <td><span className={`outcome outcome-${c.recommended.toLowerCase()}`}>{c.recommended}</span></td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <header className="card-h"><div><h2>Needs attention</h2><p className="sub">{f.bands.has('high') ? 'High-risk' : 'Matching'} cases closest to their SLA</p></div></header>
+        {urgent.length ? (
+          <div className="table-wrap">
+            <table className="data">
+              <thead><tr><th>Case</th><th>Customer</th><th>Type</th><th>Risk</th><th>Top factor</th><th className="r">SLA</th><th>Recommended</th></tr></thead>
+              <tbody>
+                {urgent.map(c => {
+                  const left = c.slaDueAt.getTime() - NOW.getTime()
+                  return (
+                    <tr key={c.id} className={`clickable band-${c.band}`} onClick={() => onOpen(c.id)} tabIndex={0} onKeyDown={e => e.key === 'Enter' && onOpen(c.id)}>
+                      <td className="mono">{c.id}</td>
+                      <td>{c.customer.name}</td>
+                      <td>{c.type}</td>
+                      <td><ScoreCell score={c.score} band={c.band} /></td>
+                      <td className="muted">{c.factors[0]?.label}</td>
+                      <td className={`r num ${left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>{left < 0 ? `Breached ${fmtDur(-left)}` : fmtDur(left)}</td>
+                      <td><span className={`outcome outcome-${c.recommended.toLowerCase()}`}>{c.recommended}</span></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : <Empty />}
       </section>
     </div>
   )
 }
+
+const Empty = () => <p className="muted small empty-inline">Nothing matches these filters. Clear a filter to see data.</p>
 
 function Kpi({ label, value, delta, tone, spark, color }: { label: string; value: string; delta: string; tone: 'good' | 'bad' | 'neutral'; spark: number[]; color?: string }) {
   return (
@@ -145,16 +202,6 @@ function Kpi({ label, value, delta, tone, spark, color }: { label: string; value
       <span className="kpi-value num">{value}</span>
       <span className={`kpi-delta ${tone}`}>{delta}</span>
       <Sparkline values={spark} color={color} />
-    </div>
-  )
-}
-
-export function Legend() {
-  return (
-    <div className="legend">
-      <span><i className="dot" style={{ background: bandVar('high') }} />High</span>
-      <span><i className="dot" style={{ background: bandVar('medium') }} />Medium</span>
-      <span><i className="dot" style={{ background: bandVar('low') }} />Low</span>
     </div>
   )
 }
