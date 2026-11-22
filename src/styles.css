@@ -744,3 +744,14 @@ tr.clickable:hover .fs-link { text-decoration: underline; }
 .fs-crumb-sep { margin: 0 8px; color: var(--muted); }
 .fs-breadcrumb .slds-breadcrumb__item { display: inline-flex; align-items: center; }
 .fs-page-header .slds-page-header__detail-row { background: transparent; }
+
+/* Top risk factors: both measures on every row */
+.fs-h-info { display: flex; align-items: center; gap: 2px; }
+.fs-sort-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fs-two-val { white-space: nowrap; color: var(--muted); }
+.fs-two-val b { font-weight: var(--slds-g-font-weight-4); }
+.fs-two-val b.on { color: var(--heading); font-weight: var(--slds-g-font-weight-6); }
+.fs-factors .barlist-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label val" "bar bar"; row-gap: 4px; }
+.fs-factors .barlist-label { grid-area: label; white-space: normal; }
+.fs-factors .barlist-val { grid-area: val; }
+.fs-factors .fs-progress { grid-area: bar; }

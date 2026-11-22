@@ -21,6 +21,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [9](#round-9-slds-2-design-system) | Use the SLDS 2 design system (Agentic Experiences) | SLDS 2 components and styling hooks; agentic cards and human feedback on AI content | [`round-9`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-9) |
 | [10](#round-10-slds-2-component-rules) | Follow SLDS 2 component rules for everything | Cosmos theme, page headers, vertical navigation, button groups, SLDS cards, progress bars, activity timeline, SLDS typography | [`round-10`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-10) |
 | [11](#round-11-navigation-active-state) | Why is there a half circle beside the active menu item? | Let SLDS 2 draw the vertical navigation's active state | [`round-11`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-11) |
+| [12](#round-12-top-risk-factors-explained) | What do Cases and Points mean in Top risk factors? | Both measures on every row, "Most common / Biggest impact" sort, info icon | [`round-12`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-12) |
 
 To run any round locally:
 
@@ -248,6 +249,26 @@ The original terms were kept because fraud specialists use them; the plain label
 | Before | After |
 |---|---|
 | ![Navigation before](round-11-nav-before.png) | ![Navigation after](round-11-nav-after.png) |
+
+---
+
+## Round 12: Top risk factors explained
+
+> **Feedback:** "On the Top risk factors, what do Cases and Points mean?"
+
+**The answer:** *Cases* is how many cases a factor appears in (how common it is). *Points* is the average number of points it adds to a case's 0–100 risk score when it appears (how serious it is). The screen only showed one of these at a time, under one-word labels.
+
+**What changed**
+- Every row shows **both numbers**, e.g. "85 cases · +15 pts". The one being sorted by is in bold.
+- The switch is now **"Sort by: Most common | Biggest impact"**.
+- An **ⓘ** next to the title explains both measures, and that a factor can be common but minor, or rare but serious.
+- Factor names sit on their own line above the bar, so they're never cut off.
+
+**Principles:** say what a number measures; show related numbers together; buttons say what they do.
+
+| Sorted by most common | Info popup |
+|---|---|
+| ![Top risk factors](round-12-top-risk-factors.png) | ![Top risk factors help](round-12-top-risk-factors-help.png) |
 
 ---
 

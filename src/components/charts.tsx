@@ -191,14 +191,14 @@ export function RiskGauge({ score, band, size = 132 }: { score: number; band: Ba
 }
 
 // ---------- Horizontal bar list ----------
-export function BarList({ rows }: { rows: { label: ReactNode; value: number; display?: string; color?: string }[] }) {
+export function BarList({ rows }: { rows: { label: ReactNode; value: number; display?: ReactNode; color?: string }[] }) {
   const max = Math.max(...rows.map(r => r.value), 1)
   return (
     <div className="barlist">
       {rows.map((r, i) => (
         <div className="barlist-row" key={i}>
           <div className="barlist-label">{r.label}</div>
-          <ProgressBar value={(r.value / max) * 100} color={r.color ?? 'var(--viz-brand)'} label={`${typeof r.label === 'string' ? r.label : 'Value'}: ${r.display ?? r.value}`} />
+          <ProgressBar value={(r.value / max) * 100} color={r.color ?? 'var(--viz-brand)'} label={`${typeof r.label === 'string' ? r.label : 'Value'}: ${r.value}`} />
           <div className="barlist-val num">{r.display ?? r.value}</div>
         </div>
       ))}

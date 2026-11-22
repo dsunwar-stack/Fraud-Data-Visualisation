@@ -3,6 +3,7 @@ import { ALERTS, CASES, CASE_TYPES, NOW, SOURCE_HEALTH, fmtDateTime, fmtDur, fmt
 import { AlertVolume, BarList, ScoreCell, ScoreHistogram, Sparkline, bandVar, type HourPoint } from '../components/charts'
 import { FilterBar, Switch, matchCase, type Filters } from '../components/Filters'
 import { PageHeader, ProgressBar, RadioButtonGroup } from '../components/slds'
+import { InfoTip } from '../components/InfoTip'
 
 const AUTO_DECLINE = 85
 
@@ -124,12 +125,25 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
       <section className="grid-3">
         <div className="slds-card card">
           <header className="card-h">
-            <div><h2>Top risk factors</h2><p className="sub">{factorMode === 'count' ? 'Number of cases each factor appears in' : 'Average points each factor adds to the score'}</p></div>
-            <RadioButtonGroup name="factor-mode" legend="Rank factors by" size="small" value={factorMode} onChange={setFactorMode}
-              options={[{ value: 'count' as const, label: 'Cases' }, { value: 'points' as const, label: 'Points' }]} />
+            <div>
+              <h2 className="fs-h-info">Top risk factors
+                <InfoTip label="Top risk factors">
+                  <span><b>Most common</b> ranks factors by how many cases they appear in.</span>
+                  <span><b>Biggest impact</b> ranks them by the average points they add to a case's risk score (0–100) when they appear.</span>
+                  <span className="infotip-ex">A factor can be common but minor, or rare but serious.</span>
+                </InfoTip>
+              </h2>
+              <p className="sub">{factorMode === 'count' ? 'Sorted by how many cases each factor appears in' : 'Sorted by the average points each factor adds to the risk score'}</p>
+            </div>
           </header>
+          <div className="fs-sort-row">
+            <span className="kpi-label" id="factor-sort-label">Sort by</span>
+            <RadioButtonGroup name="factor-mode" legend="Sort risk factors by" size="small" value={factorMode} onChange={setFactorMode}
+              options={[{ value: 'count' as const, label: 'Most common' }, { value: 'points' as const, label: 'Biggest impact' }]} />
+          </div>
           {factorRows.length
-            ? <BarList rows={factorRows.map(r => ({ label: r.label, value: factorMode === 'count' ? r.n : r.avg, display: factorMode === 'count' ? String(r.n) : `+${r.avg}` }))} />
+            ? <div className="fs-factors"><BarList rows={factorRows.map(r => ({ label: r.label, value: factorMode === 'count' ? r.n : r.avg,
+                display: <span className="fs-two-val"><b className={factorMode === 'count' ? 'on' : ''}>{r.n} cases</b> · <b className={factorMode === 'points' ? 'on' : ''}>+{r.avg} pts</b></span> }))} /></div>
             : <Empty />}
         </div>
         <div className="slds-card card">
