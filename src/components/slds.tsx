@@ -75,7 +75,7 @@ export function AgenticCard({ children, className = '', as: Tag = 'section' }: {
     ref.current!.style.setProperty('--mx', `${e.clientX - r.left}px`)
     ref.current!.style.setProperty('--my', `${e.clientY - r.top}px`)
   }
-  return <Tag ref={ref as never} className={`card agentic ${className}`} onPointerMove={onMove}>{children}</Tag>
+  return <Tag ref={ref as never} className={`slds-card card agentic ${className}`} onPointerMove={onMove}>{children}</Tag>
 }
 
 export function AgenticIcon({ size = 28 }: { size?: number }) {
@@ -158,5 +158,173 @@ function IconBtn({ label, icon, onClick, pressed, expanded }: { label: string; i
       <Icon name={icon} size={14} />
       <span className="slds-assistive-text">{label}</span>
     </button>
+  )
+}
+
+// ---------- Object icon tile (as in SLDS page and card headers) ----------
+const objectPaths = {
+  dashboard: 'M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm8 0h8v-9h-8v9Zm0-16v5h8V4h-8Z',
+  list: 'M4 6h2v2H4V6Zm4 0h12v2H8V6Zm-4 5h2v2H4v-2Zm4 0h12v2H8v-2Zm-4 5h2v2H4v-2Zm4 0h12v2H8v-2Z',
+  case: 'M9 4h6a2 2 0 0 1 2 2v1h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3V6a2 2 0 0 1 2-2Zm0 3h6V6H9v1Zm-4 3v8h14v-8H5Z',
+  shield: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9l-7 7Z',
+}
+export type ObjectIconName = keyof typeof objectPaths
+export function ObjectIcon({ name, tone = 'brand', size = 32 }: { name: ObjectIconName; tone?: 'brand' | 'case' | 'shield'; size?: number }) {
+  return (
+    <span className={`fs-object-icon tone-${tone}`} style={{ width: size, height: size }} aria-hidden="true">
+      <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24"><path d={objectPaths[name]} fill="currentColor" /></svg>
+    </span>
+  )
+}
+
+// ---------- Page header (SLDS page header) ----------
+export function PageHeader({ icon, tone, label, title, meta, actions, details, breadcrumb }: {
+  icon: ObjectIconName; tone?: 'brand' | 'case' | 'shield'; label: string; title: ReactNode; meta?: ReactNode; actions?: ReactNode
+  details?: { label: string; value: ReactNode }[]; breadcrumb?: ReactNode
+}) {
+  return (
+    <div className="slds-page-header fs-page-header">
+      {breadcrumb}
+      <div className="slds-page-header__row">
+        <div className="slds-page-header__col-title">
+          <div className="slds-media">
+            <div className="slds-media__figure"><ObjectIcon name={icon} tone={tone} /></div>
+            <div className="slds-media__body">
+              <div className="slds-page-header__name">
+                <div className="slds-page-header__name-title">
+                  <span className="fs-object-label">{label}</span>
+                  <h1 className="slds-page-header__title">{title}</h1>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {actions && <div className="slds-page-header__col-actions"><div className="slds-page-header__controls">{actions}</div></div>}
+      </div>
+      {meta && <div className="slds-page-header__row"><div className="slds-page-header__col-meta"><p className="slds-page-header__meta-text">{meta}</p></div></div>}
+      {details && (
+        <div className="slds-page-header__row slds-page-header__row_gutters">
+          <div className="slds-page-header__col-details">
+            <ul className="slds-page-header__detail-row">
+              {details.map(d => (
+                <li key={d.label} className="slds-page-header__detail-block">
+                  <div className="slds-text-title fs-detail-label">{d.label}</div>
+                  <div className="fs-detail-value">{d.value}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------- Radio button group (single choice) ----------
+export function RadioButtonGroup<T extends string | number>({ name, legend, options, value, onChange, size }: {
+  name: string; legend: string; options: { value: T; label: ReactNode }[]; value: T; onChange: (v: T) => void; size?: 'small'
+}) {
+  return (
+    <fieldset className={`slds-form-element fs-rbg ${size === 'small' ? 'fs-rbg-small' : ''}`}>
+      <legend className="slds-assistive-text">{legend}</legend>
+      <div className="slds-form-element__control">
+        <div className="slds-radio_button-group">
+          {options.map(o => {
+            const id = `${name}-${o.value}`
+            return (
+              <span key={String(o.value)} className="slds-button slds-radio_button">
+                <input type="radio" name={name} id={id} value={String(o.value)} checked={value === o.value} onChange={() => onChange(o.value)} />
+                <label className="slds-radio_button__label" htmlFor={id}><span className="slds-radio_faux">{o.label}</span></label>
+              </span>
+            )
+          })}
+        </div>
+      </div>
+    </fieldset>
+  )
+}
+
+// ---------- Checkbox button group (multiple choice) ----------
+export function CheckboxButtonGroup<T extends string>({ name, legend, options, selected, onToggle }: {
+  name: string; legend: string; options: { value: T; label: ReactNode }[]; selected: Set<T>; onToggle: (v: T) => void
+}) {
+  return (
+    <fieldset className="slds-form-element fs-cbg">
+      <legend className="slds-assistive-text">{legend}</legend>
+      <div className="slds-form-element__control">
+        <div className="slds-checkbox_button-group">
+          {options.map(o => {
+            const id = `${name}-${o.value}`
+            return (
+              <span key={o.value} className="slds-button slds-checkbox_button">
+                <input type="checkbox" id={id} name={name} checked={selected.has(o.value)} onChange={() => onToggle(o.value)} />
+                <label className="slds-checkbox_button__label" htmlFor={id}><span className="slds-checkbox_faux">{o.label}</span></label>
+              </span>
+            )
+          })}
+        </div>
+      </div>
+    </fieldset>
+  )
+}
+
+// ---------- Progress bar (SLDS progress bar, used as a meter) ----------
+export function ProgressBar({ value, color, label, size = 'small' }: { value: number; color?: string; label: string; size?: 'x-small' | 'small' | 'medium' }) {
+  return (
+    <div className={`slds-progress-bar slds-progress-bar_${size} fs-progress`} role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)} aria-label={label}>
+      <span className="slds-progress-bar__value" style={{ width: `${Math.max(0, Math.min(100, value))}%`, background: color }} />
+    </div>
+  )
+}
+
+// ---------- Breadcrumb ----------
+export function Breadcrumb({ items }: { items: { label: string; onClick?: () => void }[] }) {
+  return (
+    <nav role="navigation" aria-label="Breadcrumbs" className="fs-breadcrumb">
+      <ol className="slds-breadcrumb slds-list_horizontal slds-wrap">
+        {items.map((it, i) => (
+          <li key={i} className="slds-breadcrumb__item">
+            {i > 0 && <span className="fs-crumb-sep" aria-hidden="true">›</span>}
+            {it.onClick ? <button className="slds-button" onClick={it.onClick}>{it.label}</button> : <span aria-current="page">{it.label}</span>}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+// ---------- Activity timeline (SLDS timeline items) ----------
+export type TimelineKind = 'task' | 'event' | 'email' | 'call'
+export function ActivityTimeline({ items }: { items: { time: string; title: string; detail: string; kind: TimelineKind; isNew?: boolean; extra?: ReactNode }[] }) {
+  const glyph: Record<TimelineKind, string> = {
+    task: 'M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6L20.1 8.4 18.7 7z',
+    event: 'M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm-2 7h14v10H5V9Z',
+    email: 'M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm1 2.4V17h16V7.4l-8 5-8-5ZM5.4 7l6.6 4.1L18.6 7H5.4Z',
+    call: 'M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2Z',
+  }
+  return (
+    <ul className="fs-timeline">
+      {items.map((it, i) => (
+        <li key={i} className={it.isNew ? 'is-new' : ''}>
+          <div className={`slds-timeline__item_expandable slds-timeline__item_${it.kind} fs-timeline-item`}>
+            <div className="slds-media">
+              <div className="slds-media__figure">
+                <span className={`slds-icon_container slds-timeline__icon fs-tl-icon kind-${it.kind}`} title={it.kind}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d={glyph[it.kind]} fill="currentColor" /></svg>
+                </span>
+              </div>
+              <div className="slds-media__body">
+                <div className="fs-tl-row">
+                  <h3 className="fs-tl-title" title={it.title}>{it.title}</h3>
+                  <p className="slds-timeline__date">{it.time}</p>
+                </div>
+                <p className="fs-tl-detail">{it.detail}</p>
+                {it.extra}
+              </div>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
   )
 }

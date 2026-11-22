@@ -1,90 +1,56 @@
-/* SLDS 2 (Lightning Blue). Every colour, font, radius and shadow below comes from SLDS 2 global styling hooks. */
-@import "@salesforce-ux/design-system-2/dist/css/bundled/slds2.lightning-blue.css";
+/* SLDS 2 (Cosmos, the Enhanced Lightning UI). Colours, type, radius and spacing come from SLDS 2 styling hooks.
+   Cosmos hooks use light-dark(), so light and dark mode both come from SLDS 2 itself. */
+@import "@salesforce-ux/design-system-2/dist/css/bundled/slds2.cosmos.css";
 
-/* Layout: Lightning-style console: navigation rail, page header, cards on the SLDS surface. */
+/* Layout: Lightning console: vertical navigation, page header, cards on the SLDS page surface. */
 :root {
   --bg: var(--slds-g-color-surface-2);
   --surface: var(--slds-g-color-surface-container-1);
   --surface-2: var(--slds-g-color-surface-container-2);
+  --surface-3: var(--slds-g-color-surface-container-3);
   --border: var(--slds-g-color-border-1);
-  --border-strong: var(--slds-g-color-neutral-base-70);
-  --text: var(--slds-g-color-on-surface-3);
+  --border-strong: var(--slds-g-color-border-2);
+  --heading: var(--slds-g-color-on-surface-3);
+  --text: var(--slds-g-color-on-surface-2);
   --muted: var(--slds-g-color-on-surface-1);
-  --primary: var(--slds-g-color-brand-base-50);
+  --primary: var(--slds-g-color-accent-2);
   --primary-soft: var(--slds-g-color-brand-base-95);
-  --risk-high: var(--slds-g-color-error-base-50);
-  --risk-medium: var(--slds-g-color-warning-base-50);
-  --risk-low: var(--slds-g-color-success-base-50);
-  --risk-high-soft: var(--slds-g-color-error-base-95);
-  --risk-medium-soft: var(--slds-g-color-warning-base-95);
-  --risk-low-soft: var(--slds-g-color-success-base-95);
-  --track: var(--slds-g-color-neutral-base-90);
-  --track-strong: var(--slds-g-color-neutral-base-80);
-  --shadow: var(--slds-g-shadow-1);
+  /* Semantic risk colours for text and badges */
+  --risk-high: var(--slds-g-color-error-1);
+  --risk-medium: var(--slds-g-color-warning-1);
+  --risk-low: var(--slds-g-color-success-1);
+  --risk-high-soft: var(--slds-g-color-error-container-1);
+  --risk-medium-soft: var(--slds-g-color-warning-container-1);
+  --risk-low-soft: var(--slds-g-color-success-container-1);
+  /* Data visualisation fills from the SLDS 2 palette */
+  --viz-high: var(--slds-g-color-palette-red-60);
+  --viz-medium: var(--slds-g-color-palette-orange-70);
+  --viz-low: var(--slds-g-color-palette-teal-60);
+  --viz-brand: var(--slds-g-color-palette-blue-60);
+  --track: var(--slds-g-color-surface-container-3);
+  --track-strong: var(--slds-g-color-border-1);
+  --shadow: none;
   --font: var(--slds-g-font-family);
   --mono: var(--slds-g-font-family-monospace);
   --radius: var(--slds-g-radius-border-4);
-  /* Agentic tokens (SLDS 2 Agentic Experiences): Purple-95 cue fill, aurora gradient */
+  /* Agentic (SLDS 2 Agentic Experiences): Purple-95 cue fill, aurora gradient */
   --ai-fill: var(--slds-g-color-palette-purple-95);
   --ai-ink: var(--slds-g-color-palette-purple-40);
   --ai-line: var(--slds-g-color-palette-purple-80);
-  --aurora: linear-gradient(120deg, var(--slds-g-color-brand-base-60), var(--slds-g-color-palette-purple-60) 45%, var(--slds-g-color-palette-pink-70) 75%, var(--slds-g-color-palette-indigo-70));
-  --aurora-glow-1: var(--slds-g-color-brand-base-80);
+  --aurora: linear-gradient(120deg, #1b96ff, #9050e9 45%, #f38ae5 75%, #7f8ced);
+  --aurora-glow-1: var(--slds-g-color-palette-blue-80, #aacbff);
   --aurora-glow-2: var(--slds-g-color-palette-purple-80);
-  color-scheme: light;
+  color-scheme: light dark;
 }
-/* SLDS 2 Lightning Blue is light only. Dark mode is built from the SLDS 2 neutral and palette ramps,
-   and re-points the SLDS hooks so SLDS components follow. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --slds-g-color-surface-1: var(--slds-g-color-neutral-base-10);
-    --slds-g-color-surface-2: var(--slds-g-color-neutral-base-10);
-    --slds-g-color-surface-container-1: var(--slds-g-color-neutral-base-15);
-    --slds-g-color-surface-container-2: var(--slds-g-color-neutral-base-20);
-    --slds-g-color-surface-container-3: var(--slds-g-color-neutral-base-30);
-    --slds-g-color-on-surface-1: var(--slds-g-color-neutral-base-70);
-    --slds-g-color-on-surface-2: var(--slds-g-color-neutral-base-90);
-    --slds-g-color-on-surface-3: var(--slds-g-color-neutral-base-95);
-    --slds-g-color-border-1: var(--slds-g-color-neutral-base-30);
-    --slds-g-color-border-2: var(--slds-g-color-neutral-base-50);
-    --border-strong: var(--slds-g-color-neutral-base-50);
-    --primary: var(--slds-g-color-brand-base-70);
-    --primary-soft: var(--slds-g-color-brand-base-15);
-    --risk-high: var(--slds-g-color-error-base-70); --risk-medium: var(--slds-g-color-warning-base-70); --risk-low: var(--slds-g-color-success-base-70);
-    --risk-high-soft: var(--slds-g-color-error-base-15); --risk-medium-soft: var(--slds-g-color-warning-base-15); --risk-low-soft: var(--slds-g-color-success-base-15);
-    --track: var(--slds-g-color-neutral-base-20); --track-strong: var(--slds-g-color-neutral-base-30);
-    --ai-fill: var(--slds-g-color-palette-purple-10); --ai-ink: var(--slds-g-color-palette-purple-70); --ai-line: var(--slds-g-color-palette-purple-30);
-    --aurora-glow-1: var(--slds-g-color-brand-base-30); --aurora-glow-2: var(--slds-g-color-palette-purple-30);
-    --shadow: none; color-scheme: dark;
-  }
-}
-:root[data-theme='dark'] {
-  --slds-g-color-surface-1: var(--slds-g-color-neutral-base-10);
-  --slds-g-color-surface-2: var(--slds-g-color-neutral-base-10);
-  --slds-g-color-surface-container-1: var(--slds-g-color-neutral-base-15);
-  --slds-g-color-surface-container-2: var(--slds-g-color-neutral-base-20);
-  --slds-g-color-surface-container-3: var(--slds-g-color-neutral-base-30);
-  --slds-g-color-on-surface-1: var(--slds-g-color-neutral-base-70);
-  --slds-g-color-on-surface-2: var(--slds-g-color-neutral-base-90);
-  --slds-g-color-on-surface-3: var(--slds-g-color-neutral-base-95);
-  --slds-g-color-border-1: var(--slds-g-color-neutral-base-30);
-  --slds-g-color-border-2: var(--slds-g-color-neutral-base-50);
-  --border-strong: var(--slds-g-color-neutral-base-50);
-  --primary: var(--slds-g-color-brand-base-70);
-  --primary-soft: var(--slds-g-color-brand-base-15);
-  --risk-high: var(--slds-g-color-error-base-70); --risk-medium: var(--slds-g-color-warning-base-70); --risk-low: var(--slds-g-color-success-base-70);
-  --risk-high-soft: var(--slds-g-color-error-base-15); --risk-medium-soft: var(--slds-g-color-warning-base-15); --risk-low-soft: var(--slds-g-color-success-base-15);
-  --track: var(--slds-g-color-neutral-base-20); --track-strong: var(--slds-g-color-neutral-base-30);
-  --ai-fill: var(--slds-g-color-palette-purple-10); --ai-ink: var(--slds-g-color-palette-purple-70); --ai-line: var(--slds-g-color-palette-purple-30);
-  --aurora-glow-1: var(--slds-g-color-brand-base-30); --aurora-glow-2: var(--slds-g-color-palette-purple-30);
-  --shadow: none; color-scheme: dark;
-}
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
-body { font-family: var(--font); font-size: 0.8125rem; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-h1, h2 { margin: 0; text-wrap: balance; }
-h2 { font-size: var(--slds-g-font-scale-2, 1rem); font-weight: var(--slds-g-font-weight-bold, 700); }
+body { font-family: var(--font); font-size: var(--slds-g-font-scale-neg-1, 0.75rem); font-size: 0.8125rem; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+/* SLDS 2 headings: regular weight, heading colour */
+h1, h2, h3 { margin: 0; text-wrap: balance; color: var(--heading); font-weight: var(--slds-g-font-weight-4); }
+h2 { font-size: var(--slds-g-font-scale-3); line-height: 1.25; }
 input, select, textarea { font: inherit; }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .num { font-variant-numeric: tabular-nums; }
@@ -101,7 +67,7 @@ input, select, textarea { font: inherit; }
   position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 20px;
   background: var(--surface); border-right: 1px solid var(--border); padding: 18px 14px;
 }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; padding: 0 6px; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: var(--slds-g-font-scale-2); color: var(--heading); padding: 0 6px; }
 .nav nav { display: grid; gap: 2px; }
 .nav a {
   display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px;
@@ -139,7 +105,8 @@ input, select, textarea { font: inherit; }
 @media (max-width: 1180px) { .grid-3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .grid-3 > :last-child { grid-column: 1 / -1; } }
 @media (max-width: 980px) { .grid-2-1, .grid-3 { grid-template-columns: minmax(0, 1fr); } }
 
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); min-width: 0; display: grid; gap: 12px; align-content: start; }
+/* Card look (background, border, radius, shadow) comes from .slds-card; this only sets the inner layout. */
+.card { padding: var(--slds-g-spacing-4); min-width: 0; display: grid; gap: var(--slds-g-spacing-3); align-content: start; }
 .card.flush { padding: 0; gap: 0; }
 .card-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 .sub { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
@@ -150,8 +117,8 @@ input, select, textarea { font: inherit; }
 @media (max-width: 1180px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .kpi { gap: 2px; }
-.kpi-label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
-.kpi-value { font-size: 26px; font-weight: 650; letter-spacing: -0.02em; }
+.kpi-label { font-size: 0.75rem; font-weight: var(--slds-g-font-weight-4); color: var(--muted); } /* SLDS form label style */
+.kpi-value { font-size: var(--slds-g-font-scale-5); font-weight: var(--slds-g-font-weight-4); color: var(--heading); line-height: 1.2; }
 .kpi-delta { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .kpi-delta.bad { color: var(--risk-high); }
 .kpi-delta.good { color: var(--risk-low); }
@@ -314,7 +281,7 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .fcol { padding: 12px; min-width: 0; }
 .fcol + .fcol { border-left: 1px solid var(--border); }
 @media (max-width: 760px) { .fcol + .fcol { border-left: 0; border-top: 1px solid var(--border); } }
-.fcol-h { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; display: flex; gap: 6px; align-items: center; }
+.fcol-h { font-size: 0.875rem; font-weight: var(--slds-g-font-weight-6); margin-bottom: 8px; display: flex; gap: 6px; align-items: center; }
 .fcol-high .fcol-h { color: var(--risk-high); }
 .fcol-low .fcol-h { color: var(--risk-low); }
 .fcol-neutral .fcol-h { color: var(--muted); }
@@ -341,7 +308,7 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .decision textarea { width: 100%; resize: vertical; border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px; background: var(--surface-2); font-family: var(--mono); font-size: 12px; line-height: 1.55; }
 .outcomes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .ob { position: relative; border: 1px solid var(--border-strong); background: var(--surface); border-radius: 8px; padding: 10px 4px 8px; font-weight: 600; cursor: pointer; display: grid; gap: 2px; justify-items: center; }
-.ob .rec { font-size: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; opacity: 0.85; }
+.ob .rec { font-size: 0.6875rem; font-weight: var(--slds-g-font-weight-4); opacity: 0.9; }
 .ob.ob-decline[aria-checked='true'] { background: var(--risk-high); border-color: var(--risk-high); color: #fff; }
 .ob.ob-refer[aria-checked='true'] { background: var(--risk-medium); border-color: var(--risk-medium); color: #fff; }
 .ob.ob-accept[aria-checked='true'] { background: var(--risk-low); border-color: var(--risk-low); color: #fff; }
@@ -539,7 +506,6 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 /* =====================================================================
    SLDS 2 component adjustments
    ===================================================================== */
-.card { border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
 .data th, .mini th { text-transform: none; letter-spacing: normal; font-size: 0.75rem; color: var(--slds-g-color-on-surface-2); font-weight: var(--slds-g-font-weight-bold, 700); }
 .slds-table.data, .slds-table.mini { background: transparent; }
 .slds-table.data th, .slds-table.data td, .slds-table.mini th, .slds-table.mini td { background: transparent; color: inherit; }
@@ -669,3 +635,114 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .fs-toasts .fs-toast-close.slds-button { position: static; margin-left: auto; flex: none; width: 28px; height: 28px; justify-content: center; }
 .fs-path, .fs-path .slds-path__track, .fs-path .slds-path__scroller-container { min-width: 0; max-width: 100%; }
 .fs-path .slds-path__scroller { overflow-x: auto; overflow-y: hidden; }
+
+
+/* =====================================================================
+   Round 10: SLDS 2 Cosmos component rules
+   ===================================================================== */
+.slds-card + .slds-card { margin-block-start: 0; } /* layout gaps come from grid/stack gap */
+.card-h h2 { font-size: var(--slds-g-font-scale-3); }
+.sub { font-size: 0.75rem; color: var(--muted); }
+
+/* Page header: record and list headers as in the SLDS 2 key screens */
+.fs-page-header {
+  --slds-s-pageheader-title-font-size: var(--slds-g-font-scale-5);
+  --slds-s-pageheader-title-font-weight: var(--slds-g-font-weight-4);
+  padding: var(--slds-g-spacing-4); display: grid; gap: var(--slds-g-spacing-3);
+  border: 1px solid var(--border);
+}
+.fs-page-header .slds-page-header__row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.fs-page-header .slds-media { display: flex; gap: 12px; align-items: center; }
+.fs-object-label { display: block; font-size: 0.8125rem; color: var(--text); }
+.fs-page-header .slds-page-header__title { margin: 0; }
+.fs-page-header .slds-page-header__meta-text { margin: 0; font-size: 0.8125rem; color: var(--muted); }
+.fs-page-header .slds-page-header__detail-row { list-style: none; margin: 0; padding: var(--slds-g-spacing-3) 0 0; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: var(--slds-g-spacing-3) var(--slds-g-spacing-6); }
+.fs-page-header .slds-page-header__detail-block { display: grid; gap: 2px; min-width: 0; padding: 0; }
+.fs-detail-label { font-size: 0.75rem; color: var(--muted); }
+.fs-detail-value { font-size: 0.875rem; color: var(--text); }
+.fs-object-icon { display: inline-grid; place-items: center; flex: none; border-radius: var(--slds-g-radius-border-2); color: #fff; background: var(--slds-g-color-palette-indigo-60, #5867e8); }
+.fs-object-icon.tone-case { background: var(--slds-g-color-palette-pink-60, #e3066a); }
+.fs-live { display: inline-flex; align-items: center; gap: 6px; }
+.fs-live i { width: 8px; height: 8px; border-radius: 50%; background: var(--slds-g-color-palette-green-60); }
+.fs-breadcrumb .slds-breadcrumb { margin: 0 0 2px; padding: 0; font-size: 0.8125rem; }
+.fs-breadcrumb .slds-button { padding: 0; height: auto; line-height: inherit; }
+
+/* Vertical navigation */
+.fs-nav { display: grid; gap: var(--slds-g-spacing-4); }
+.fs-nav ul { list-style: none; margin: 0; padding: 0; }
+.fs-nav .slds-nav-vertical__title { font-size: 0.75rem; color: var(--muted); padding: 0 var(--slds-g-spacing-3) 4px; margin: 0; text-transform: none; letter-spacing: normal; font-weight: var(--slds-g-font-weight-4); }
+.fs-nav .slds-nav-vertical__action { display: flex; align-items: center; gap: 10px; padding: 8px var(--slds-g-spacing-3); border-radius: var(--slds-g-radius-border-pill); color: var(--text); text-decoration: none; font-size: 0.875rem; }
+.fs-nav .slds-nav-vertical__action:hover { background: var(--surface-2); }
+.fs-nav .slds-is-active .slds-nav-vertical__action { background: var(--primary-soft); color: var(--primary); font-weight: var(--slds-g-font-weight-6); }
+.fs-nav .fs-count { margin-left: auto; }
+@media (max-width: 860px) { .fs-nav { display: flex; flex-wrap: wrap; gap: 4px 12px; } .fs-nav .slds-nav-vertical__title { display: none; } .fs-nav ul { display: flex; gap: 4px; } }
+
+/* Radio and checkbox button groups: dots and counts inside labels */
+.fs-rbg, .fs-cbg { border: 0; margin: 0; padding: 0; min-width: 0; }
+.fs-cbg .dot { margin-right: 6px; }
+.dot-high { background: var(--viz-high); } .dot-medium { background: var(--viz-medium); } .dot-low { background: var(--viz-low); }
+.fs-count-inline { margin-left: 6px; opacity: 0.75; }
+.fs-rbg-small .slds-radio_button__label, .fs-rbg-small .slds-radio_faux { font-size: 0.75rem; }
+.fs-rbg .slds-radio_button-group, .fs-cbg .slds-checkbox_button-group { flex-wrap: wrap; }
+.nav-foot .fs-rbg .slds-radio_button-group { width: 100%; }
+.nav-foot .fs-rbg .slds-radio_button { flex: 1; }
+.nav-foot .fs-rbg .slds-radio_button__label { width: 100%; justify-content: center; }
+
+/* Progress bars as meters */
+.fs-progress { min-width: 0; }
+.barlist-row .fs-progress, .hub-score .fs-progress { align-self: center; }
+.scorecell .fs-progress { width: 48px; }
+
+/* Links: blue text as in SLDS data tables */
+.fs-link { color: var(--primary); }
+tr.clickable:hover .fs-link { text-decoration: underline; }
+
+/* Activity timeline */
+.fs-timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.fs-timeline li { position: relative; padding-bottom: var(--slds-g-spacing-3); }
+.fs-timeline li::before { content: ''; position: absolute; left: 13px; top: 30px; bottom: 2px; width: 2px; border-radius: 2px; background: var(--border); }
+.fs-timeline li:last-child::before { display: none; }
+.fs-timeline-item .slds-media { display: flex; gap: 10px; align-items: flex-start; }
+.fs-tl-icon { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; }
+.fs-tl-icon.kind-task { background: var(--slds-g-color-palette-green-60); }
+.fs-tl-icon.kind-event { background: var(--slds-g-color-palette-purple-60, #ad7bee); }
+.fs-tl-icon.kind-email { background: var(--slds-g-color-palette-cloud-blue-60, #1b96ff); }
+.fs-tl-icon.kind-call { background: var(--slds-g-color-palette-teal-60); }
+.fs-tl-row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.fs-tl-title { margin: 0; font-size: 0.8125rem; font-weight: var(--slds-g-font-weight-6); color: var(--primary); }
+.fs-timeline li.is-new .fs-tl-title { color: var(--heading); }
+.fs-timeline .slds-timeline__date { margin: 0; font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.fs-tl-detail { margin: 0; font-size: 0.75rem; color: var(--muted); }
+.fs-timeline .tl-why { margin: 2px 0 0; font-size: 0.75rem; font-style: italic; color: var(--text); }
+
+/* Customer profile: stacked read-only fields, as in the SLDS record "About" card */
+.decision ~ .slds-card .kv.compact > div, .kv.compact > div { grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 8px 0; }
+.kv.compact dt { font-size: 0.75rem; }
+.kv.compact dd { font-size: 0.875rem; color: var(--text); }
+
+/* Badges for risk levels use SLDS badge shape with semantic containers */
+.slds-badge.pill { font-weight: var(--slds-g-font-weight-6); border: 0; }
+.slds-badge.pill-high { background: var(--risk-high-soft); color: var(--risk-high); }
+.slds-badge.pill-medium { background: var(--risk-medium-soft); color: var(--risk-medium); }
+.slds-badge.pill-low { background: var(--risk-low-soft); color: var(--risk-low); }
+.slds-badge.pill-none { background: var(--surface-2); color: var(--muted); }
+
+/* Agentic tile and AI label keep their gradient in both themes */
+.fs-agentic-icon { color: #fff; }
+
+/* Round 10 fixes from the visual check */
+.main { padding-top: var(--slds-g-spacing-4); }
+.fs-page-header.slds-page-header { background: var(--surface); border-radius: var(--radius); }
+.fs-breadcrumb .slds-breadcrumb { display: flex; flex-wrap: wrap; list-style: none; gap: 0; }
+.fs-breadcrumb .slds-breadcrumb__item + .slds-breadcrumb__item::before { content: '›'; margin: 0 8px; color: var(--muted); }
+.fs-breadcrumb .slds-breadcrumb__item span[aria-current] { color: var(--muted); }
+.kv.compact dd { display: block; }
+.table-head { flex-wrap: nowrap; }
+.table-head .toolbar { justify-content: flex-end; }
+.table-head .slds-select_container { flex: 0 0 190px; }
+@media (max-width: 900px) { .table-head { flex-wrap: wrap; } .table-head .toolbar { justify-content: flex-start; } }
+
+.fs-breadcrumb .slds-breadcrumb__item::before, .fs-breadcrumb .slds-breadcrumb__item::after { content: none !important; display: none !important; }
+.fs-crumb-sep { margin: 0 8px; color: var(--muted); }
+.fs-breadcrumb .slds-breadcrumb__item { display: inline-flex; align-items: center; }
+.fs-page-header .slds-page-header__detail-row { background: transparent; }

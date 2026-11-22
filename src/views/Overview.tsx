@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { ALERTS, CASES, CASE_TYPES, NOW, SOURCE_HEALTH, fmtDur, fmtTime, sourceName, type CaseType, type FraudCase } from '../data'
+import { ALERTS, CASES, CASE_TYPES, NOW, SOURCE_HEALTH, fmtDateTime, fmtDur, fmtTime, sourceName, type CaseType, type FraudCase } from '../data'
 import { AlertVolume, BarList, ScoreCell, ScoreHistogram, Sparkline, bandVar, type HourPoint } from '../components/charts'
 import { FilterBar, Switch, matchCase, type Filters } from '../components/Filters'
+import { PageHeader, ProgressBar, RadioButtonGroup } from '../components/slds'
 
 const AUTO_DECLINE = 85
 
@@ -77,6 +78,8 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
 
   return (
     <div className="stack">
+      <PageHeader icon="dashboard" label="Fraud" title="Overview"
+        meta={<><span className="fs-live"><i />Live</span> · Updated {fmtDateTime(NOW)} UTC · Last {f.range} hours · Synthetic data</>} />
       <FilterBar f={f} set={setFilters} showRange counts={counts} />
 
       <section className="kpis" aria-label={`Key metrics, last ${f.range} hours`}>
@@ -92,7 +95,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
       </section>
 
       <section className="grid-2-1">
-        <div className="card">
+        <div className="slds-card card">
           <header className="card-h">
             <div>
               <h2>Alert volume</h2>
@@ -107,7 +110,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
             </p>
           )}
         </div>
-        <div className="card">
+        <div className="slds-card card">
           <header className="card-h"><div><h2>Risk score distribution</h2><p className="sub">{cases.length} cases, scored 0–100</p></div></header>
           {cases.length ? <ScoreHistogram scores={cases.map(c => c.score)} threshold={AUTO_DECLINE} /> : <Empty />}
           <dl className="bands">
@@ -119,19 +122,17 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
       </section>
 
       <section className="grid-3">
-        <div className="card">
+        <div className="slds-card card">
           <header className="card-h">
             <div><h2>Top risk factors</h2><p className="sub">{factorMode === 'count' ? 'Number of cases each factor appears in' : 'Average points each factor adds to the score'}</p></div>
-            <div className="segmented sm" role="group" aria-label="Rank factors by">
-              <button aria-pressed={factorMode === 'count'} onClick={() => setFactorMode('count')}>Cases</button>
-              <button aria-pressed={factorMode === 'points'} onClick={() => setFactorMode('points')}>Points</button>
-            </div>
+            <RadioButtonGroup name="factor-mode" legend="Rank factors by" size="small" value={factorMode} onChange={setFactorMode}
+              options={[{ value: 'count' as const, label: 'Cases' }, { value: 'points' as const, label: 'Points' }]} />
           </header>
           {factorRows.length
             ? <BarList rows={factorRows.map(r => ({ label: r.label, value: factorMode === 'count' ? r.n : r.avg, display: factorMode === 'count' ? String(r.n) : `+${r.avg}` }))} />
             : <Empty />}
         </div>
-        <div className="card">
+        <div className="slds-card card">
           <header className="card-h"><div><h2>Cases by type</h2><p className="sub">Click a type to filter the dashboard</p></div></header>
           {byType.length ? (
             <div className="barlist">
@@ -143,7 +144,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
                   <button key={label} className={`barlist-row as-btn ${active ? 'active' : ''}`} aria-pressed={active}
                     onClick={() => setFilters({ ...f, type: active ? 'all' : (label as CaseType) })}>
                     <span className="barlist-label">{label}</span>
-                    <span className="barlist-track"><span className="barlist-fill" style={{ width: `${(cs.length / max) * 100}%`, background: hi > 0.3 ? bandVar('high') : hi > 0.15 ? bandVar('medium') : 'var(--primary)' }} /></span>
+                    <ProgressBar value={(cs.length / max) * 100} label={`${label}: ${cs.length} cases`} color={hi > 0.3 ? bandVar('high') : hi > 0.15 ? bandVar('medium') : 'var(--viz-brand)'} />
                     <span className="barlist-val num">{cs.length} · {Math.round(hi * 100)}% high</span>
                   </button>
                 )
@@ -151,7 +152,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
             </div>
           ) : <Empty />}
         </div>
-        <div className="card">
+        <div className="slds-card card">
           <header className="card-h"><div><h2>Data source health</h2><p className="sub">Click a source to filter cases that cite it</p></div></header>
           <table className="slds-table slds-table_cell-buffer mini">
             <thead><tr><th>Source</th><th className="r">Hits</th><th className="r">Precision</th><th className="r">p95</th></tr></thead>
@@ -175,7 +176,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
         </div>
       </section>
 
-      <section className="card">
+      <section className="slds-card card">
         <header className="card-h"><div><h2>Needs attention</h2><p className="sub">{f.bands.has('high') ? 'High-risk' : 'Matching'} cases closest to their SLA</p></div></header>
         {urgent.length ? (
           <div className="table-wrap">
@@ -186,7 +187,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
                   const left = c.slaDueAt.getTime() - NOW.getTime()
                   return (
                     <tr key={c.id} className={`clickable band-${c.band}`} onClick={() => onOpen(c.id)} tabIndex={0} onKeyDown={e => e.key === 'Enter' && onOpen(c.id)}>
-                      <td className="mono">{c.id}</td>
+                      <td><span className="fs-link mono">{c.id}</span></td>
                       <td>{c.customer.name}</td>
                       <td>{c.type}</td>
                       <td><ScoreCell score={c.score} band={c.band} /></td>
@@ -209,7 +210,7 @@ const Empty = () => <p className="muted small empty-inline">Nothing matches thes
 
 function Kpi({ label, value, delta, tone, spark, color, labels, unit }: { label: string; value: string; delta: string; tone: 'good' | 'bad' | 'neutral'; spark: number[]; color?: string; labels: string[]; unit: string }) {
   return (
-    <div className="card kpi">
+    <div className="slds-card card kpi">
       <span className="kpi-label">{label}</span>
       <span className="kpi-value num">{value}</span>
       <span className={`kpi-delta ${tone}`}>{delta}</span>

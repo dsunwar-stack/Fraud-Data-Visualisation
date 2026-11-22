@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { CASES, NOW, fmtDur, fmtMoney, type FraudCase } from '../data'
+import { CASES, NOW, fmtDateTime, fmtDur, fmtMoney, type FraudCase } from '../data'
 import { ScoreCell } from '../components/charts'
-import { FilterBar, Switch, matchCase, type Filters } from '../components/Filters'
+import { FilterBar, Switch, activeCount, matchCase, type Filters } from '../components/Filters'
+import { PageHeader } from '../components/slds'
 
 type SortKey = 'score' | 'sla' | 'created'
 
@@ -33,6 +34,8 @@ export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) =>
 
   return (
     <div className="stack">
+      <PageHeader icon="list" label="Cases" title="Case queue"
+        meta={<>{rows.length} of {CASES.length} items · Sorted by {sort === 'score' ? 'highest risk' : sort === 'sla' ? 'SLA due soonest' : 'newest'}{activeCount(filters) ? ` · ${activeCount(filters)} filter${activeCount(filters) > 1 ? 's' : ''} applied` : ''} · Updated {fmtDateTime(NOW)} UTC</>} />
       <FilterBar f={filters} set={setFilters} counts={counts}>
         <label className="search">
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -40,9 +43,9 @@ export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) =>
         </label>
       </FilterBar>
 
-      <section className="card flush">
+      <section className="slds-card card flush">
         <div className="table-head">
-          <span className="muted small">{rows.length} of {CASES.length} cases</span>
+          <span className="muted small">{rows.length} of {CASES.length} cases shown</span>
           <div className="toolbar">
             <Switch id="q-urgent" checked={urgentOnly} onChange={setUrgentOnly} label="Due within 1h or breached" />
             <Switch id="q-signals" checked={showSignals} onChange={setShowSignals} label="Signals column" />
@@ -65,7 +68,7 @@ export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) =>
                 const done = c.status === 'Decided'
                 return (
                   <tr key={c.id} className={`clickable band-${c.band}`} onClick={() => onOpen(c.id)} tabIndex={0} onKeyDown={e => e.key === 'Enter' && onOpen(c.id)}>
-                    <td className="mono">{c.id}</td>
+                    <td><span className="fs-link mono">{c.id}</span></td>
                     <td><div>{c.customer.name}</div>{!compact && <div className="muted small">{c.customer.country}</div>}</td>
                     <td>{c.type}</td>
                     <td><ScoreCell score={c.score} band={c.band} /></td>

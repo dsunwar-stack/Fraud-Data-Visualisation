@@ -3,17 +3,17 @@ import {
   CASES, CATEGORIES, NOW, SOURCES, bandOf, categoryName, fmtDateTime, fmtDur, fmtMoney, fmtTime, sourceName, sourceShort,
   type Category, type FraudCase, type Finding, type Outcome, type SourceId,
 } from '../data'
-import { RiskGauge, bandVar } from '../components/charts'
+import { RiskGauge, bandText, bandVar } from '../components/charts'
 import { Switch } from '../components/Filters'
 import { InfoTip } from '../components/InfoTip'
-import { AgenticCard, AgenticIcon, FeedbackGroup, Icon } from '../components/slds'
+import { ActivityTimeline, AgenticCard, AgenticIcon, Breadcrumb, FeedbackGroup, Icon, PageHeader, ProgressBar, RadioButtonGroup, type TimelineKind } from '../components/slds'
 
 const STEPS = ['Triage', 'Evidence', 'Review', 'Decision', 'Closed']
 
 export function CaseView({ id, onBack }: { id: string; onBack: () => void }) {
   const c = CASES.find(x => x.id === id)
   if (!c) return (
-    <div className="card empty-state">
+    <div className="slds-card card empty-state">
       <h2>Case {id} was not found</h2>
       <p className="muted">It may have been closed or the link is mistyped.</p>
       <button className="slds-button slds-button_neutral" onClick={onBack}>Back to queue</button>
@@ -72,24 +72,16 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
 
   return (
     <div className="stack">
-      <div className="case-head card">
-        <div className="case-title">
-          <button className="slds-button back" onClick={onBack}>← Case queue</button>
-          <div className="eyebrow">{c.type} · <span className="mono">{c.id}</span></div>
-          <h1>{c.customer.name}</h1>
-          <div className="meta">
-            <span className={`slds-badge status status-${(recorded ? 'Decided' : c.status).replace(' ', '-').toLowerCase()}`}>{recorded ? 'Decided' : c.status}</span>
-            <span>Queue: {c.owner}</span>
-            <span>Opened {fmtDateTime(c.createdAt)} UTC</span>
-            {c.amount && <span>Amount at risk <b className="num">{fmtMoney(c.amount)}</b></span>}
-          </div>
-        </div>
-        <div className={`sla ${recorded ? '' : left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>
-          <span className="kpi-label">SLA</span>
-          <span className="sla-val num">{recorded ? 'Met' : left < 0 ? `Breached ${fmtDur(-left)} ago` : `${fmtDur(left)} left`}</span>
-          <span className="muted small">Due {fmtTime(c.slaDueAt)} UTC · {c.band === 'high' ? '4h' : c.band === 'medium' ? '24h' : '48h'} target</span>
-        </div>
-      </div>
+      <PageHeader icon="case" tone="case" label={`Case · ${c.type}`} title={c.customer.name}
+        breadcrumb={<Breadcrumb items={[{ label: 'Case queue', onClick: onBack }, { label: c.id }]} />}
+        details={[
+          { label: 'Case number', value: <span className="mono">{c.id}</span> },
+          { label: 'Status', value: <span className={`slds-badge status status-${(recorded ? 'Decided' : c.status).replace(' ', '-').toLowerCase()}`}>{recorded ? 'Decided' : c.status}</span> },
+          { label: 'Queue', value: c.owner },
+          { label: 'Opened', value: `${fmtDateTime(c.createdAt)} UTC` },
+          ...(c.amount ? [{ label: 'Amount at risk', value: <span className="num">{fmtMoney(c.amount)}</span> }] : []),
+          { label: 'SLA', value: <span className={`num ${recorded ? '' : left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>{recorded ? 'Met' : left < 0 ? `Breached ${fmtDur(-left)} ago` : `${fmtDur(left)} left`} <span className="muted">· due {fmtTime(c.slaDueAt)} UTC</span></span> },
+        ]} />
 
       <AgenticCard as="div" className="glance">
         <AgenticIcon size={32} />
@@ -126,7 +118,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
       <div className="case-grid">
         <div className="stack">
           {/* ---- Risk hub ---- */}
-          <section className="card">
+          <section className="slds-card card">
             <header className="card-h">
               <div>
                 <h2>Risk hub</h2>
@@ -151,9 +143,9 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                       <span className="hub-plain">{k.plain}</span>
                     </div>
                     <div className="hub-score" aria-label={`${k.name} score ${v} out of 100, ${b} risk`}>
-                      <span className="barlist-track"><span className="barlist-fill" style={{ width: `${v}%`, background: bandVar(b) }} /></span>
-                      <span className="num hub-v" style={{ color: v ? bandVar(b) : 'var(--muted)' }}>{v}</span>
-                      <span className={`pill ${v ? `pill-${b}` : 'pill-none'} hub-band`}>{v ? (b === 'high' ? 'High' : b === 'medium' ? 'Medium' : 'Low') : 'None'}</span>
+                      <ProgressBar value={v} color={bandVar(b)} label={`${k.name} score ${v} of 100`} />
+                      <span className="num hub-v" style={{ color: v ? bandText(b) : 'var(--muted)' }}>{v}</span>
+                      <span className={`slds-badge pill ${v ? `pill-${b}` : 'pill-none'} hub-band`}>{v ? (b === 'high' ? 'High' : b === 'medium' ? 'Medium' : 'Low') : 'None'}</span>
                     </div>
                     <div className="hub-act">
                       {n ? (
@@ -207,7 +199,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             <div className="summary">
               <div className="summary-score">
                 <RiskGauge score={adjScore} band={adjBand} />
-                <span className={`pill pill-${adjBand} lg`}>{adjBand === 'high' ? 'High risk' : adjBand === 'medium' ? 'Medium risk' : 'Low risk'}</span>
+                <span className={`slds-badge pill pill-${adjBand} lg`}>{adjBand === 'high' ? 'High risk' : adjBand === 'medium' ? 'Medium risk' : 'Low risk'}</span>
                 {adjScore !== c.score && <span className="muted small">Model score {c.score}, adjusted by analyst</span>}
               </div>
               <div className="summary-body">
@@ -260,16 +252,12 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           </AgenticCard>
 
           {/* ---- Findings ---- */}
-          <section className="card">
+          <section className="slds-card card">
             <header className="card-h">
               <div><h2>Findings</h2><p className="sub">Evidence sorted by what it says about fraud: for it, against it, or unclear. <b>Examine</b> shows the raw signals behind an item. <b>Mitigate</b> moves it to the middle column once you've cleared it.</p></div>
             </header>
-            <div className="seg" role="group" aria-label="Filter findings by source">
-              <button className="chip" aria-pressed={srcFilter === 'all'} onClick={() => setSrcFilter('all')}>All sources</button>
-              {SOURCES.map(s => (
-                <button key={s.id} className="chip" aria-pressed={srcFilter === s.id} onClick={() => setSrcFilter(srcFilter === s.id ? 'all' : s.id)}>{s.short}</button>
-              ))}
-            </div>
+            <RadioButtonGroup name="find-src" legend="Filter findings by source" size="small" value={srcFilter} onChange={setSrcFilter}
+              options={[{ value: 'all' as SourceId | 'all', label: 'All sources' }, ...SOURCES.map(x => ({ value: x.id as SourceId | 'all', label: x.short }))]} />
             <div className="findings">
               <div className="fcol fcol-high">
                 <FindingHead k="substantiation" count={subst.length} />
@@ -320,7 +308,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           </section>
 
           {/* ---- Source evidence ---- */}
-          <section className="card">
+          <section className="slds-card card">
             <header className="card-h">
               <div><h2>Source evidence</h2><p className="sub">Raw signals behind the summary, so you can check them without switching systems</p></div>
               <Switch id="ev-flagged" checked={flaggedOnly} onChange={setFlaggedOnly} label="Flagged signals only" />
@@ -352,7 +340,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
         </div>
 
         <aside className="stack">
-          <section className="card decision">
+          <section className="slds-card card decision">
             <h2>Decision</h2>
             {recorded ? (
               <div className="decision-record" role="status">
@@ -424,7 +412,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             )}
           </section>
 
-          <section className="card">
+          <section className="slds-card card">
             <h2>Customer profile</h2>
             <dl className="kv compact">
               <div><dt>Name</dt><dd>{c.customer.name}</dd></div>
@@ -449,21 +437,16 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             </dl>
           </section>
 
-          <section className="card">
-            <h2>Timeline</h2>
-            <ol className="timeline">
-              {recorded && c.status !== 'Decided' && (
-                <li className="new"><span className="num t">{fmtTime(recorded.at)}</span><div>
-                  <div>Outcome recorded: {recorded.outcome}{recorded.overrode && ' (overrode recommendation)'}</div>
-                  <div className="muted small">You · {recorded.reason}</div>
-                  <div className="small tl-why">"{recorded.rationale}"</div>
-                </div></li>
-              )}
-              {feedback && <li className="new"><span className="num t">{fmtTime(NOW)}</span><div><div>Summary marked {feedback === 'correct' ? 'correct' : 'for review'}</div><div className="muted small">You</div></div></li>}
-              {[...c.events].reverse().map((e, i) => (
-                <li key={i}><span className="num t">{fmtTime(e.at)}</span><div><div>{e.label}</div><div className="muted small">{e.actor}</div></div></li>
-              ))}
-            </ol>
+          <section className="slds-card card">
+            <h2>Activity</h2>
+            <ActivityTimeline items={[
+              ...(recorded && c.status !== 'Decided' ? [{ time: fmtTime(recorded.at), kind: 'task' as const, isNew: true,
+                title: `Outcome recorded: ${recorded.outcome}${recorded.overrode ? ' (overrode recommendation)' : ''}`, detail: `You · ${recorded.reason}`,
+                extra: <p className="tl-why">"{recorded.rationale}"</p> }] : []),
+              ...(feedback ? [{ time: fmtTime(NOW), kind: 'task' as const, isNew: true, title: `Summary marked ${feedback === 'correct' ? 'helpful' : 'for review'}`, detail: 'You' }] : []),
+              ...[...c.events].reverse().map(e => ({ time: fmtTime(e.at), title: e.label, detail: e.actor,
+                kind: (/received|opened/i.test(e.label) ? 'event' : /Requested/i.test(e.label) ? 'email' : 'task') as TimelineKind })),
+            ]} />
           </section>
         </aside>
       </div>

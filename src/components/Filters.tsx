@@ -1,4 +1,4 @@
-import { Toggle } from './slds'
+import { CheckboxButtonGroup, RadioButtonGroup, Toggle } from './slds'
 import { CASE_TYPES, SOURCES, type Band, type CaseType, type FraudCase, type SourceId } from '../data'
 
 export type Range = 12 | 24 | 48
@@ -41,22 +41,14 @@ export function FilterBar({ f, set, showRange, counts, children }: {
   }
   const n = activeCount(f)
   return (
-    <section className="card filterbar" aria-label="Filters">
+    <section className="slds-card card filterbar" aria-label="Filters">
       <div className="toolbar">
         {showRange && (
-          <div className="segmented" role="group" aria-label="Time range">
-            {([12, 24, 48] as Range[]).map(r => (
-              <button key={r} aria-pressed={f.range === r} onClick={() => set({ ...f, range: r })}>{r}h</button>
-            ))}
-          </div>
+          <RadioButtonGroup name="range" legend="Time range" value={f.range} onChange={r => set({ ...f, range: r })}
+            options={([12, 24, 48] as Range[]).map(r => ({ value: r, label: `${r}h` }))} />
         )}
-        <div className="seg" role="group" aria-label="Risk band">
-          {BANDS.map(b => (
-            <button key={b} className={`chip chip-${b}`} aria-pressed={f.bands.has(b)} onClick={() => toggleBand(b)}>
-              <i className="dot" />{b[0].toUpperCase() + b.slice(1)}{counts && <span className="num muted"> {counts[b]}</span>}
-            </button>
-          ))}
-        </div>
+        <CheckboxButtonGroup name="band" legend="Risk level" selected={f.bands} onToggle={toggleBand}
+          options={BANDS.map(b => ({ value: b, label: <><i className={`dot dot-${b}`} />{b[0].toUpperCase() + b.slice(1)}{counts && <span className="fs-count-inline num">{counts[b]}</span>}</> }))} />
         <div className="slds-select_container"><select className="slds-select" id="f-type" value={f.type} onChange={e => set({ ...f, type: e.target.value as Filters['type'] })} aria-label="Case type">
           <option value="all">All case types</option>
           {CASE_TYPES.map(t => <option key={t}>{t}</option>)}

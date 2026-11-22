@@ -50,7 +50,7 @@ Pushing to `main` runs `.github/workflows/deploy.yml`, which builds the site and
 
 ## Stack
 
-React 19, TypeScript and Vite, styled with **SLDS 2** (`@salesforce-ux/design-system-2`, Lightning Blue): every colour, font, radius and shadow comes from SLDS 2 global styling hooks, and buttons, select menus, text areas, toggles, the path, tabs, tables, badges and toasts use SLDS 2 components. AI content follows the SLDS 2 **Agentic Experiences** patterns (agentic card, AI label, human feedback). Charts are hand-built SVG. SLDS 2 Lightning Blue is light only, so dark mode is built from SLDS 2's own neutral and palette colours.
+React 19, TypeScript and Vite, styled with **SLDS 2** (`@salesforce-ux/design-system-2`, Cosmos theme, the Enhanced Lightning UI): every colour, font, radius and shadow comes from SLDS 2 global styling hooks, and buttons, select menus, text areas, toggles, the path, tabs, tables, badges and toasts use SLDS 2 components. AI content follows the SLDS 2 **Agentic Experiences** patterns (agentic card, AI label, human feedback). Charts are hand-built SVG using the SLDS 2 data palette. Light and dark mode both come from SLDS 2 Cosmos itself.
 
 ## Project layout
 

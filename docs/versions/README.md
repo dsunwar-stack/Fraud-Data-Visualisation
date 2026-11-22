@@ -19,6 +19,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [7](#round-7-who-decides-and-where-the-reason-goes) | Does the LLM decide? Where do I write my reason? | "You decide" statement, required reason, saved decision record | [`round-7`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-7) |
 | [8](#round-8-the-case-snapshot-is-not-a-note) | Is the investigation note written by AI? | Read-only case snapshot, one optional notes field | [`round-8`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-8) |
 | [9](#round-9-slds-2-design-system) | Use the SLDS 2 design system (Agentic Experiences) | SLDS 2 components and styling hooks; agentic cards and human feedback on AI content | [`round-9`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-9) |
+| [10](#round-10-slds-2-component-rules) | Follow SLDS 2 component rules for everything | Cosmos theme, page headers, vertical navigation, button groups, SLDS cards, progress bars, activity timeline, SLDS typography | [`round-10`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-10) |
 
 To run any round locally:
 
@@ -192,6 +193,42 @@ The original terms were kept because fraud specialists use them; the plain label
 | AI summary with feedback | Dark mode |
 |---|---|
 | ![AI summary with feedback popover](round-9-ai-summary-feedback.png) | ![Case in dark mode](round-9-case-dark.png) |
+
+---
+
+## Round 10: SLDS 2 component rules
+
+> **Feedback:** "There is the web component library for SLDS 2. Can you make sure we have used the design system rules, from typography, text, tables, buttons, filters, colours, cards, timeline to everything?" (Components for Web | Lightning Design System 2)
+
+**Finding:** the Figma library is drawn in SLDS 2's **Cosmos** theme (the Enhanced Lightning UI), but round 9 used the older **Lightning Blue** theme. That explained most of the differences: square buttons, bold headings, a different blue, and no built-in dark mode.
+
+**What changed, by area**
+
+| Area | Before (round 9) | Now (SLDS 2 rule) |
+|---|---|---|
+| Theme | Lightning Blue | **Cosmos**: brand blue #066afe, navy heading text, 1.25rem container radius |
+| Dark mode | Hand-built from palette ramps | **Built into SLDS 2 Cosmos** (light-dark hooks); no custom colours |
+| Typography | Bold headings, uppercase labels, Inter-like sizes | **Regular-weight headings** in heading colour on the SLDS type scale; **sentence-case labels** in the form-label style |
+| Page header | Plain page title | **SLDS page header**: object icon, object label and title; list view meta line ("112 of 148 items · Sorted by…"); **record header** with breadcrumb and a row of key fields |
+| Navigation | Custom links | **SLDS vertical navigation** with sections |
+| Buttons | Square | **Pill buttons** (neutral, brand, destructive, success) |
+| Filters | Custom chips and segmented controls | **Checkbox button group** for risk levels (multiple choice); **radio button groups** for time range, Cases/Points, Findings source and theme (single choice) |
+| Cards | Custom border, radius and shadow | **slds-card** for every card; titles regular weight |
+| Tables | Custom | **SLDS data table** with link-blue case IDs, as in the list view |
+| Bars and meters | Custom tracks | **SLDS progress bar** |
+| Badges | Custom pills | **slds-badge** with semantic containers |
+| Timeline | Custom list | **Activity timeline**: coloured icon circles, connecting line, link-blue titles, time on the right |
+| Customer profile | Two-column list | **Stacked read-only fields**, as in the record page "About" card |
+| Chart colours | Semantic text colours | **SLDS 2 data palette** (red-60, orange-70, teal-60, blue-60); text keeps semantic colours for contrast |
+
+**Still custom, because SLDS 2 has no component for them:** the charts (drawn with SLDS colours), the Risk Hub rows and the agentic glow.
+
+![Round 10 overview](round-10-overview.png)
+![Round 10 record header](round-10-record-header.png)
+
+| Case page | Queue in dark mode |
+|---|---|
+| ![Round 10 case](round-10-case.png) | ![Round 10 queue dark](round-10-queue-dark.png) |
 
 ---
 

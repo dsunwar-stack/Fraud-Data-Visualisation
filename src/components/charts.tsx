@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Band } from '../data'
+import { ProgressBar } from './slds'
 
 export interface HourPoint { t: Date; high: number; medium: number; low: number; autoDeclined: number }
 import { fmtTime } from '../data'
@@ -16,7 +17,9 @@ export function useWidth<T extends HTMLElement>() {
   return [ref, w] as const
 }
 
-export const bandVar = (b: Band) => `var(--risk-${b})`
+// Fills use the SLDS 2 data palette; text uses the semantic colours, which meet contrast.
+export const bandVar = (b: Band) => `var(--viz-${b})`
+export const bandText = (b: Band) => `var(--risk-${b})`
 
 // ---------- Sparkline (hover or tap for values) ----------
 export function Sparkline({ values, labels, unit = '', color = 'var(--primary)', height = 40 }: {
@@ -180,7 +183,7 @@ export function RiskGauge({ score, band, size = 132 }: { score: number; band: Ba
         </g>
       </svg>
       <div className="gauge-label">
-        <span className="gauge-num" style={{ color: bandVar(band) }}>{score}</span>
+        <span className="gauge-num" style={{ color: bandText(band) }}>{score}</span>
         <span className="gauge-cap">of 100</span>
       </div>
     </div>
@@ -195,7 +198,7 @@ export function BarList({ rows }: { rows: { label: ReactNode; value: number; dis
       {rows.map((r, i) => (
         <div className="barlist-row" key={i}>
           <div className="barlist-label">{r.label}</div>
-          <div className="barlist-track"><div className="barlist-fill" style={{ width: `${(r.value / max) * 100}%`, background: r.color ?? 'var(--primary)' }} /></div>
+          <ProgressBar value={(r.value / max) * 100} color={r.color ?? 'var(--viz-brand)'} label={`${typeof r.label === 'string' ? r.label : 'Value'}: ${r.display ?? r.value}`} />
           <div className="barlist-val num">{r.display ?? r.value}</div>
         </div>
       ))}
@@ -207,9 +210,9 @@ export function BarList({ rows }: { rows: { label: ReactNode; value: number; dis
 export function ScoreCell({ score, band }: { score: number; band: Band }) {
   return (
     <span className="scorecell">
-      <span className={`pill pill-${band}`}>{band === 'high' ? 'High' : band === 'medium' ? 'Med' : 'Low'}</span>
+      <span className={`slds-badge pill pill-${band}`}>{band === 'high' ? 'High' : band === 'medium' ? 'Med' : 'Low'}</span>
       <span className="num">{score}</span>
-      <span className="mini-track"><span style={{ width: `${score}%`, background: bandVar(band) }} /></span>
+      <ProgressBar value={score} color={bandVar(band)} size="x-small" label={`Risk score ${score} of 100`} />
     </span>
   )
 }
