@@ -96,9 +96,9 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="wrap">
   <header class="hero">
     <span class="eyebrow">Design story · Fraud data visualisation</span>
-    <h1>Fraud Signal: how eleven rounds of feedback shaped it</h1>
+    <h1>Fraud Signal: how twelve rounds of feedback shaped it</h1>
     <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
-    <div class="facts"><span><b>11</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="facts"><span><b>12</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
     <div class="links">
       <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
       <a href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation">Code on GitHub</a>
@@ -121,6 +121,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-9"><b>9</b> SLDS 2</a></li>
       <li><a href="#round-10"><b>10</b> SLDS 2 rules</a></li>
       <li><a href="#round-11"><b>11</b> Navigation</a></li>
+      <li><a href="#round-12"><b>12</b> Risk factors</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -322,6 +323,23 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     </div>
   </section>
 
+  <section class="round" id="round-12">
+    <div class="round-head"><span class="num">12</span><h2>Top risk factors explained</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-12">Code: round-12</a><span class="kicker">Say what a number measures</span></div>
+    <blockquote><cite>Feedback</cite>"On the Top risk factors, what do Cases and Points mean?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li><b>Cases</b> = how common a factor is. <b>Points</b> = how much it raises a case's risk score on average. Every row now shows both, e.g. "85 cases · +15 pts".</li>
+        <li>The switch reads <b>"Sort by: Most common | Biggest impact"</b>.</li>
+        <li>An ⓘ explains both measures. Factor names are no longer cut off.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Say what a number measures</li><li>Show related numbers together</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-12-top-risk-factors.png" alt="Top risk factors with cases and points on every row" width="748" height="828" loading="lazy" style="max-width:380px"><figcaption>Both measures on every row</figcaption></figure>
+      <figure><img src="../versions/round-12-top-risk-factors-help.png" alt="Info popup explaining Most common and Biggest impact" width="1066" height="834" loading="lazy"><figcaption>The info popup</figcaption></figure>
+    </div>
+  </section>
+
   <section class="close" id="principles">
     <h2>The principles we ended up with</h2>
     <ol>
@@ -337,7 +355,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><b>Follow the design system's rules,</b> not just its colours: SLDS 2 Cosmos components, type and layout, plus the Agentic Experiences patterns for AI.</li>
     </ol>
     <div class="next">
-      <p><b>Next, proposed for round 12:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+      <p><b>Next, proposed for round 13:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
     </div>
   </section>
 
