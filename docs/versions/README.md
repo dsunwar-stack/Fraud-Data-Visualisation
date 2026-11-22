@@ -4,7 +4,7 @@ Screenshots of the same case (**FR-104237**, account takeover, score 90) in both
 
 | | Version 1 | Version 2 |
 |---|---|---|
-| Git tag | [`v1`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/v1) | [`v2`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/v2) |
+| Code (branch) | [`version-1`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/version-1) | [`version-2`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/version-2) |
 | Focus | Filters, toggles, Risk Hub and the wireframe features | Plain-English help for fraud types, based on UX principles |
 
 ## Risk Hub
