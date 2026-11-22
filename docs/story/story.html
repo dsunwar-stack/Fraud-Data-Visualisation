@@ -96,9 +96,9 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="wrap">
   <header class="hero">
     <span class="eyebrow">Design story · Fraud data visualisation</span>
-    <h1>Fraud Signal: how sixteen rounds of feedback shaped it</h1>
+    <h1>Fraud Signal: how seventeen rounds of feedback shaped it</h1>
     <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
-    <div class="facts"><span><b>16</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="facts"><span><b>17</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
     <div class="links">
       <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
       <a href="https://claude.ai/artifact/RG7ujThqcfG1f7GyPyddaq">Design system</a>
@@ -127,6 +127,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-14"><b>14</b> Decision buttons</a></li>
       <li><a href="#round-15"><b>15</b> Button hierarchy</a></li>
       <li><a href="#round-16"><b>16</b> Notifications</a></li>
+      <li><a href="#round-17"><b>17</b> Adjust score</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -411,6 +412,21 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     </div>
   </section>
 
+  <section class="round" id="round-17">
+    <div class="round-head"><span class="num">17</span><h2>"Adjust score", not "Edit"</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-17">Code: round-17</a><span class="kicker">Name a button after what it changes</span></div>
+    <blockquote><cite>Feedback</cite>"In the Fraud summary we have an Edit button but I cannot edit anything?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>The button only took factors out of the score, so it's now <b>Adjust score</b>, with an info note explaining it.</li>
+        <li>SLDS checkboxes; excluded factors are struck through and the gauge shows the adjustment.</li>
+        <li>The adjustment is <b>saved with the decision</b> and in the timeline. The AI's text stays read-only for the audit trail.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Labels match what happens</li><li>Every change is recorded</li></ul></div>
+    </div>
+    <div class="shots"><figure><img src="../versions/round-17-edit-before.png" alt="Before: Edit button with plain checkboxes" width="1592" height="1286" loading="lazy"><figcaption><span class="tag before">Before</span>"Edit"</figcaption></figure>
+    <figure><img src="../versions/round-17-adjust-score.png" alt="After: Adjust score with info note and SLDS checkboxes" width="1592" height="1510" loading="lazy"><figcaption><span class="tag after">After</span>"Adjust score"</figcaption></figure></div>
+  </section>
+
   <section class="close" id="principles">
     <h2>The principles we ended up with</h2>
     <ol>
@@ -426,7 +442,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><b>Follow the design system's rules,</b> not just its colours: SLDS 2 Cosmos components, type and layout, plus the Agentic Experiences patterns for AI.</li>
     </ol>
     <div class="next">
-      <p><b>Next, proposed for round 17:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+      <p><b>Next, proposed for round 18:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
     </div>
   </section>
 
