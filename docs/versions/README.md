@@ -20,6 +20,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [8](#round-8-the-case-snapshot-is-not-a-note) | Is the investigation note written by AI? | Read-only case snapshot, one optional notes field | [`round-8`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-8) |
 | [9](#round-9-slds-2-design-system) | Use the SLDS 2 design system (Agentic Experiences) | SLDS 2 components and styling hooks; agentic cards and human feedback on AI content | [`round-9`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-9) |
 | [10](#round-10-slds-2-component-rules) | Follow SLDS 2 component rules for everything | Cosmos theme, page headers, vertical navigation, button groups, SLDS cards, progress bars, activity timeline, SLDS typography | [`round-10`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-10) |
+| [11](#round-11-navigation-active-state) | Why is there a half circle beside the active menu item? | Let SLDS 2 draw the vertical navigation's active state | [`round-11`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-11) |
 
 To run any round locally:
 
@@ -229,6 +230,24 @@ The original terms were kept because fraud specialists use them; the plain label
 | Case page | Queue in dark mode |
 |---|---|
 | ![Round 10 case](round-10-case.png) | ![Round 10 queue dark](round-10-queue-dark.png) |
+
+---
+
+## Round 11: navigation active state
+
+> **Feedback:** "Why do we have this half circle on the side? Can you align with SLDS 2?"
+
+**Cause:** SLDS 2 marks the active navigation item with a full-width tint and a **straight 4px accent bar** on the left edge. Our own pill-shaped background and rounded corners sat on top of it and bent the bar into a half circle.
+
+**What changed**
+- Removed the custom radius, background and colours from the navigation. SLDS 2 now draws the active, hover and section-title styles itself.
+- The navigation runs edge to edge in the sidebar, as in SLDS, so the bar sits on the sidebar's edge.
+
+**Principle:** when the design system has a component, don't restyle it; set layout only.
+
+| Before | After |
+|---|---|
+| ![Navigation before](round-11-nav-before.png) | ![Navigation after](round-11-nav-after.png) |
 
 ---
 
