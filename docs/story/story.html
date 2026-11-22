@@ -96,9 +96,9 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="wrap">
   <header class="hero">
     <span class="eyebrow">Design story · Fraud data visualisation</span>
-    <h1>Fraud Signal: how nine rounds of feedback shaped it</h1>
+    <h1>Fraud Signal: how ten rounds of feedback shaped it</h1>
     <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
-    <div class="facts"><span><b>9</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="facts"><span><b>10</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
     <div class="links">
       <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
       <a href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation">Code on GitHub</a>
@@ -119,6 +119,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-7"><b>7</b> Who decides</a></li>
       <li><a href="#round-8"><b>8</b> Case snapshot</a></li>
       <li><a href="#round-9"><b>9</b> SLDS 2</a></li>
+      <li><a href="#round-10"><b>10</b> SLDS 2 rules</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -284,6 +285,26 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     <div class="shots one"><figure><img src="../versions/round-9-overview.png" alt="Overview in SLDS 2" width="1440" height="1000" loading="lazy"><figcaption>Overview in SLDS 2</figcaption></figure></div>
   </section>
 
+  <section class="round" id="round-10">
+    <div class="round-head"><span class="num">10</span><h2>SLDS 2 component rules</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-10">Code: round-10</a><span class="kicker">From "uses SLDS 2" to "follows SLDS 2"</span></div>
+    <blockquote><cite>Feedback</cite>"Can you make sure we have used the design system rules, from typography, text, tables, buttons, filters, colours, cards, timeline to everything?" (Components for Web | Lightning Design System 2)</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>Switched to the <b>Cosmos</b> theme the Figma library is drawn in: pill buttons, 1.25rem cards, navy headings, and <b>dark mode built into SLDS 2</b>.</li>
+        <li><b>Regular-weight headings</b> and <b>sentence-case labels</b> on the SLDS type scale.</li>
+        <li><b>SLDS page headers</b> (list view meta line; record header with breadcrumb and key fields) and <b>vertical navigation</b>.</li>
+        <li>Filters use <b>checkbox and radio button groups</b>. Meters use <b>progress bars</b>. The timeline is the SLDS <b>activity timeline</b>.</li>
+        <li>Charts use the <b>SLDS 2 data palette</b>.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Follow the system's rules, not just its colours</li><li>Use the right control for the choice</li><li>Consistent with every other Lightning page</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-10-record-header.png" alt="SLDS record header with breadcrumb, case icon, name and a row of key fields" width="1152" height="182" loading="lazy"><figcaption>Record header: breadcrumb, object icon, title and key fields</figcaption></figure>
+      <figure><img src="../versions/round-10-queue-dark.png" alt="Case queue in dark mode with list view header and button groups" width="1440" height="1000" loading="lazy"><figcaption>List view header and button groups, in SLDS 2 dark mode</figcaption></figure>
+    </div>
+    <div class="shots one"><figure><img src="../versions/round-10-overview.png" alt="Overview in SLDS 2 Cosmos" width="1440" height="1000" loading="lazy"><figcaption>Overview in SLDS 2 Cosmos</figcaption></figure></div>
+  </section>
+
   <section class="close" id="principles">
     <h2>The principles we ended up with</h2>
     <ol>
@@ -296,10 +317,10 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><b>Colour has meaning.</b> Red, amber, green for risk; purple only for AI.</li>
       <li><b>The specialist decides, not the AI,</b> and every decision has a recorded reason.</li>
       <li><b>Mark anything written by AI,</b> and collect feedback on every AI response.</li>
-      <li><b>Use the design system:</b> SLDS 2 and its Agentic Experiences patterns.</li>
+      <li><b>Follow the design system's rules,</b> not just its colours: SLDS 2 Cosmos components, type and layout, plus the Agentic Experiences patterns for AI.</li>
     </ol>
     <div class="next">
-      <p><b>Next, proposed for round 10:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+      <p><b>Next, proposed for round 11:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
     </div>
   </section>
 
