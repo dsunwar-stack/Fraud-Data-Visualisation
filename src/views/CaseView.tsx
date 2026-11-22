@@ -6,6 +6,7 @@ import {
 import { RiskGauge, bandVar } from '../components/charts'
 import { Switch } from '../components/Filters'
 import { InfoTip } from '../components/InfoTip'
+import { AgenticCard, AgenticIcon, FeedbackGroup, Icon } from '../components/slds'
 
 const STEPS = ['Triage', 'Evidence', 'Review', 'Decision', 'Closed']
 
@@ -15,7 +16,7 @@ export function CaseView({ id, onBack }: { id: string; onBack: () => void }) {
     <div className="card empty-state">
       <h2>Case {id} was not found</h2>
       <p className="muted">It may have been closed or the link is mistyped.</p>
-      <button className="btn" onClick={onBack}>Back to queue</button>
+      <button className="slds-button slds-button_neutral" onClick={onBack}>Back to queue</button>
     </div>
   )
   return <CaseBody key={c.id} c={c} onBack={onBack} />
@@ -73,11 +74,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
     <div className="stack">
       <div className="case-head card">
         <div className="case-title">
-          <button className="link" onClick={onBack}>← Case queue</button>
+          <button className="slds-button back" onClick={onBack}>← Case queue</button>
           <div className="eyebrow">{c.type} · <span className="mono">{c.id}</span></div>
           <h1>{c.customer.name}</h1>
           <div className="meta">
-            <span className={`status status-${(recorded ? 'Decided' : c.status).replace(' ', '-').toLowerCase()}`}>{recorded ? 'Decided' : c.status}</span>
+            <span className={`slds-badge status status-${(recorded ? 'Decided' : c.status).replace(' ', '-').toLowerCase()}`}>{recorded ? 'Decided' : c.status}</span>
             <span>Queue: {c.owner}</span>
             <span>Opened {fmtDateTime(c.createdAt)} UTC</span>
             {c.amount && <span>Amount at risk <b className="num">{fmtMoney(c.amount)}</b></span>}
@@ -90,19 +91,37 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
         </div>
       </div>
 
-      <div className={`glance glance-${c.band}`} role="note">
-        <span className="kpi-label">At a glance</span>
-        <p>{c.glance}</p>
-      </div>
+      <AgenticCard as="div" className="glance">
+        <AgenticIcon size={32} />
+        <div className="glance-body">
+          <span className="kpi-label">At a glance <span className="ai-label">AI summary</span></span>
+          <p>{c.glance}</p>
+        </div>
+      </AgenticCard>
 
-      <ol className="stepper" aria-label="Case progress">
-        {STEPS.map((s, i) => (
-          <li key={s} className={i < stepIdx ? 'done' : i === stepIdx ? 'current' : ''} aria-current={i === stepIdx ? 'step' : undefined}>
-            {i < stepIdx && <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.5 2.5L11 4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>}
-            {s}
-          </li>
-        ))}
-      </ol>
+      <div className="slds-path fs-path">
+        <div className="slds-grid slds-path__track">
+          <div className="slds-grid slds-path__scroller-container">
+            <div className="slds-path__scroller">
+              <div className="slds-path__scroller_inner">
+                <ul className="slds-path__nav" role="listbox" aria-label="Case progress" aria-orientation="horizontal">
+                  {STEPS.map((st, i) => {
+                    const state = i < stepIdx ? 'slds-is-complete' : i === stepIdx ? 'slds-is-current slds-is-active' : 'slds-is-incomplete'
+                    return (
+                      <li key={st} className={`slds-path__item ${state}`} role="presentation">
+                        <span className="slds-path__link" role="option" aria-selected={i === stepIdx} aria-current={i === stepIdx ? 'step' : undefined}>
+                          <span className="slds-path__stage">{i < stepIdx && <Icon name="check" size={14} />}<span className="slds-assistive-text">{i < stepIdx ? 'Stage complete' : i === stepIdx ? 'Current stage' : ''}</span></span>
+                          <span className="slds-path__title">{st}</span>
+                        </span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="case-grid">
         <div className="stack">
@@ -114,7 +133,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <p className="sub">How strongly the evidence points to each type of fraud, from 0 (none) to 100. <b>Show factors</b> narrows the summary and findings below to that type.</p>
               </div>
               <div className="hub-tools">
-                <button className="btn ghost" aria-expanded={explain} aria-pressed={explain} onClick={() => setExplain(e => !e)}>
+                <button className={`slds-button slds-button_neutral ${explain ? 'slds-is-selected' : ''}`} aria-expanded={explain} aria-pressed={explain} onClick={() => setExplain(e => !e)}>
                   <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="M8 7v4.5M8 4.6v.1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
                   {explain ? 'Hide explanations' : 'What do these mean?'}
                 </button>
@@ -138,7 +157,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                     </div>
                     <div className="hub-act">
                       {n ? (
-                        <button className={`btn hub-btn ${active ? 'on' : ''}`} aria-pressed={active} onClick={() => setCat(active ? 'all' : k.id)}>
+                        <button className={`slds-button ${active ? 'slds-button_brand' : 'slds-button_neutral'} hub-btn`} aria-pressed={active} onClick={() => setCat(active ? 'all' : k.id)}>
                           {active ? 'Show all evidence' : `Show ${n} factor${n === 1 ? '' : 's'}`}
                         </button>
                       ) : <span className="muted small">No evidence found</span>}
@@ -166,19 +185,22 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           </section>
 
           {/* ---- AI summary ---- */}
-          <section className="card">
+          <AgenticCard>
             <header className="card-h">
-              <div>
-                <h2><span className="ai-badge">AI</span> Fraud summary</h2>
+              <div className="agentic-head">
+                <AgenticIcon />
+                <div>
+                <h2>Fraud summary <span className="ai-label">AI summary</span></h2>
                 <p className="sub">Compiled from {usedSources.size} of {SOURCES.length} sources at {fmtTime(c.events[3]?.at ?? c.createdAt)} UTC · model confidence {Math.round(c.confidence * 100)}%</p>
+                </div>
               </div>
-              <button className="btn ghost" aria-pressed={editing} onClick={() => setEditing(e => !e)}>{editing ? 'Done editing' : 'Edit'}</button>
+              <button className={`slds-button slds-button_neutral ${editing ? 'slds-is-selected' : ''}`} aria-pressed={editing} onClick={() => setEditing(e => !e)}>{editing ? 'Done editing' : 'Edit'}</button>
             </header>
 
             {filtering && (
               <div className="focus-bar">
                 Showing {cat !== 'all' && <b title={CATEGORIES.find(k => k.id === cat)!.plain}>{categoryName(cat)}</b>}{cat !== 'all' && srcFilter !== 'all' && ' from '}{srcFilter !== 'all' && <b>{sourceName(srcFilter)}</b>} only
-                <button className="link small" onClick={() => { setCat('all'); setSrcFilter('all') }}>Show everything</button>
+                <button className="slds-button" onClick={() => { setCat('all'); setSrcFilter('all') }}>Show everything</button>
               </div>
             )}
 
@@ -203,7 +225,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                             onChange={() => setExcluded(s => { const n = new Set(s); if (n.has(f.label)) n.delete(f.label); else n.add(f.label); return n })} />
                         )}
                         <div>
-                          <div className="factor-h"><b>{f.label}</b><span className="tag src">{sourceShort(f.source)}</span><span className="tag" title={CATEGORIES.find(k => k.id === f.category)!.plain}>{categoryName(f.category)}</span><span className="pts num">+{f.points}</span></div>
+                          <div className="factor-h"><b>{f.label}</b><span className="slds-badge tag src">{sourceShort(f.source)}</span><span className="slds-badge slds-badge_lightest tag" title={CATEGORIES.find(k => k.id === f.category)!.plain}>{categoryName(f.category)}</span><span className="pts num">+{f.points}</span></div>
                           <div className="factor-d">{f.detail}</div>
                         </div>
                       </li>
@@ -227,21 +249,15 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <p className="muted small">Baseline {base} for every case, plus the points from each factor. Bands: low 0–39, medium 40–69, high 70–100.</p>
             </div>
 
-            <div className="feedback">
-              <span className="small">Is this summary accurate?</span>
-              {feedback ? (
-                <span className={`small ${feedback === 'correct' ? 'txt-accept' : 'txt-refer'}`} role="status">
-                  {feedback === 'correct' ? 'Marked as correct. Thanks, this helps train the summary.' : 'Flagged for review. Say what was wrong in Additional notes.'}
-                  <button className="link small" onClick={() => setFeedback(null)}>Undo</button>
-                </span>
-              ) : (
-                <>
-                  <button className="btn fb-yes" onClick={() => setFeedback('correct')}>This is correct</button>
-                  <button className="btn" onClick={() => setFeedback('incorrect')}>Something's wrong</button>
-                </>
-              )}
-            </div>
-          </section>
+            <footer className="agentic-foot">
+              <p className="disclaimer small">
+                <Icon name="sparkle" size={12} /> Generated by AI from {usedSources.size} data sources. Check important details in Source evidence before you decide.
+                {feedback && <span className="fb-note"> {feedback === 'correct' ? 'You rated this summary helpful.' : 'You flagged this summary for review.'}</span>}
+              </p>
+              <FeedbackGroup copyText={[c.glance, '', ...c.factors.map(f => `${f.label}: ${f.detail}`)].join('\n')}
+                onRated={rt => setFeedback(rt === 'up' ? 'correct' : 'incorrect')} />
+            </footer>
+          </AgenticCard>
 
           {/* ---- Findings ---- */}
           <section className="card">
@@ -261,10 +277,10 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                   <ul>
                     {subst.map(f => (
                       <li key={f.id}>
-                        {f.text}<span className="tag src">{sourceShort(f.source)}</span>
+                        {f.text}<span className="slds-badge tag src">{sourceShort(f.source)}</span>
                         <div className="f-actions">
-                          <button className="link small" aria-expanded={examining === f.id} onClick={() => setExamining(examining === f.id ? null : f.id)}>{examining === f.id ? 'Close' : 'Examine'}</button>
-                          <button className="link small" onClick={() => { setMitigated(s => new Set(s).add(f.id)); setExamining(null) }}>Mitigate</button>
+                          <button className="slds-button small" aria-expanded={examining === f.id} onClick={() => setExamining(examining === f.id ? null : f.id)}>{examining === f.id ? 'Close' : 'Examine'}</button>
+                          <button className="slds-button small" onClick={() => { setMitigated(s => new Set(s).add(f.id)); setExamining(null) }}>Mitigate</button>
                         </div>
                         {examining === f.id && (
                           <dl className="kv compact examine">
@@ -284,10 +300,10 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                   <ul>
                     {mitig.map(f => (
                       <li key={f.id}>
-                        {f.text}<span className="tag src">{sourceShort(f.source)}</span>
+                        {f.text}<span className="slds-badge tag src">{sourceShort(f.source)}</span>
                         {'byAnalyst' in f && (
-                          <div className="f-actions"><span className="tag mitig">Mitigated by you</span>
-                            <button className="link small" onClick={() => setMitigated(s => { const n = new Set(s); n.delete(f.id); return n })}>Undo</button></div>
+                          <div className="f-actions"><span className="slds-badge tag mitig">Mitigated by you</span>
+                            <button className="slds-button small" onClick={() => setMitigated(s => { const n = new Set(s); n.delete(f.id); return n })}>Undo</button></div>
                         )}
                       </li>
                     ))}
@@ -297,7 +313,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <div className="fcol fcol-neutral">
                 <FindingHead k="unaligned" count={unal.length} />
                 {unal.length ? (
-                  <ul>{unal.map(f => <li key={f.id}>{f.text}<span className="tag src">{sourceShort(f.source)}</span></li>)}</ul>
+                  <ul>{unal.map(f => <li key={f.id}>{f.text}<span className="slds-badge tag src">{sourceShort(f.source)}</span></li>)}</ul>
                 ) : <p className="muted small">No conflicting evidence.</p>}
               </div>
             </div>
@@ -309,12 +325,16 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <div><h2>Source evidence</h2><p className="sub">Raw signals behind the summary, so you can check them without switching systems</p></div>
               <Switch id="ev-flagged" checked={flaggedOnly} onChange={setFlaggedOnly} label="Flagged signals only" />
             </header>
-            <div className="tabs" role="tablist">
-              {SOURCES.map(s => (
-                <button key={s.id} role="tab" aria-selected={tab === s.id} onClick={() => setTab(s.id)}>
-                  {s.short}{usedSources.has(s.id) && <i className="dot" style={{ background: bandVar(c.band) }} />}
-                </button>
-              ))}
+            <div className="slds-tabs_default fs-tabs">
+              <ul className="slds-tabs_default__nav" role="tablist">
+                {SOURCES.map(src => (
+                  <li key={src.id} className={`slds-tabs_default__item ${tab === src.id ? 'slds-is-active' : ''}`} role="presentation">
+                    <button className="slds-tabs_default__link" role="tab" aria-selected={tab === src.id} tabIndex={tab === src.id ? 0 : -1} onClick={() => setTab(src.id)}>
+                      {src.short}{usedSources.has(src.id) && <i className="dot" style={{ background: bandVar(c.band) }} />}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
             <div role="tabpanel" className="signals-panel">
               <div className="muted small">{sourceName(tab)}</div>
@@ -346,10 +366,10 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                   <div><dt>Why</dt><dd className="pre">{recorded.rationale}</dd></div>
                   {recorded.notes && <div><dt>Notes</dt><dd className="pre">{recorded.notes}</dd></div>}
                 </dl>
-                <button className="link small" aria-expanded={showSnap} onClick={() => setShowSnap(v => !v)}>{showSnap ? 'Hide case snapshot' : 'View case snapshot attached to this decision'}</button>
+                <button className="slds-button small" aria-expanded={showSnap} onClick={() => setShowSnap(v => !v)}>{showSnap ? 'Hide case snapshot' : 'View case snapshot attached to this decision'}</button>
                 {showSnap && <Snapshot text={recorded.snapshot} />}
                 {c.status !== 'Decided' && (
-                  <button className="link small" onClick={() => { setRecorded(null); setTried(false) }}>Undo and change decision</button>
+                  <button className="slds-button small" onClick={() => { setRecorded(null); setTried(false) }}>Undo and change decision</button>
                 )}
               </div>
             ) : (
@@ -359,7 +379,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 </p>
                 <div className="outcomes" role="radiogroup" aria-label="Outcome">
                   {(['Decline', 'Refer', 'Accept'] as Outcome[]).map(o => (
-                    <button key={o} role="radio" aria-checked={choice === o} className={`ob ob-${o.toLowerCase()}`}
+                    <button key={o} role="radio" aria-checked={choice === o} className={`slds-button slds-button_neutral ob ob-${o.toLowerCase()}`}
                       onClick={() => { setChoice(o); if (!REASONS[o].includes(reason)) setReason('') }}>
                       {o}{o === c.recommended && <span className="rec">Recommended</span>}
                     </button>
@@ -370,34 +390,34 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 )}
 
                 <label htmlFor="case-reason" className="kpi-label">Reason <span className="req">required</span></label>
-                <select id="case-reason" value={reason} onChange={e => setReason(e.target.value)} aria-invalid={tried && !reason} className={tried && !reason ? 'invalid' : ''}>
+                <div className="slds-select_container"><select id="case-reason" value={reason} onChange={e => setReason(e.target.value)} aria-invalid={tried && !reason} className={`slds-select ${tried && !reason ? 'invalid' : ''}`}>
                   <option value="">Choose a reason for {choice.toLowerCase()}…</option>
                   {REASONS[choice].map(x => <option key={x}>{x}</option>)}
-                </select>
+                </select></div>
                 {tried && !reason && <span className="field-err">Choose a reason.</span>}
 
                 <label htmlFor="case-rationale" className="kpi-label">Why did you make this decision? <span className="req">required</span></label>
                 <textarea id="case-rationale" rows={4} value={rationale} onChange={e => setRationale(e.target.value)}
                   placeholder={choice === 'Accept' ? 'e.g. Customer confirmed the new device by phone; the payee is their own savings account.' : choice === 'Refer' ? 'e.g. ID check service was degraded; need a fresh document check before deciding.' : 'e.g. Device is rooted and linked to 4 other profiles; email reported for impersonation twice this month.'}
-                  aria-invalid={tried && !rationaleOk} className={tried && !rationaleOk ? 'invalid' : ''} />
+                  aria-invalid={tried && !rationaleOk} className={`slds-textarea ${tried && !rationaleOk ? 'invalid' : ''}`} />
                 <div className="row-between">
                   {tried && !rationaleOk ? <span className="field-err">Write at least 20 characters so reviewers understand your decision.</span> : <span className="muted small">Saved with the decision and shown in the case history.</span>}
                   <span className="muted small num">{rationale.trim().length}</span>
                 </div>
 
                 <label htmlFor="case-notes" className="kpi-label">Additional notes <span className="req">optional</span></label>
-                <textarea id="case-notes" rows={3} value={notes} onChange={e => setNotes(e.target.value)}
+                <textarea id="case-notes" className="slds-textarea" rows={3} value={notes} onChange={e => setNotes(e.target.value)}
                   placeholder="Anything else you found or did, e.g. Called the customer at 14:10, no answer. Left a voicemail." />
 
                 <details className="note-box">
                   <summary><span className="kpi-label">Case snapshot</span> <span className="muted small">attached to your decision automatically</span></summary>
                   <p className="note-src small">
-                    <b>Built by a fixed template from the case data, not by AI and not by a person.</b> The only AI-written line is marked <span className="ai-badge">AI</span>. It's saved with your decision so reviewers can see what you saw. You don't need to edit it.
+                    <b>Built by a fixed template from the case data, not by AI and not by a person.</b> The only AI-written line is marked <span className="ai-label">AI</span>. It's saved with your decision so reviewers can see what you saw. You don't need to edit it.
                   </p>
                   <Snapshot text={snapshot} />
                 </details>
 
-                <button className={`btn solid ob-${choice.toLowerCase()} record-btn`} onClick={record} aria-disabled={!canRecord}>
+                <button className={`slds-button ${choice === 'Decline' ? 'slds-button_destructive' : choice === 'Accept' ? 'slds-button_success' : 'slds-button_brand ob-refer-solid'} record-btn`} onClick={record} aria-disabled={!canRecord}>
                   Record {choice.toLowerCase()}
                 </button>
               </>
@@ -511,7 +531,7 @@ function Snapshot({ text }: { text: string }) {
   return (
     <div className="note-view" aria-label="Case snapshot">
       {text.split('\n').map((line, i) => line.startsWith('[AI] ')
-        ? <div key={i}><span className="ai-badge">AI</span>{line.slice(5)}</div>
+        ? <div key={i}><span className="ai-label">AI</span>{line.slice(5)}</div>
         : <div key={i}>{line || '\u00a0'}</div>)}
     </div>
   )

@@ -1,51 +1,91 @@
-/* Clean observability UI: cool-grey canvas, white cards, one blue accent, semantic risk colours. */
+/* SLDS 2 (Lightning Blue). Every colour, font, radius and shadow below comes from SLDS 2 global styling hooks. */
+@import "@salesforce-ux/design-system-2/dist/css/bundled/slds2.lightning-blue.css";
+
+/* Layout: Lightning-style console: navigation rail, page header, cards on the SLDS surface. */
 :root {
-  --bg: #f3f5f8;
-  --surface: #ffffff;
-  --surface-2: #f7f9fb;
-  --border: #e2e7ee;
-  --border-strong: #cfd6e0;
-  --text: #17212e;
-  --muted: #5d6b7d;
-  --primary: #0b5cab;
-  --primary-soft: #e7f0fa;
-  --risk-high: #d1372f;
-  --risk-medium: #dd7a0b;
-  --risk-low: #2e8b57;
-  --risk-high-soft: #fdecea;
-  --risk-medium-soft: #fdf1e2;
-  --risk-low-soft: #e6f4ec;
-  --track: #e8ecf1;
-  --track-strong: #c4ccd7;
-  --shadow: 0 1px 2px rgba(23, 33, 46, 0.05), 0 1px 1px rgba(23, 33, 46, 0.03);
-  --font: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --radius: 10px;
+  --bg: var(--slds-g-color-surface-2);
+  --surface: var(--slds-g-color-surface-container-1);
+  --surface-2: var(--slds-g-color-surface-container-2);
+  --border: var(--slds-g-color-border-1);
+  --border-strong: var(--slds-g-color-neutral-base-70);
+  --text: var(--slds-g-color-on-surface-3);
+  --muted: var(--slds-g-color-on-surface-1);
+  --primary: var(--slds-g-color-brand-base-50);
+  --primary-soft: var(--slds-g-color-brand-base-95);
+  --risk-high: var(--slds-g-color-error-base-50);
+  --risk-medium: var(--slds-g-color-warning-base-50);
+  --risk-low: var(--slds-g-color-success-base-50);
+  --risk-high-soft: var(--slds-g-color-error-base-95);
+  --risk-medium-soft: var(--slds-g-color-warning-base-95);
+  --risk-low-soft: var(--slds-g-color-success-base-95);
+  --track: var(--slds-g-color-neutral-base-90);
+  --track-strong: var(--slds-g-color-neutral-base-80);
+  --shadow: var(--slds-g-shadow-1);
+  --font: var(--slds-g-font-family);
+  --mono: var(--slds-g-font-family-monospace);
+  --radius: var(--slds-g-radius-border-4);
+  /* Agentic tokens (SLDS 2 Agentic Experiences): Purple-95 cue fill, aurora gradient */
+  --ai-fill: var(--slds-g-color-palette-purple-95);
+  --ai-ink: var(--slds-g-color-palette-purple-40);
+  --ai-line: var(--slds-g-color-palette-purple-80);
+  --aurora: linear-gradient(120deg, var(--slds-g-color-brand-base-60), var(--slds-g-color-palette-purple-60) 45%, var(--slds-g-color-palette-pink-70) 75%, var(--slds-g-color-palette-indigo-70));
+  --aurora-glow-1: var(--slds-g-color-brand-base-80);
+  --aurora-glow-2: var(--slds-g-color-palette-purple-80);
   color-scheme: light;
 }
+/* SLDS 2 Lightning Blue is light only. Dark mode is built from the SLDS 2 neutral and palette ramps,
+   and re-points the SLDS hooks so SLDS components follow. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0d1218; --surface: #141b24; --surface-2: #19212c; --border: #243040; --border-strong: #324155;
-    --text: #e6ebf1; --muted: #8e9bad; --primary: #4c9cf0; --primary-soft: #16283d;
-    --risk-high: #f0605a; --risk-medium: #f0a040; --risk-low: #4cc38a;
-    --risk-high-soft: #3a1c1d; --risk-medium-soft: #3a2a17; --risk-low-soft: #16301f;
-    --track: #222c39; --track-strong: #3a4757; --shadow: none; color-scheme: dark;
+    --slds-g-color-surface-1: var(--slds-g-color-neutral-base-10);
+    --slds-g-color-surface-2: var(--slds-g-color-neutral-base-10);
+    --slds-g-color-surface-container-1: var(--slds-g-color-neutral-base-15);
+    --slds-g-color-surface-container-2: var(--slds-g-color-neutral-base-20);
+    --slds-g-color-surface-container-3: var(--slds-g-color-neutral-base-30);
+    --slds-g-color-on-surface-1: var(--slds-g-color-neutral-base-70);
+    --slds-g-color-on-surface-2: var(--slds-g-color-neutral-base-90);
+    --slds-g-color-on-surface-3: var(--slds-g-color-neutral-base-95);
+    --slds-g-color-border-1: var(--slds-g-color-neutral-base-30);
+    --slds-g-color-border-2: var(--slds-g-color-neutral-base-50);
+    --border-strong: var(--slds-g-color-neutral-base-50);
+    --primary: var(--slds-g-color-brand-base-70);
+    --primary-soft: var(--slds-g-color-brand-base-15);
+    --risk-high: var(--slds-g-color-error-base-70); --risk-medium: var(--slds-g-color-warning-base-70); --risk-low: var(--slds-g-color-success-base-70);
+    --risk-high-soft: var(--slds-g-color-error-base-15); --risk-medium-soft: var(--slds-g-color-warning-base-15); --risk-low-soft: var(--slds-g-color-success-base-15);
+    --track: var(--slds-g-color-neutral-base-20); --track-strong: var(--slds-g-color-neutral-base-30);
+    --ai-fill: var(--slds-g-color-palette-purple-10); --ai-ink: var(--slds-g-color-palette-purple-70); --ai-line: var(--slds-g-color-palette-purple-30);
+    --aurora-glow-1: var(--slds-g-color-brand-base-30); --aurora-glow-2: var(--slds-g-color-palette-purple-30);
+    --shadow: none; color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --bg: #0d1218; --surface: #141b24; --surface-2: #19212c; --border: #243040; --border-strong: #324155;
-  --text: #e6ebf1; --muted: #8e9bad; --primary: #4c9cf0; --primary-soft: #16283d;
-  --risk-high: #f0605a; --risk-medium: #f0a040; --risk-low: #4cc38a;
-  --risk-high-soft: #3a1c1d; --risk-medium-soft: #3a2a17; --risk-low-soft: #16301f;
-  --track: #222c39; --track-strong: #3a4757; --shadow: none; color-scheme: dark;
+  --slds-g-color-surface-1: var(--slds-g-color-neutral-base-10);
+  --slds-g-color-surface-2: var(--slds-g-color-neutral-base-10);
+  --slds-g-color-surface-container-1: var(--slds-g-color-neutral-base-15);
+  --slds-g-color-surface-container-2: var(--slds-g-color-neutral-base-20);
+  --slds-g-color-surface-container-3: var(--slds-g-color-neutral-base-30);
+  --slds-g-color-on-surface-1: var(--slds-g-color-neutral-base-70);
+  --slds-g-color-on-surface-2: var(--slds-g-color-neutral-base-90);
+  --slds-g-color-on-surface-3: var(--slds-g-color-neutral-base-95);
+  --slds-g-color-border-1: var(--slds-g-color-neutral-base-30);
+  --slds-g-color-border-2: var(--slds-g-color-neutral-base-50);
+  --border-strong: var(--slds-g-color-neutral-base-50);
+  --primary: var(--slds-g-color-brand-base-70);
+  --primary-soft: var(--slds-g-color-brand-base-15);
+  --risk-high: var(--slds-g-color-error-base-70); --risk-medium: var(--slds-g-color-warning-base-70); --risk-low: var(--slds-g-color-success-base-70);
+  --risk-high-soft: var(--slds-g-color-error-base-15); --risk-medium-soft: var(--slds-g-color-warning-base-15); --risk-low-soft: var(--slds-g-color-success-base-15);
+  --track: var(--slds-g-color-neutral-base-20); --track-strong: var(--slds-g-color-neutral-base-30);
+  --ai-fill: var(--slds-g-color-palette-purple-10); --ai-ink: var(--slds-g-color-palette-purple-70); --ai-line: var(--slds-g-color-palette-purple-30);
+  --aurora-glow-1: var(--slds-g-color-brand-base-30); --aurora-glow-2: var(--slds-g-color-palette-purple-30);
+  --shadow: none; color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
-body { font: 14px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); font-size: 0.8125rem; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 h1, h2 { margin: 0; text-wrap: balance; }
-h2 { font-size: 15px; font-weight: 600; }
-button, input, select, textarea { font: inherit; color: inherit; }
+h2 { font-size: var(--slds-g-font-scale-2, 1rem); font-weight: var(--slds-g-font-weight-bold, 700); }
+input, select, textarea { font: inherit; }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .num { font-variant-numeric: tabular-nums; }
 .mono { font-family: var(--mono); font-size: 12.5px; }
@@ -495,3 +535,137 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .note-view .ai-badge { margin-right: 6px; font-size: 9.5px; vertical-align: 1px; }
 .note-src .ai-badge { font-size: 9.5px; margin: 0 2px; vertical-align: 1px; }
 .decision textarea, .note-view { scrollbar-color: var(--track-strong) transparent; }
+
+/* =====================================================================
+   SLDS 2 component adjustments
+   ===================================================================== */
+.card { border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.data th, .mini th { text-transform: none; letter-spacing: normal; font-size: 0.75rem; color: var(--slds-g-color-on-surface-2); font-weight: var(--slds-g-font-weight-bold, 700); }
+.slds-table.data, .slds-table.mini { background: transparent; }
+.slds-table.data th, .slds-table.data td, .slds-table.mini th, .slds-table.mini td { background: transparent; color: inherit; }
+.slds-table.data thead th { background: var(--surface-2); }
+.slds-table.data tbody tr.clickable:hover > td { background: var(--surface-2); }
+.slds-table.mini tr.selected > td { background: var(--primary-soft); }
+
+/* Toggle: input, switch, then label, aligned on one line */
+.fs-toggle .slds-checkbox_toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.fs-toggle .slds-form-element__label { margin: 0; padding: 0; font-size: 0.8125rem; white-space: nowrap; }
+.fs-toggle input:checked ~ .slds-form-element__label { color: var(--text); }
+
+/* Buttons */
+.slds-button { white-space: nowrap; }
+.slds-button.small { font-size: 0.75rem; }
+.slds-button.back { justify-self: start; padding: 0; }
+.ob.slds-button { display: grid; justify-items: center; gap: 2px; padding: 10px 4px 8px; line-height: 1.2; height: auto; }
+.record-btn { width: 100%; justify-content: center; padding-block: 10px; }
+.slds-button.slds-button_brand.ob-refer-solid { background-color: var(--slds-g-color-warning-base-50); border-color: var(--slds-g-color-warning-base-50); color: #fff; }
+.hub-btn.slds-button { font-weight: 500; }
+
+/* Select and textarea fill their column */
+.slds-select_container { min-width: 0; }
+.toolbar .slds-select_container { flex: 0 1 220px; }
+.decision .slds-select_container { width: 100%; }
+.slds-select.invalid, .slds-textarea.invalid { border-color: var(--risk-high); box-shadow: 0 0 0 1px var(--risk-high) inset; }
+
+/* Badges */
+.slds-badge.status { font-size: 0.75rem; }
+.slds-badge.status-new { background: var(--primary-soft); color: var(--primary); }
+.slds-badge.status-awaiting-info { background: var(--risk-medium-soft); color: var(--risk-medium); }
+.slds-badge.status-in-review { background: var(--surface-2); color: var(--text); }
+.slds-badge.status-decided { background: var(--surface-2); color: var(--muted); }
+.slds-badge.tag { font-size: 0.6875rem; padding-block: 1px; }
+.slds-badge.tag.src { background: var(--primary-soft); color: var(--primary); border-color: transparent; }
+.slds-badge.tag.mitig { background: var(--risk-low-soft); color: var(--risk-low); }
+.fcol li .slds-badge.tag { margin-left: 6px; }
+
+/* Path */
+.fs-path { margin: 0; }
+.fs-path .slds-path__stage .fs-icon { color: #fff; }
+.fs-path .slds-path__link { cursor: default; }
+
+/* Tabs */
+.fs-tabs .slds-tabs_default__link { background: none; border: 0; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.fs-tabs .slds-tabs_default__link .dot { margin: 0; width: 6px; height: 6px; }
+.fs-tabs .slds-tabs_default__nav { overflow-x: auto; }
+
+/* Info popovers use the SLDS 2 tooltip colours */
+.infotip-pop { background: var(--slds-g-color-surface-container-inverse-1); color: var(--slds-g-color-on-surface-inverse-1); }
+
+/* Toasts (SLDS notify) */
+.fs-toasts { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 200; display: grid; gap: 8px; width: min(480px, calc(100vw - 24px)); pointer-events: none; }
+.fs-toasts .slds-notify_toast { pointer-events: auto; display: flex; align-items: center; gap: 12px; margin: 0; min-width: 0; width: 100%; padding: 12px 16px; border-radius: var(--slds-g-radius-border-3); box-shadow: var(--slds-g-shadow-3, 0 4px 12px rgba(0,0,0,.2)); }
+.fs-toasts .slds-notify__content { flex: 1; min-width: 0; }
+.fs-toasts .slds-text-heading_small { font-size: 0.875rem; margin: 0; }
+.fs-toast-close { color: inherit; }
+
+/* =====================================================================
+   Agentic patterns (SLDS 2 Agentic Experiences): used only for AI content
+   ===================================================================== */
+.ai-label {
+  display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 0 7px; border-radius: var(--slds-g-radius-border-pill);
+  background: var(--ai-fill); color: var(--ai-ink); border: 1px solid var(--ai-line);
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: normal; text-transform: none; vertical-align: 2px; line-height: 1.5;
+}
+.fs-agentic-icon { display: inline-grid; place-items: center; flex: none; border-radius: var(--slds-g-radius-border-2); background: var(--aurora); color: #fff; }
+
+/* Agentic card: aurora border, cursor-driven aurora fill, aurora shadow on hover */
+.card.agentic {
+  --mx: -400px; --my: -400px;
+  border: 1px solid transparent;
+  background:
+    radial-gradient(420px circle at var(--mx) var(--my), var(--ai-fill), transparent 60%) padding-box,
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    var(--aurora) border-box;
+  transition: box-shadow .25s ease;
+}
+.card.agentic:hover { box-shadow: -8px 0 22px -10px var(--aurora-glow-1), 8px 6px 26px -10px var(--aurora-glow-2); }
+.agentic-head { display: flex; gap: 10px; align-items: flex-start; }
+.agentic-head h2 { display: flex; align-items: center; flex-wrap: wrap; }
+
+/* At a glance is an agentic outcome: Purple-95 fill and a sparkle */
+.card.agentic.glance {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 16px;
+  background:
+    radial-gradient(420px circle at var(--mx) var(--my), var(--surface), transparent 60%) padding-box,
+    linear-gradient(var(--ai-fill), var(--ai-fill)) padding-box,
+    var(--aurora) border-box;
+}
+.glance-body { display: grid; gap: 2px; }
+.glance-body p { margin: 0; font-size: 0.9375rem; font-weight: 500; }
+.glance-body .kpi-label { display: flex; align-items: center; }
+
+.agentic-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 12px; }
+.disclaimer { margin: 0; color: var(--muted); display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; flex: 1 1 260px; }
+.disclaimer .fs-icon { color: var(--ai-ink); align-self: center; }
+.fb-note { color: var(--text); }
+
+/* Human feedback button group and "Why wasn't it helpful?" popover */
+.fs-feedback { position: relative; flex: none; }
+.fs-icon-btn.slds-button { width: 32px; height: 32px; justify-content: center; color: var(--muted); }
+.fs-icon-btn.slds-button.slds-is-selected { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
+.fs-feedback-pop {
+  position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 40; width: min(300px, calc(100vw - 32px));
+  display: grid; gap: 8px; padding: 12px 14px; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--slds-g-radius-border-3); box-shadow: var(--slds-g-shadow-3, 0 8px 24px rgba(0,0,0,.18));
+}
+.fs-pop-head { display: flex; justify-content: space-between; align-items: center; }
+.fs-reasons { border: 0; margin: 0; padding: 0; display: grid; gap: 4px; }
+.fs-reasons .slds-form-element__label { font-size: 0.8125rem; color: var(--text); }
+.fs-pop-foot { display: flex; justify-content: flex-end; gap: 8px; }
+.fs-icon { flex: none; }
+.note-view .ai-label, .note-src .ai-label { margin: 0 6px 0 0; }
+
+@media (prefers-reduced-motion: reduce) { .card.agentic { transition: none; } }
+
+/* Fixes from the visual check */
+.card > * { min-width: 0; }
+.case-grid { min-width: 0; }
+.fs-tabs { min-width: 0; overflow-x: auto; }
+.fs-tabs .slds-tabs_default__item { flex: none; }
+.slds-table.mini th, .slds-table.mini td { padding-left: 4px; padding-right: 4px; white-space: normal; }
+.hub-tools .slds-button { gap: 6px; }
+.fs-reasons .slds-checkbox_faux { margin-right: 8px; }
+.fs-toasts .slds-notify_toast { position: relative; }
+.fs-toasts .fs-toast-close.slds-button { position: static; margin-left: auto; flex: none; width: 28px; height: 28px; justify-content: center; }
+.fs-path, .fs-path .slds-path__track, .fs-path .slds-path__scroller-container { min-width: 0; max-width: 100%; }
+.fs-path .slds-path__scroller { overflow-x: auto; overflow-y: hidden; }

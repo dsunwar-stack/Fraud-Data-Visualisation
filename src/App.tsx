@@ -4,6 +4,7 @@ import { Overview } from './views/Overview'
 import { Queue } from './views/Queue'
 import { CaseView } from './views/CaseView'
 import { DEFAULT_FILTERS, type Filters } from './components/Filters'
+import { ToastProvider } from './components/slds'
 
 type Route = { view: 'overview' } | { view: 'queue' } | { view: 'case'; id: string }
 
@@ -40,6 +41,7 @@ export default function App() {
   const lastCase = route.view === 'case' ? route.id : null
 
   return (
+    <ToastProvider>
     <div className="shell">
       <aside className="nav">
         <div className="brand">
@@ -83,6 +85,7 @@ export default function App() {
         {route.view === 'case' && <CaseView id={route.id} onBack={() => go('queue')} />}
       </main>
     </div>
+    </ToastProvider>
   )
 }
 

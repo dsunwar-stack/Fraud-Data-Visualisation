@@ -153,7 +153,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
         </div>
         <div className="card">
           <header className="card-h"><div><h2>Data source health</h2><p className="sub">Click a source to filter cases that cite it</p></div></header>
-          <table className="mini">
+          <table className="slds-table slds-table_cell-buffer mini">
             <thead><tr><th>Source</th><th className="r">Hits</th><th className="r">Precision</th><th className="r">p95</th></tr></thead>
             <tbody>
               {SOURCE_HEALTH.map(s => {
@@ -179,7 +179,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
         <header className="card-h"><div><h2>Needs attention</h2><p className="sub">{f.bands.has('high') ? 'High-risk' : 'Matching'} cases closest to their SLA</p></div></header>
         {urgent.length ? (
           <div className="table-wrap">
-            <table className="data">
+            <table className="slds-table slds-table_cell-buffer slds-table_bordered data">
               <thead><tr><th>Case</th><th>Customer</th><th>Type</th><th>Risk</th><th>Top factor</th><th className="r">SLA</th><th>Recommended</th></tr></thead>
               <tbody>
                 {urgent.map(c => {

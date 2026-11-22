@@ -1,3 +1,4 @@
+import { Toggle } from './slds'
 import { CASE_TYPES, SOURCES, type Band, type CaseType, type FraudCase, type SourceId } from '../data'
 
 export type Range = 12 | 24 | 48
@@ -22,14 +23,8 @@ export const matchCase = (c: FraudCase, f: Filters) =>
 export const activeCount = (f: Filters) =>
   (f.bands.size < 3 ? 1 : 0) + (f.type !== 'all' ? 1 : 0) + (f.source !== 'all' ? 1 : 0) + (f.includeDecided ? 1 : 0)
 
-export function Switch({ id, checked, onChange, label }: { id: string; checked: boolean; onChange: (v: boolean) => void; label: string }) {
-  return (
-    <label className="switch" htmlFor={id}>
-      <input id={id} type="checkbox" role="switch" checked={checked} onChange={e => onChange(e.target.checked)} />
-      <span className="switch-track" aria-hidden="true"><span /></span>
-      {label}
-    </label>
-  )
+export function Switch(props: { id: string; checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  return <Toggle {...props} />
 }
 
 export function FilterBar({ f, set, showRange, counts, children }: {
@@ -62,18 +57,18 @@ export function FilterBar({ f, set, showRange, counts, children }: {
             </button>
           ))}
         </div>
-        <select id="f-type" value={f.type} onChange={e => set({ ...f, type: e.target.value as Filters['type'] })} aria-label="Case type">
+        <div className="slds-select_container"><select className="slds-select" id="f-type" value={f.type} onChange={e => set({ ...f, type: e.target.value as Filters['type'] })} aria-label="Case type">
           <option value="all">All case types</option>
           {CASE_TYPES.map(t => <option key={t}>{t}</option>)}
-        </select>
-        <select id="f-source" value={f.source} onChange={e => set({ ...f, source: e.target.value as Filters['source'] })} aria-label="Data source">
+        </select></div>
+        <div className="slds-select_container"><select className="slds-select" id="f-source" value={f.source} onChange={e => set({ ...f, source: e.target.value as Filters['source'] })} aria-label="Data source">
           <option value="all">All data sources</option>
           {SOURCES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        </select></div>
         {children}
         <Switch id="f-decided" checked={f.includeDecided} onChange={v => set({ ...f, includeDecided: v })} label="Include decided" />
         {n > 0 && (
-          <button className="link small reset" onClick={() => set({ ...DEFAULT_FILTERS, range: f.range })}>
+          <button className="slds-button reset" onClick={() => set({ ...DEFAULT_FILTERS, range: f.range })}>
             Clear {n} filter{n > 1 ? 's' : ''}
           </button>
         )}

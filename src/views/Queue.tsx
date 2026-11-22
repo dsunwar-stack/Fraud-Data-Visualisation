@@ -47,15 +47,15 @@ export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) =>
             <Switch id="q-urgent" checked={urgentOnly} onChange={setUrgentOnly} label="Due within 1h or breached" />
             <Switch id="q-signals" checked={showSignals} onChange={setShowSignals} label="Signals column" />
             <Switch id="q-compact" checked={compact} onChange={setCompact} label="Compact rows" />
-            <select id="queue-sort" value={sort} onChange={e => setSort(e.target.value as SortKey)} aria-label="Sort by">
+            <div className="slds-select_container"><select className="slds-select" id="queue-sort" value={sort} onChange={e => setSort(e.target.value as SortKey)} aria-label="Sort by">
               <option value="score">Sort: highest risk</option>
               <option value="sla">Sort: SLA due soonest</option>
               <option value="created">Sort: newest</option>
-            </select>
+            </select></div>
           </div>
         </div>
         <div className="table-wrap">
-          <table className={`data ${compact ? 'compact' : ''}`}>
+          <table className={`slds-table slds-table_cell-buffer slds-table_bordered data ${compact ? 'compact' : ''}`}>
             <thead>
               <tr><th>Case</th><th>Customer</th><th>Type</th><th>Risk score</th>{showSignals && <th>Signals</th>}<th className="r">Amount</th><th className="r">SLA</th><th>Status</th><th>Recommended</th></tr>
             </thead>
@@ -70,11 +70,11 @@ export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) =>
                     <td>{c.type}</td>
                     <td><ScoreCell score={c.score} band={c.band} /></td>
                     {showSignals && (
-                      <td><span className="signals">{c.factors.slice(0, 2).map(f => <span key={f.label} className="tag" title={f.detail}>{f.label}</span>)}{c.factors.length > 2 && <span className="tag muted" title={c.factors.slice(2).map(f => f.label).join(', ')}>+{c.factors.length - 2}</span>}</span></td>
+                      <td><span className="signals">{c.factors.slice(0, 2).map(f => <span key={f.label} className="slds-badge slds-badge_lightest tag" title={f.detail}>{f.label}</span>)}{c.factors.length > 2 && <span className="slds-badge slds-badge_lightest tag muted" title={c.factors.slice(2).map(f => f.label).join(', ')}>+{c.factors.length - 2}</span>}</span></td>
                     )}
                     <td className="r num">{c.amount ? fmtMoney(c.amount) : '—'}</td>
                     <td className={`r num ${done ? 'muted' : left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>{done ? 'Closed' : left < 0 ? `-${fmtDur(-left)}` : fmtDur(left)}</td>
-                    <td><span className={`status status-${c.status.replace(' ', '-').toLowerCase()}`}>{c.status}</span></td>
+                    <td><span className={`slds-badge status status-${c.status.replace(' ', '-').toLowerCase()}`}>{c.status}</span></td>
                     <td><span className={`outcome outcome-${c.recommended.toLowerCase()}`}>{c.recommended}</span></td>
                   </tr>
                 )

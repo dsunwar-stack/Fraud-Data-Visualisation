@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@salesforce-ux/design-system-2": "^2.264.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
