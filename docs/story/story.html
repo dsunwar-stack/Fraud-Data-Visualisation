@@ -96,11 +96,12 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="wrap">
   <header class="hero">
     <span class="eyebrow">Design story · Fraud data visualisation</span>
-    <h1>Fraud Signal: how twelve rounds of feedback shaped it</h1>
+    <h1>Fraud Signal: how thirteen rounds of feedback shaped it</h1>
     <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
-    <div class="facts"><span><b>12</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="facts"><span><b>13</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
     <div class="links">
       <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
+      <a href="https://claude.ai/artifact/RG7ujThqcfG1f7GyPyddaq">Design system</a>
       <a href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation">Code on GitHub</a>
       <a href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/blob/main/docs/versions/README.md">Feedback log</a>
     </div>
@@ -122,6 +123,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-10"><b>10</b> SLDS 2 rules</a></li>
       <li><a href="#round-11"><b>11</b> Navigation</a></li>
       <li><a href="#round-12"><b>12</b> Risk factors</a></li>
+      <li><a href="#round-13"><b>13</b> Design system</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -340,6 +342,23 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     </div>
   </section>
 
+  <section class="round" id="round-13">
+    <div class="round-head"><span class="num">13</span><h2>Design system and Storybook</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-13">Code: round-13</a><span class="kicker">One source of truth for designers and developers</span></div>
+    <blockquote><cite>Feedback</cite>"Is it possible to create a design system file in GitHub … so developers and designers can work in live code?" … "Also have documentation like the story, a storybook for the design system, which is separate?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li><b>Storybook</b> with foundations, components, charts and AI patterns, each with <b>editable controls</b> and a light/dark switch.</li>
+        <li>A <b>separate design system site</b> with live examples, <b>copyable code</b> and <b>do / don't rules</b>: <a href="https://claude.ai/artifact/RG7ujThqcfG1f7GyPyddaq">open it</a>.</li>
+        <li><b>DESIGN_SYSTEM.md</b> with token tables mapped to SLDS 2, and one import point for every component.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Design and code share one source</li><li>Rules live next to the components</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-13-design-system-site.png" alt="Design system site with principles and colour tokens" width="1280" height="900" loading="lazy"><figcaption>The design system site</figcaption></figure>
+      <figure><img src="../versions/round-13-storybook.png" alt="Storybook showing the info icon story with controls" width="1440" height="900" loading="lazy"><figcaption>Storybook: the info icon with editable controls</figcaption></figure>
+    </div>
+  </section>
+
   <section class="close" id="principles">
     <h2>The principles we ended up with</h2>
     <ol>
@@ -355,7 +374,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><b>Follow the design system's rules,</b> not just its colours: SLDS 2 Cosmos components, type and layout, plus the Agentic Experiences patterns for AI.</li>
     </ol>
     <div class="next">
-      <p><b>Next, proposed for round 13:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+      <p><b>Next, proposed for round 14:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
     </div>
   </section>
 
