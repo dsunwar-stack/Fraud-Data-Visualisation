@@ -487,3 +487,5 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .note-box summary::-webkit-details-marker { display: none; }
 .note-box summary::before { content: ''; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); margin-right: 2px; transition: transform .15s; align-self: center; }
 .note-box[open] summary::before { transform: rotate(45deg); }
+.note-src { margin: 0; padding: 8px 10px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+.note-src b { color: var(--text); font-weight: 600; }

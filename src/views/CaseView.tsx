@@ -384,7 +384,10 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 </div>
 
                 <details className="note-box">
-                  <summary><span className="kpi-label">Investigation note</span> <span className="muted small">checks done and evidence, pre-filled</span></summary>
+                  <summary><span className="kpi-label">Investigation note</span> <span className="muted small">optional, pre-filled from case data</span></summary>
+                  <p className="note-src small">
+                    <b>Filled in automatically by Fraud Signal</b> from this case's score, sources and top evidence. Nobody has written it. Add anything else you found; your decision reason goes in the fields above.
+                  </p>
                   <textarea id="case-note" value={note} onChange={e => setNote(e.target.value)} rows={10} aria-label="Investigation note" />
                   <button className="link small" onClick={() => setNote(noteTemplate(c))}>Reset to template</button>
                 </details>
@@ -486,6 +489,7 @@ function FindingHead({ k, count }: { k: keyof typeof FINDING_TYPES; count: numbe
 
 function noteTemplate(c: FraudCase) {
   return [
+    '[Auto-filled from case data. Edit or add to it.]',
     `Case ${c.id}, ${c.type}`,
     `Score: ${c.score}/100 (${c.band}). Recommended: ${c.recommended}.`,
     `At a glance: ${c.glance}`,
