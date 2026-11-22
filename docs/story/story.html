@@ -96,9 +96,9 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="wrap">
   <header class="hero">
     <span class="eyebrow">Design story · Fraud data visualisation</span>
-    <h1>Fraud Signal: how fifteen rounds of feedback shaped it</h1>
+    <h1>Fraud Signal: how sixteen rounds of feedback shaped it</h1>
     <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
-    <div class="facts"><span><b>15</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="facts"><span><b>16</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
     <div class="links">
       <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
       <a href="https://claude.ai/artifact/RG7ujThqcfG1f7GyPyddaq">Design system</a>
@@ -126,6 +126,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-13"><b>13</b> Design system</a></li>
       <li><a href="#round-14"><b>14</b> Decision buttons</a></li>
       <li><a href="#round-15"><b>15</b> Button hierarchy</a></li>
+      <li><a href="#round-16"><b>16</b> Notifications</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -393,6 +394,23 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     </div>
   </section>
 
+  <section class="round" id="round-16">
+    <div class="round-head"><span class="num">16</span><h2>Scoped notifications</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-16">Code: round-16</a><span class="kicker">One standard way to show status in place</span></div>
+    <blockquote><cite>Feedback</cite>"Here is the scoped notification. Can you please apply it where necessary, with the icons?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>SLDS 2 <b>scoped notifications</b> with their utility icons: default, info, warning, error, success.</li>
+        <li>Used for the alert spike, a <b>degraded data source</b>, <b>SLA breached or due soon</b>, who decides, overriding the recommendation, the <b>recorded decision</b>, and empty states.</li>
+        <li>Most include a next step, e.g. <i>Show affected cases</i>.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Status shown where it applies</li><li>Every warning has a next step</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-16-scoped-notifications.png" alt="Five scoped notification variants with icons" width="2400" height="1300" loading="lazy"><figcaption>The five variants in the design system</figcaption></figure>
+      <figure><img src="../versions/round-16-case-sla-error.png" alt="Error notification for a breached SLA on a case" width="2420" height="840" loading="lazy"><figcaption>SLA breached on a case</figcaption></figure>
+    </div>
+  </section>
+
   <section class="close" id="principles">
     <h2>The principles we ended up with</h2>
     <ol>
@@ -408,7 +426,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><b>Follow the design system's rules,</b> not just its colours: SLDS 2 Cosmos components, type and layout, plus the Agentic Experiences patterns for AI.</li>
     </ol>
     <div class="next">
-      <p><b>Next, proposed for round 16:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+      <p><b>Next, proposed for round 17:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
     </div>
   </section>
 
