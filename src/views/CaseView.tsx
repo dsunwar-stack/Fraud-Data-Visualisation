@@ -230,7 +230,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           {/* ---- Findings ---- */}
           <section className="card">
             <header className="card-h">
-              <div><h2>Findings</h2><p className="sub">Evidence for and against fraud. Examine an item to see its raw signals, or mitigate it once you've cleared it.</p></div>
+              <div><h2>Findings</h2><p className="sub">Evidence sorted by what it says about fraud: for it, against it, or unclear. <b>Examine</b> shows the raw signals behind an item. <b>Mitigate</b> moves it to the middle column once you've cleared it.</p></div>
             </header>
             <div className="seg" role="group" aria-label="Filter findings by source">
               <button className="chip" aria-pressed={srcFilter === 'all'} onClick={() => setSrcFilter('all')}>All sources</button>
@@ -240,7 +240,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             </div>
             <div className="findings">
               <div className="fcol fcol-high">
-                <div className="fcol-h">Substantiation <span className="num muted">{subst.length}</span></div>
+                <FindingHead k="substantiation" count={subst.length} />
                 {subst.length ? (
                   <ul>
                     {subst.map(f => (
@@ -263,7 +263,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 ) : <p className="muted small">No supporting evidence{filtering ? ' for this filter' : ''}.</p>}
               </div>
               <div className="fcol fcol-low">
-                <div className="fcol-h">Mitigation <span className="num muted">{mitig.length}</span></div>
+                <FindingHead k="mitigation" count={mitig.length} />
                 {mitig.length ? (
                   <ul>
                     {mitig.map(f => (
@@ -279,7 +279,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 ) : <p className="muted small">Nothing found that lowers risk.</p>}
               </div>
               <div className="fcol fcol-neutral">
-                <div className="fcol-h">Unaligned <span className="num muted">{unal.length}</span></div>
+                <FindingHead k="unaligned" count={unal.length} />
                 {unal.length ? (
                   <ul>{unal.map(f => <li key={f.id}>{f.text}<span className="tag src">{sourceShort(f.source)}</span></li>)}</ul>
                 ) : <p className="muted small">No conflicting evidence.</p>}
@@ -380,6 +380,38 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           </section>
         </aside>
       </div>
+    </div>
+  )
+}
+
+const FINDING_TYPES = {
+  substantiation: {
+    name: 'Substantiation', plain: 'Supports fraud',
+    meaning: 'Evidence that makes fraud more likely. These are the reasons the case was raised.',
+    example: "The customer's email address has been reported for impersonation by other banks.",
+  },
+  mitigation: {
+    name: 'Mitigation', plain: 'Lowers the risk',
+    meaning: 'Evidence that the customer is probably genuine, or items you have checked and cleared using Mitigate.',
+    example: 'The passport chip was read successfully and the face matches.',
+  },
+  unaligned: {
+    name: 'Unaligned', plain: "Doesn't point either way",
+    meaning: 'Evidence that is related but unclear: it may be old, involve someone else, or be common among genuine customers. Use your judgement.',
+    example: 'An address match from 2021 on a different surname.',
+  },
+} as const
+
+function FindingHead({ k, count }: { k: keyof typeof FINDING_TYPES; count: number }) {
+  const t = FINDING_TYPES[k]
+  return (
+    <div className="fcol-head">
+      <div className="fcol-h">
+        {t.name}
+        <InfoTip label={t.name} align={k === 'unaligned' ? 'end' : 'start'}><span>{t.meaning}</span><span className="infotip-ex"><b>Example:</b> {t.example}</span></InfoTip>
+        <span className="num muted">{count}</span>
+      </div>
+      <span className="fcol-plain">{t.plain}</span>
     </div>
   )
 }
