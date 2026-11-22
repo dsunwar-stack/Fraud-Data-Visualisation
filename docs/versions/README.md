@@ -13,6 +13,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [5](#round-5-one-risk-hub-list-and-clear-buttons) | Bars and circles repeat each other; what does "Go" mean? | One row per fraud type, "Show 3 factors" button | [`round-5`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-5) |
 | [6](#round-6-explain-the-findings-columns) | What do Substantiation, Mitigation and Unaligned mean? | Plain labels and info icons on each column | [`round-6`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-6) |
 | [7](#round-7-who-decides-and-where-the-reason-goes) | Does the LLM decide? Where do I write my reason? | "You decide" statement, required reason, saved decision record | [`round-7`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-7) |
+| [8](#round-8-the-case-snapshot-is-not-a-note) | Is the investigation note written by AI? | Read-only case snapshot, one optional notes field | [`round-8`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-8) |
 
 To run any round locally:
 
@@ -142,6 +143,26 @@ The original terms were kept because fraud specialists use them; the plain label
 | Filling in a decision | After recording |
 |---|---|
 | ![Decision form](round-7-decision-form.png) | ![Decision recorded](round-7-decision-recorded.png) |
+
+---
+
+## Round 8: the case snapshot is not a note
+
+> **Feedback:** "I saw that we still have an investigation note under it. Is this done by AI?"
+
+**The answer:** no. It was filled in by a fixed template from the case data. Only the At a glance line inside it came from the AI summary. But the panel had three text boxes, and the pre-filled one looked like someone's written opinion.
+
+**What changed**
+- The pre-filled text is now a **read-only Case snapshot**, labelled "Built by a fixed template from the case data, not by AI and not by a person". The one AI-written line is marked with an **AI** badge.
+- The snapshot is **attached to the decision automatically**, so reviewers see what the specialist saw. Nobody needs to edit it.
+- The specialist writes in only two places: **Why did you make this decision?** (required) and a new, empty **Additional notes** box (optional).
+- After recording, the decision shows Reason, Why, Notes, and a link to view the snapshot.
+
+**Principles:** say where content comes from, and mark anything written by AI; one clear place to write; don't ask people to edit what the system already knows.
+
+| Filling in a decision | After recording |
+|---|---|
+| ![Decision form](round-8-decision-form.png) | ![Decision recorded](round-8-decision-recorded.png) |
 
 ---
 
