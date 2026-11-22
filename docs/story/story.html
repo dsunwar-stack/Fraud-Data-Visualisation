@@ -1,0 +1,308 @@
+<title>Fraud Signal Design Story</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; a sticky round index; each round = feedback → change → principle → evidence. */
+:root {
+  --bg: #f4f6f9;
+  --paper: #ffffff;
+  --ink: #16202c;
+  --muted: #5b6878;
+  --line: #dfe4ec;
+  --blue: #0b5cab;
+  --blue-soft: #e8f1fb;
+  --ai: #7526e3;
+  --ai-soft: #f4effc;
+  --quote: #fff8ec;
+  --quote-line: #e4a13a;
+  --display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1419; --paper: #171e26; --ink: #e8edf3; --muted: #95a2b3; --line: #2a3440;
+    --blue: #6aacf2; --blue-soft: #152536; --ai: #c29ef1; --ai-soft: #231a33; --quote: #2a2214; --quote-line: #d99a3a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1419; --paper: #171e26; --ink: #e8edf3; --muted: #95a2b3; --line: #2a3440;
+  --blue: #6aacf2; --blue-soft: #152536; --ai: #c29ef1; --ai-soft: #231a33; --quote: #2a2214; --quote-line: #d99a3a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--body); margin: 0; }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--blue); }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+
+header.hero { padding-block: 56px 28px; display: grid; gap: 14px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); }
+.hero h1 { font-size: clamp(34px, 5.4vw, 54px); line-height: 1.05; }
+.hero p { margin: 0; font-size: 18px; color: var(--muted); max-width: 62ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); }
+.facts b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.links a { font-size: 14px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); background: var(--paper); padding: 7px 12px; border-radius: 8px; }
+.links a:hover { border-color: var(--blue); }
+
+nav.index { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+nav.index ol { list-style: none; margin: 0; padding-block: 10px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+nav.index a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 13px; text-decoration: none; color: var(--muted); padding: 5px 10px; border-radius: 999px; border: 1px solid transparent; }
+nav.index a:hover, nav.index a:focus-visible { color: var(--ink); border-color: var(--line); background: var(--paper); }
+nav.index b { font-family: var(--display); color: var(--blue); }
+
+main { display: grid; gap: 28px; padding-block: 28px 56px; }
+.round { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 26px 26px 22px; display: grid; gap: 18px; scroll-margin-top: 64px; min-width: 0; }
+.round-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 16px; align-items: baseline; }
+.num { font-family: var(--display); font-size: 40px; font-weight: 700; color: var(--blue); line-height: 1; grid-row: span 2; font-variant-numeric: tabular-nums; }
+.round h2 { font-size: 24px; }
+.round-head .branch { font-size: 13px; white-space: nowrap; }
+.round-head .kicker { color: var(--muted); font-size: 14px; grid-column: 2 / -1; }
+@media (max-width: 560px) { .round { padding: 20px 16px; } .round-head { grid-template-columns: auto minmax(0, 1fr); } .round-head .branch { grid-column: 2; } }
+
+blockquote { margin: 0; padding: 12px 16px; background: var(--quote); border-left: 4px solid var(--quote-line); border-radius: 0 8px 8px 0; font-size: 16px; }
+blockquote cite { display: block; font-style: normal; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 760px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.cols h3 { font-size: 14px; font-family: var(--body); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.cols ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.cols ul.principles { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.principles li { font-size: 13px; background: var(--blue-soft); color: var(--blue); padding: 3px 10px; border-radius: 999px; }
+.principles li.ai { background: var(--ai-soft); color: var(--ai); }
+
+.shots { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); align-items: start; }
+.shots.one { grid-template-columns: minmax(0, 1fr); }
+figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+figure img { width: 100%; height: auto; max-width: 100%; display: block; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+figure.narrow img { max-width: 340px; }
+figcaption { font-size: 13px; color: var(--muted); }
+figure .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 7px; border-radius: 4px; margin-right: 6px; }
+.tag.before { background: var(--quote); color: var(--quote-line); }
+.tag.after { background: var(--blue-soft); color: var(--blue); }
+
+.close { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 26px; display: grid; gap: 14px; }
+.close h2 { font-size: 26px; }
+.close ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.next { border: 1px dashed var(--blue); background: var(--blue-soft); border-radius: 10px; padding: 14px 16px; }
+.next p { margin: 0; }
+footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow">Design story · Fraud data visualisation</span>
+    <h1>Fraud Signal: how nine rounds of feedback shaped it</h1>
+    <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
+    <div class="facts"><span><b>9</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="links">
+      <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
+      <a href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation">Code on GitHub</a>
+      <a href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/blob/main/docs/versions/README.md">Feedback log</a>
+    </div>
+  </header>
+</div>
+
+<nav class="index" aria-label="Rounds">
+  <div class="wrap">
+    <ol>
+      <li><a href="#round-1"><b>1</b> First version</a></li>
+      <li><a href="#round-2"><b>2</b> Wireframe, filters</a></li>
+      <li><a href="#round-3"><b>3</b> Chart values</a></li>
+      <li><a href="#round-4"><b>4</b> Fraud types</a></li>
+      <li><a href="#round-5"><b>5</b> Risk Hub</a></li>
+      <li><a href="#round-6"><b>6</b> Findings</a></li>
+      <li><a href="#round-7"><b>7</b> Who decides</a></li>
+      <li><a href="#round-8"><b>8</b> Case snapshot</a></li>
+      <li><a href="#round-9"><b>9</b> SLDS 2</a></li>
+      <li><a href="#principles">Principles</a></li>
+    </ol>
+  </div>
+</nav>
+
+<div class="wrap">
+<main>
+
+  <section class="round" id="round-1">
+    <div class="round-head"><span class="num">1</span><h2>First version</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-1">Code: round-1</a><span class="kicker">From concept slides to three working views</span></div>
+    <blockquote><cite>Feedback</cite>"Create a fraud data visualisation based on the slides: observability, clean UI, modern."</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li><b>Overview</b> to spot problems: summary cards, alert volume by hour, risk score distribution, top risk factors, data source health.</li>
+        <li><b>Case queue</b> to choose what to work on next, with a risk marker on every row.</li>
+        <li><b>Case investigation</b> to decide: risk gauge, AI summary with exact figures, score breakdown, findings, source evidence, colour-coded decision.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Big picture first, then evidence</li><li>Exact figures, not vague words</li><li>Explain the score</li><li>Colour has meaning</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-1-overview.png" alt="Round 1 overview with summary cards, alert volume and risk distribution" width="2880" height="1800"><figcaption>Overview</figcaption></figure>
+      <figure><img src="../versions/round-1-case.png" alt="Round 1 case investigation with risk gauge and AI summary" width="2880" height="1800" loading="lazy"><figcaption>Case investigation</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="round" id="round-2">
+    <div class="round-head"><span class="num">2</span><h2>Wireframe features, filters and toggles</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-2">Code: round-2</a><span class="kicker">Closing the gap with the early wireframe</span></div>
+    <blockquote><cite>Feedback</cite>"Is this [the early wireframe slide] included?" … "Can you have filters and toggles too?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li><b>Risk Hub</b> scores each fraud type separately.</li>
+        <li><b>At a glance</b> one-line summary, and a <b>full customer profile</b>: date of birth, address history, electoral roll, income, credit score.</li>
+        <li><b>Examine / Mitigate</b> on each finding, and feedback on the AI summary.</li>
+        <li><b>Shared filters</b> (risk, case type, data source) and <b>toggles</b> (time range, chart lines, compact rows, urgent only).</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Evidence in one place</li><li>Narrow down without losing context</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-2-overview.png" alt="Round 2 overview with filter bar" width="2880" height="1800" loading="lazy"><figcaption>Filter bar across the top of the Overview</figcaption></figure>
+      <figure><img src="../versions/round-2-case.png" alt="Round 2 case with At a glance and Risk Hub" width="2880" height="1800" loading="lazy"><figcaption>At a glance and the first Risk Hub</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="round" id="round-3">
+    <div class="round-head"><span class="num">3</span><h2>Charts show their values</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-3">Code: round-3</a><span class="kicker">Every chart answers "how many?"</span></div>
+    <blockquote><cite>Feedback</cite>"There's no info in the graphs, such as alerts, high-risk alerts and auto-declined, when I click on the graph, whereas Alert volume has it."</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>Hover or tap any summary card's trend line to see the value for that hour.</li>
+        <li>Two trend lines were decorative. They are now worked out from real case data and match the card's number.</li>
+        <li>The risk score chart shows the count and share for each score range.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Charts readable on their own</li><li>Numbers agree with each other</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-3-card-hover.png" alt="Summary card trend line showing 7 high-risk alerts from 01:00 to 02:00" width="1210" height="280" loading="lazy"><figcaption>Hovering a summary card's trend line</figcaption></figure>
+      <figure class="narrow"><img src="../versions/round-3-histogram-hover.png" alt="Score 80 to 84: 8 high-risk cases, 7% of cases" width="364" height="180" loading="lazy"><figcaption>Hovering a score range</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="round" id="round-4">
+    <div class="round-head"><span class="num">4</span><h2>Explain the fraud types</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-4">Code: round-4</a><span class="kicker">Plain English for fraud-team jargon</span></div>
+    <blockquote><cite>Feedback</cite>"I think people would not know what impersonation, false identity and false application mean in the Risk Hub." … "Can we have an info icon with help text on what they mean?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>A one-line plain meaning on each fraud type, e.g. <i>Impersonation: someone is using a real person's stolen details</i>.</li>
+        <li>An ⓘ icon with the full meaning and an example, by hover, keyboard or tap.</li>
+        <li>A "What do these mean?" panel listing the signals behind each type for the case.</li>
+        <li>Fixed which fraud type each factor belongs to. A type with no evidence now scores 0.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Plain language, not jargon</li><li>Help where it's needed</li><li>Numbers agree with each other</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-4-risk-hub-before.png" alt="Risk Hub before: labels only" width="1592" height="558" loading="lazy"><figcaption><span class="tag before">Before</span>Labels only</figcaption></figure>
+      <figure><img src="../versions/round-4-risk-hub-help.png" alt="Risk Hub after: info popup explaining Impersonation" width="1624" height="1090" loading="lazy"><figcaption><span class="tag after">After</span>Plain meanings and an info popup</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="round" id="round-5">
+    <div class="round-head"><span class="num">5</span><h2>One Risk Hub list and clear buttons</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-5">Code: round-5</a><span class="kicker">Say it once, and say what the button does</span></div>
+    <blockquote><cite>Feedback</cite>"In Risk Hub we have two, one with the bar and one with the circles. Isn't it the same information? And what does Go mean to the users?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>Bars and rings merged into <b>one row per fraud type</b>, with a risk label.</li>
+        <li><b>"Go"</b> became <b>"Show 3 factors"</b>, and "Show all evidence" to undo it.</li>
+        <li>Types with no evidence say "No evidence found" instead of offering a button.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Show information once</li><li>Buttons say exactly what happens</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-4-risk-hub.png" alt="Risk Hub with bars and rings both shown" width="1592" height="940" loading="lazy"><figcaption><span class="tag before">Before</span>The same scores shown twice, and "Go"</figcaption></figure>
+      <figure><img src="../versions/round-5-risk-hub.png" alt="Risk Hub as one list with Show 3 factors buttons" width="1592" height="900" loading="lazy"><figcaption><span class="tag after">After</span>One list with clear buttons</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="round" id="round-6">
+    <div class="round-head"><span class="num">6</span><h2>Explain the Findings columns</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-6">Code: round-6</a><span class="kicker">Specialist terms, plain labels</span></div>
+    <blockquote><cite>Feedback</cite>"In the Findings section, what do Substantiation, Mitigation and Unaligned mean?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>Plain labels under each column: <b>Supports fraud</b>, <b>Lowers the risk</b>, <b>Doesn't point either way</b>.</li>
+        <li>An ⓘ icon on each with the full meaning and an example.</li>
+        <li>The section explains what Examine and Mitigate do.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Plain language, not jargon</li><li>Keep terms experts already use</li></ul></div>
+    </div>
+    <div class="shots one">
+      <figure><img src="../versions/round-6-findings-help.png" alt="Findings with plain labels and the Unaligned info popup open" width="812" height="700" loading="lazy" style="max-width:600px"><figcaption>Plain labels and the Unaligned popup</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="round" id="round-7">
+    <div class="round-head"><span class="num">7</span><h2>Who decides, and where the reason goes</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-7">Code: round-7</a><span class="kicker">The specialist decides, and says why</span></div>
+    <blockquote><cite>Feedback</cite>"Is the decision taken by the LLM?" … "If I decline, refer or accept, where will I leave my note on what basis I took the decision?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>A clear statement: <b>you make the final decision</b>. The AI summarises the evidence. The recommendation comes from the risk score.</li>
+        <li>A <b>required reason code</b> for each outcome and a <b>required explanation</b> in the specialist's own words.</li>
+        <li>Going against the recommendation is flagged and saved as an <b>override</b>.</li>
+        <li>After recording, the decision, reason and explanation stay visible and appear in the timeline.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>The specialist decides, not the AI</li><li>Every decision has a reason</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure class="narrow"><img src="../versions/round-7-decision-form.png" alt="Decision form with required reason and explanation" width="340" height="729" loading="lazy"><figcaption>Filling in a decision</figcaption></figure>
+      <figure class="narrow"><img src="../versions/round-7-decision-recorded.png" alt="Recorded decision showing reason and explanation" width="340" height="649" loading="lazy"><figcaption>After recording</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="round" id="round-8">
+    <div class="round-head"><span class="num">8</span><h2>The case snapshot is not a note</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-8">Code: round-8</a><span class="kicker">Say where content comes from</span></div>
+    <blockquote><cite>Feedback</cite>"I saw that we still have an investigation note under it. Is this done by AI?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>The pre-filled text became a <b>read-only case snapshot</b>, labelled as built by a fixed template, not by AI or a person. Its one AI-written line is marked.</li>
+        <li>The snapshot is attached to the decision automatically.</li>
+        <li>The specialist writes in only two places: the required reason and optional <b>Additional notes</b>.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Mark anything written by AI</li><li>One clear place to write</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure class="narrow"><img src="../versions/round-8-decision-form.png" alt="Decision panel with additional notes and read-only case snapshot" width="340" height="1113" loading="lazy"><figcaption>Reason, notes and the read-only snapshot</figcaption></figure>
+      <figure class="narrow"><img src="../versions/round-8-decision-recorded.png" alt="Recorded decision with notes and snapshot" width="340" height="641" loading="lazy"><figcaption>After recording</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="round" id="round-9">
+    <div class="round-head"><span class="num">9</span><h2>SLDS 2 design system</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-9">Code: round-9</a><span class="kicker">The organisation's design system, and agentic patterns for AI</span></div>
+    <blockquote><cite>Feedback</cite>"Please make sure you use the SLDS 2 design system" (SLDS 2 Pattern: Agentic Experiences)</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>The official SLDS 2 stylesheet, with every colour, font, radius and shadow from SLDS 2 styling hooks.</li>
+        <li>SLDS 2 buttons, select menus, toggles, path, tabs, tables, badges and toasts.</li>
+        <li><b>Agentic card</b> for AI content: sparkle icon, aurora border and glow, AI label, disclaimer.</li>
+        <li><b>Human feedback</b>: helpful, not helpful with reasons, and copy, confirmed by a toast.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Use the design system</li><li class="ai">Mark AI content consistently and sparingly</li><li class="ai">Standard feedback on every AI response</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure><img src="../versions/round-9-ai-summary-feedback.png" alt="Agentic AI summary card with the Why wasn't it helpful popover" width="796" height="623" loading="lazy"><figcaption>Agentic AI summary with the feedback popover</figcaption></figure>
+      <figure><img src="../versions/round-9-case-dark.png" alt="Case investigation in dark mode with SLDS 2 styling" width="1440" height="1000" loading="lazy"><figcaption>Dark mode</figcaption></figure>
+    </div>
+    <div class="shots one"><figure><img src="../versions/round-9-overview.png" alt="Overview in SLDS 2" width="1440" height="1000" loading="lazy"><figcaption>Overview in SLDS 2</figcaption></figure></div>
+  </section>
+
+  <section class="close" id="principles">
+    <h2>The principles we ended up with</h2>
+    <ol>
+      <li><b>Big picture first, then evidence.</b> Overview → queue → case.</li>
+      <li><b>Exact figures, not vague words.</b> Counts and time windows, never "recent".</li>
+      <li><b>Explain every score.</b> Show where each number comes from.</li>
+      <li><b>Evidence in one place.</b> No switching between systems.</li>
+      <li><b>Plain language,</b> with ⓘ help for specialist terms.</li>
+      <li><b>Show information once,</b> and buttons say exactly what they do.</li>
+      <li><b>Colour has meaning.</b> Red, amber, green for risk; purple only for AI.</li>
+      <li><b>The specialist decides, not the AI,</b> and every decision has a recorded reason.</li>
+      <li><b>Mark anything written by AI,</b> and collect feedback on every AI response.</li>
+      <li><b>Use the design system:</b> SLDS 2 and its Agentic Experiences patterns.</li>
+    </ol>
+    <div class="next">
+      <p><b>Next, proposed for round 10:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+    </div>
+  </section>
+
+</main>
+<footer>All data in Fraud Signal is synthetic. No real customers, cases or institutions are shown. Feedback quotes are from the product designer, lightly edited for spelling.</footer>
+</div>

@@ -1,5 +1,9 @@
 # Design history and feedback log
 
+> **Read it as a story:** [Fraud Signal Design Story](https://claude.ai/artifact/GdusjY27biDLL4jqm9JxaY) walks through every round with screenshots. A copy of that page is kept in [`docs/story/story.html`](../story/story.html); open it from a local clone to view it offline.
+
+**How we keep this up to date:** every new round of feedback gets (1) a section here and in the story page, (2) screenshots in this folder named `round-N-…png`, and (3) a `round-N` branch with that round's code.
+
 Every round of design feedback, what changed because of it, and why. Each round has screenshots and a saved copy of the code on its own branch, so you can open or run any earlier version.
 
 All data is synthetic. Feedback is from the product designer reviewing the dashboard, lightly edited for spelling.
