@@ -23,7 +23,7 @@ All data is synthetic and generated in the browser from a fixed seed. No real cu
 
 ## Versions
 
-See [docs/versions](docs/versions/README.md) for screenshots comparing version 1 and version 2.
+See the [design history and feedback log](docs/versions/README.md) for every round of feedback, what changed, screenshots, and a branch with the code for each round.
 
 ## Design principles
 
