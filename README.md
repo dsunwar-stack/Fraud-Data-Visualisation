@@ -21,6 +21,10 @@ All data is synthetic and generated in the browser from a fixed seed. No real cu
 - **Case queue:** search, sort, due within 1 hour or breached, show or hide the signals column, and compact rows.
 - **Case investigation:** **Go** on a fraud type focuses the summary and findings on it, findings can be filtered by source, and there are toggles to hide fraud types with no signals and show flagged signals only.
 
+## Versions
+
+See [docs/versions](docs/versions/README.md) for screenshots comparing version 1 and version 2.
+
 ## Design principles
 
 These come from user research on an earlier LLM fraud summary concept:
