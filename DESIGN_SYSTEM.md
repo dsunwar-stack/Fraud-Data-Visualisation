@@ -86,6 +86,7 @@ Import from `src/design-system`. Each has a Storybook story with controls.
 | Component | Use it for | Rules |
 |---|---|---|
 | **Card** (`.slds-card.card` + `.card-h`) | Every block of content | Title, one-line description, optional control on the right. Don't add your own border, radius or shadow. |
+| **Page header** (`PageHeader`) | Top of every screen | Same container look as cards: SLDS 2 Cosmos gives containers **no border and no shadow**, only the surface colour and 20px radius. Don't add a border to one container type and not the others. |
 | **Metric card** (`.kpi` + `Sparkline`) | The 3–6 numbers that answer "is something wrong?" | Always pass `labels` so the trend line shows values on hover. Say what a change compares against. |
 | **InfoTip** (ⓘ) | Specialist terms and numbers whose meaning isn't obvious | Plain meaning first, then an example. Also show a one-line plain label on screen. No links or buttons inside. |
 | **Badges** (`.slds-badge`) | Risk level, status, source, AI | Risk badges show the word, not only colour. The AI label only on AI-written content. |

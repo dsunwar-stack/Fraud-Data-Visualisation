@@ -643,7 +643,8 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
   --slds-s-pageheader-title-font-size: var(--slds-g-font-scale-5);
   --slds-s-pageheader-title-font-weight: var(--slds-g-font-weight-4);
   padding: var(--slds-g-spacing-4); display: grid; gap: var(--slds-g-spacing-3);
-  border: 1px solid var(--border);
+  /* No border: SLDS 2 Cosmos containers (cards and page headers) have no border or shadow;
+     they stand apart from the page by their surface colour, so the header matches the cards. */
 }
 .fs-page-header .slds-page-header__row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 .fs-page-header .slds-media { display: flex; gap: 12px; align-items: center; }
@@ -909,3 +910,6 @@ ul.ds-principles { list-style: disc; }
 .fs-obs-charts .slds-radio_button-group, .fs-obs-charts fieldset { margin-bottom: 8px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 980px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+/* Metric cards: keep sparklines on one line across a row, even when the note wraps */
+.kpi { grid-template-rows: auto auto auto 1fr auto; }
+.kpi > .spark { align-self: end; }

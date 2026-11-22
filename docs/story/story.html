@@ -133,6 +133,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-20"><b>20</b> One record</a></li>
       <li><a href="#round-21"><b>21</b> Observability</a></li>
       <li><a href="#round-22"><b>22</b> Trends</a></li>
+      <li><a href="#round-23"><b>23</b> Containers</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -516,6 +517,20 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     <div class="shots"><figure><img src="img/round-22-keepingup.png" alt="Cases in versus decided per hour, and SLA forecast against team capacity" width="2304" height="890" loading="lazy"><figcaption>Keeping up, and what's coming</figcaption></figure></div>
     <div class="shots"><figure><img src="img/round-22-backlog-systems.png" alt="Open cases and breaches over 24 hours; ID check response time with alert line" width="2304" height="666" loading="lazy"><figcaption>The outage, and the backlog that followed</figcaption></figure></div>
     <div class="shots"><figure><img src="img/round-22-7days.png" alt="Decisions per day agreed or overridden; average time to decide" width="2304" height="660" loading="lazy"><figcaption>The last 7 days</figcaption></figure></div>
+  </section>
+
+  <section class="round" id="round-23">
+    <div class="round-head"><span class="num">23</span><h2>One container style</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-23">Code: round-23</a><span class="kicker">Same component, same look</span></div>
+    <blockquote><cite>Feedback</cite>"Why do the cards in the fraud screen have inconsistent borders, based on the SLDS 2 design system?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li><b>Cause:</b> our stylesheet added a grey border to the page header only. The cards followed SLDS 2 Cosmos: no border, no shadow.</li>
+        <li><b>Fix:</b> removed it, so every container is the same: white surface, 20px radius, no border. Borders stay only <i>inside</i> containers, to group content.</li>
+        <li>Sparklines in metric cards now line up across a row.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Use the design system as is</li><li>Consistency builds trust</li></ul></div>
+    </div>
+    <div class="shots"><figure><img src="img/round-23-containers.png" alt="Page header and metric cards with the same borderless container style" width="2120" height="1040" loading="lazy"><figcaption>Header and cards now match</figcaption></figure></div>
   </section>
 
   <section class="close" id="principles">
