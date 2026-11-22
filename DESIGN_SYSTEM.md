@@ -117,6 +117,16 @@ Defined once in `src/data.ts` (`THRESHOLDS`) and shown with the `RiskThresholds`
 - **Auto-decline:** alerts scoring 85+ are declined automatically. Shown as a red marker on the score bar.
 - **Adjusting a score:** if the adjusted score falls in another band, show a warning with that band's recommendation. Adjustments of **30+ points or across two bands** show an error and should go to a second reviewer (Refer).
 
+## Evidence card (Version B)
+
+Bring data from every platform into **one card grouped by the specialist's question**, not by source system: **Money · Behaviour · Account changes · Identity** (SLDS accordion).
+
+- Compare **last 7 days / last 30 days** with the customer's **usual weekly average (3 months)**. Show **absolute numbers and changes, never percentages**.
+- Use **plain terms** ("Money in (credits)", "Moved out of savings") with an ⓘ that says what the measure means and what fraud it can indicate.
+- Mark out-of-character rows with an **Unusual** badge and a red edge bar; offer an **Unusual only** toggle; show each row's **source** as a tag.
+- Open the section that matters for the case type first (Money for mule/payment fraud, Behaviour for account takeover, Identity for onboarding/synthetic identity). **Examine** on a finding jumps to its section.
+- New customers: say there's no history to compare, and don't mark money or behaviour unusual.
+
 ## Button hierarchy
 
 | Level | SLDS variant | Use | Fraud Signal examples |

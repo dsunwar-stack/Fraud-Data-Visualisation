@@ -28,6 +28,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [16](#round-16-scoped-notifications) | Apply SLDS 2 scoped notifications with their icons where needed | Info, warning, error, success and default notifications across Overview, queue and case | [`round-16`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-16) |
 | [17](#round-17-adjust-score-not-edit) | The Fraud summary has an Edit button but I can't edit anything | Renamed to Adjust score, explained, SLDS checkboxes, adjustment saved with the decision | [`round-17`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-17) |
 | [18](#round-18-risk-thresholds-on-screen) | What's the threshold when adjusting the score? Show it so the user knows | Risk thresholds table, auto-decline marker, threshold-crossing and large-adjustment notices | [`round-18`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-18) |
+| [19](#round-19-version-b-integrated-evidence) | Did we cater for the first Fraud Data Visualisation design? Make a Version B integrated, keep the current one | Version B: integrated Evidence card; Version A kept; A/B switch | [`round-19`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-19) |
 
 To run any round locally:
 
@@ -415,6 +416,32 @@ They replace the custom notes, coloured boxes and annotations used before. The c
 | Adjusted across a threshold | Overview |
 |---|---|
 | ![Adjusted](round-18-adjusted.png) | ![Overview thresholds](round-18-overview-thresholds.png) |
+
+---
+
+## Round 19: Version B, integrated evidence
+
+> **Feedback:** "When we designed this, did we cater for this first design too?" (earlier Fraud Data Visualisation research) … "What do you think is best: integrated or separate?" … "Can I have a version B integrated then, so we don't lose the one we have now?"
+
+**Gap found:** the earlier research's core, the customer's **transactional and behavioural history** (7 days vs 3 months, absolute changes, payees, account changes, grouped with info icons and plain terms), wasn't in the dashboard. *Source evidence* was organised by platform, which mirrors the toggling problem the research set out to remove.
+
+**Decision:** integrate, don't separate. A separate page would bring the switching back. Group evidence by the specialist's question and reveal detail progressively.
+
+**Version B (new)**
+- One **Evidence** card replaces Source evidence: **Money · Behaviour · Account changes · Identity** (SLDS accordion), each with its question, an unusual count, and source tags on every row.
+- **Last 7 days / Last 30 days** against the customer's **usual weekly average over 3 months**. **Absolute numbers and changes only**, following the earlier "eliminate manual calculations" decision.
+- **Plain terms** with an ⓘ per measure saying what it can indicate (e.g. money in: mule activity or a safe-account scam). The earlier research found "turnover", "saving de-funding" and percentages confusing.
+- **Payees paid in the last 7 days** (new payees flagged), **top spending** (out-of-character merchants flagged), **current device**, **account changes in the last 30 days**.
+- The relevant section **opens first** by case type; **Examine in Evidence** on a finding jumps to its section; **Unusual only** toggle; new customers get a note that there's no history.
+- The Overview uses **absolute numbers** instead of percentages.
+
+**Version A kept:** unchanged as the default, and saved on the `round-18` branch. A **Layout: A · B** switch in the sidebar compares them. Each has its own link.
+
+| Money (money mule case) | Behaviour (account takeover case) |
+|---|---|
+| ![Evidence: money](round-19-evidence-money.png) | ![Evidence: behaviour](round-19-evidence-behaviour.png) |
+
+![Evidence in dark mode](round-19-evidence-dark.png)
 
 ---
 

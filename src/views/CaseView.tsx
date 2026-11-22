@@ -7,6 +7,9 @@ import { RiskGauge, bandText, bandVar } from '../components/charts'
 import { Switch } from '../components/Filters'
 import { InfoTip } from '../components/InfoTip'
 import { RiskThresholds } from '../components/RiskThresholds'
+import { useVariant } from '../variant'
+import { EvidenceCard } from './EvidenceCard'
+import { SECTION_FOR_SOURCE, type EvidenceSection } from '../activity'
 import { ActivityTimeline, AgenticCard, AgenticIcon, Breadcrumb, FeedbackGroup, Icon, PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification, type TimelineKind } from '../components/slds'
 
 const STEPS = ['Triage', 'Evidence', 'Review', 'Decision', 'Closed']
@@ -33,6 +36,8 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const [hideZero, setHideZero] = useState(false)
   const [explain, setExplain] = useState(false)
   const [examining, setExamining] = useState<string | null>(null)
+  const { variant } = useVariant()
+  const [evidenceReq, setEvidenceReq] = useState<{ section: EvidenceSection; n: number } | undefined>()
   const [mitigated, setMitigated] = useState<Set<string>>(new Set())
   const [feedback, setFeedback] = useState<null | 'correct' | 'incorrect'>(null)
   const [choice, setChoice] = useState<Outcome>(c.recommended)
@@ -296,7 +301,9 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                       <li key={f.id}>
                         {f.text}<span className="slds-badge tag src">{sourceShort(f.source)}</span>
                         <div className="f-actions">
-                          <button className="slds-button small" aria-expanded={examining === f.id} onClick={() => setExamining(examining === f.id ? null : f.id)}>{examining === f.id ? 'Close' : 'Examine'}</button>
+                          {variant === 'B'
+                            ? <button className="slds-button small" onClick={() => setEvidenceReq(r => ({ section: SECTION_FOR_SOURCE[f.source], n: (r?.n ?? 0) + 1 }))}>Examine in Evidence</button>
+                            : <button className="slds-button small" aria-expanded={examining === f.id} onClick={() => setExamining(examining === f.id ? null : f.id)}>{examining === f.id ? 'Close' : 'Examine'}</button>}
                           <button className="slds-button small" onClick={() => { setMitigated(s => new Set(s).add(f.id)); setExamining(null) }}>Mitigate</button>
                         </div>
                         {examining === f.id && (
@@ -336,7 +343,9 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             </div>
           </section>
 
-          {/* ---- Source evidence ---- */}
+          {variant === 'B' ? (
+            <EvidenceCard c={c} degraded={degraded} openRequest={evidenceReq} />
+          ) : (<>
           <section className="slds-card card">
             <header className="card-h">
               <div><h2>Source evidence</h2><p className="sub">Raw signals behind the summary, so you can check them without switching systems</p></div>
@@ -371,6 +380,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               {flaggedOnly && !c.signals[tab].some(s => s.flag) && <p className="muted small">No flagged signals from this source.</p>}
             </div>
           </section>
+          </>)}
         </div>
 
         <aside className="stack">

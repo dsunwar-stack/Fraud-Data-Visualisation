@@ -27,6 +27,7 @@ jobs:
       - run: npm run build
       - run: npm run build:ds && cp dist-ds/design-system.html dist/design-system.html && cp -r dist-ds/assets/. dist/assets/
       - run: npm run build-storybook && cp -r storybook-static dist/storybook
+      - run: VITE_VARIANT=B npx vite build --outDir dist/b --base /Fraud-Data-Visualisation/b/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

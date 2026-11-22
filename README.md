@@ -21,6 +21,15 @@ All data is synthetic and generated in the browser from a fixed seed. No real cu
 - **Case queue:** search, sort, due within 1 hour or breached, show or hide the signals column, and compact rows.
 - **Case investigation:** **Show factors** on a fraud type narrows the summary and findings to it, findings can be filtered by source, and there are toggles to hide fraud types with no signals and show flagged signals only.
 
+## Layout versions
+
+| Version | What it is | Open |
+|---|---|---|
+| **A · Current** | Case page with *Source evidence* organised by platform (rounds 1–18) | Default build; switch in the sidebar |
+| **B · Integrated** | One *Evidence* card grouped by question (Money, Behaviour, Account changes, Identity), with 7-day and 30-day history against the customer's usual, absolute numbers and plain terms (round 19) | Build with `VITE_VARIANT=B`, or switch in the sidebar; Pages: `/b/` |
+
+Both live in the same code (`src/variant.tsx`), so they stay in step for A/B testing.
+
 ## Design system
 
 See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md). Run `npm run storybook` for live components with controls, or `npm run dev:ds` for the design system site. Once GitHub Pages is on, they're also at `/storybook/` and `/design-system.html` on the live site.

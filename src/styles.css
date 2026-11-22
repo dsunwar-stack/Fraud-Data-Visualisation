@@ -834,3 +834,37 @@ ul.ds-principles { list-style: disc; }
 .fs-thresholds.compact .fs-thr-table th, .fs-thresholds.compact .fs-thr-table td { padding-left: 6px; padding-right: 6px; }
 .wf-bar i.auto { background: var(--viz-high); opacity: 1; width: 2px; }
 .wf-scale span.auto { color: var(--risk-high); white-space: nowrap; }
+
+/* Layout switch (A/B) */
+.fs-layout-switch { display: grid; gap: 4px; }
+.fs-layout-switch .fs-rbg .slds-radio_button-group { width: 100%; }
+.fs-layout-switch .fs-rbg .slds-radio_button { flex: 1; }
+.fs-layout-switch .fs-rbg .slds-radio_button__label { width: 100%; justify-content: center; }
+
+/* Version B: Evidence card */
+.fs-evidence .slds-accordion { margin: 0; padding: 0; list-style: none; }
+.fs-evidence .slds-accordion__list-item { list-style: none; }
+.fs-evidence .slds-accordion__summary { align-items: center; gap: 10px; flex-wrap: wrap; }
+.fs-evidence .slds-accordion__summary-heading { margin: 0; font-size: var(--slds-g-font-scale-2); font-weight: var(--slds-g-font-weight-6); flex: 0 1 auto; }
+.fs-evidence .slds-accordion__summary-action { background: none; border: 0; padding: 0; gap: 6px; color: var(--heading); cursor: pointer; font: inherit; }
+.fs-ev-q { flex: 1 1 auto; }
+.fs-ev-count { flex: none; }
+.fs-ev-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.fs-ev-table td { white-space: normal; }
+.fs-ev-table tr.is-unusual td { background: var(--risk-high-soft); }
+.fs-ev-label { display: inline-flex; align-items: center; }
+.fs-ev-flag { margin-left: 8px; }
+.fs-ev-sub { margin: var(--slds-g-spacing-3) 0 4px; font-size: 0.8125rem; font-weight: var(--slds-g-font-weight-6); color: var(--heading); }
+.fs-ev-merchants { list-style: none; margin: 0; padding: 0; display: grid; }
+.fs-ev-merchants li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 4px; border-bottom: 1px solid var(--border); font-size: 0.8125rem; }
+.fs-ev-merchants li.is-unusual { background: var(--risk-high-soft); }
+.fs-ev-device { margin: 8px 0 0; }
+.fs-ev-src { margin-left: 8px; }
+.fs-evidence .slds-accordion__content { padding-top: 6px; }
+
+/* Version B Evidence: fixes */
+.fs-evidence .slds-accordion__summary-heading { flex: none; margin-right: 4px; }
+.fs-ev-q { padding-left: 4px; }
+.fs-ev-table tr.is-unusual td { background: transparent; }
+.fs-ev-table tr.is-unusual td:first-child { box-shadow: inset 3px 0 0 var(--risk-high); }
+.fs-ev-merchants li.is-unusual { background: transparent; box-shadow: inset 3px 0 0 var(--risk-high); padding-left: 10px; }

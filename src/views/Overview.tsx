@@ -5,6 +5,7 @@ import { FilterBar, Switch, matchCase, type Filters } from '../components/Filter
 import { PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification } from '../components/slds'
 import { InfoTip } from '../components/InfoTip'
 import { RiskThresholds } from '../components/RiskThresholds'
+import { useVariant } from '../variant'
 
 const AUTO_DECLINE = THRESHOLDS.autoDecline
 
@@ -25,6 +26,7 @@ function series(f: Filters): HourPoint[] {
 
 export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string) => void; filters: Filters; setFilters: (f: Filters) => void }) {
   const [showAuto, setShowAuto] = useState(true)
+  const { variant } = useVariant()
   const [factorMode, setFactorMode] = useState<'count' | 'points'>('count')
   const f = filters
   const cases = useMemo(() => CASES.filter(c => matchCase(c, f)), [f])
@@ -86,8 +88,8 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
 
       <section className="kpis" aria-label={`Key metrics, last ${f.range} hours`}>
         <Kpi label={`Alerts (${f.range}h)`} value={alerts.toLocaleString()} tone={delta != null && delta > 10 ? 'bad' : 'neutral'}
-          delta={delta == null ? 'No prior period in range' : `${delta > 0 ? '+' : ''}${delta}% vs prior ${f.range}h`} spark={cur.map(h => h.high + h.medium + h.low)} labels={hourLabels} unit="alerts" />
-        <Kpi label="High-risk alerts" value={String(high)} delta={f.bands.has('high') ? `${pct(high, alerts)}% of volume` : 'High band hidden'} tone="bad"
+          delta={delta == null ? 'No prior period in range' : variant === 'B' ? `${alerts - total(prev!) >= 0 ? '+' : '−'}${Math.abs(alerts - total(prev!)).toLocaleString()} vs prior ${f.range}h (${total(prev!).toLocaleString()})` : `${delta > 0 ? '+' : ''}${delta}% vs prior ${f.range}h`} spark={cur.map(h => h.high + h.medium + h.low)} labels={hourLabels} unit="alerts" />
+        <Kpi label="High-risk alerts" value={String(high)} delta={f.bands.has('high') ? (variant === 'B' ? `of ${alerts.toLocaleString()} alerts` : `${pct(high, alerts)}% of volume`) : 'High band hidden'} tone="bad"
           spark={cur.map(h => h.high)} color={bandVar('high')} labels={hourLabels} unit="high-risk alerts" />
         <Kpi label="Auto-declined" value={String(auto)} delta={`Score ≥ ${AUTO_DECLINE}`} tone="neutral" spark={cur.map(h => h.autoDeclined)} labels={hourLabels} unit="auto-declined" />
         <Kpi label={f.includeDecided ? 'Cases' : 'Open cases'} value={String(cases.length)} delta={cases.length ? `Average score ${avgScore}` : 'None match filters'} tone="neutral"

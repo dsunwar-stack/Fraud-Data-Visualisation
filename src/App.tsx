@@ -5,6 +5,7 @@ import { Queue } from './views/Queue'
 import { CaseView } from './views/CaseView'
 import { DEFAULT_FILTERS, type Filters } from './components/Filters'
 import { RadioButtonGroup, ToastProvider } from './components/slds'
+import { VariantProvider, useVariant } from './variant'
 
 type Route = { view: 'overview' } | { view: 'queue' } | { view: 'case'; id: string }
 
@@ -41,6 +42,7 @@ export default function App() {
   const lastCase = route.view === 'case' ? route.id : null
 
   return (
+    <VariantProvider>
     <ToastProvider>
     <div className="shell">
       <aside className="nav">
@@ -79,6 +81,7 @@ export default function App() {
           )}
         </nav>
         <div className="nav-foot">
+          <LayoutSwitch />
           <RadioButtonGroup name="theme" legend="Theme" size="small" value={theme} onChange={setTheme}
             options={(['light', 'system', 'dark'] as Theme[]).map(t => ({ value: t, label: t[0].toUpperCase() + t.slice(1) }))} />
           <p className="muted small">Synthetic demo data.<br />No real customers or cases.</p>
@@ -92,6 +95,18 @@ export default function App() {
       </main>
     </div>
     </ToastProvider>
+    </VariantProvider>
+  )
+}
+
+function LayoutSwitch() {
+  const { variant, setVariant } = useVariant()
+  return (
+    <div className="fs-layout-switch">
+      <span className="kpi-label">Layout</span>
+      <RadioButtonGroup name="layout" legend="Layout version" size="small" value={variant} onChange={setVariant}
+        options={[{ value: 'A' as const, label: 'A · Current' }, { value: 'B' as const, label: 'B · Integrated' }]} />
+    </div>
   )
 }
 
