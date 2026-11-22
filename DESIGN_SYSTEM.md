@@ -104,6 +104,19 @@ Import from `src/design-system`. Each has a Storybook story with controls.
 | **Toast** (`useToast`) | Confirming an action | Short and specific: "Thanks for your feedback." |
 | **ScopedNotification** | Advisory status inside a card or panel | Not dismissible. Icon + one or two lines + at most one link. Default = neutral note; Info = context (who decides, filtered view, alert spike); Warning = needs care (degraded source, SLA due within 1h, override); Error = needs action (SLA breached); Success = completed action (decision recorded). Put it at the top of the card it's about. |
 
+## Risk thresholds
+
+Defined once in `src/data.ts` (`THRESHOLDS`) and shown with the `RiskThresholds` component wherever a score drives a decision. **Placeholder values, to be confirmed by fraud policy.**
+
+| Band | Score | SLA | Recommendation |
+|---|---|---|---|
+| High | 70–100 | 4h | Decline |
+| Medium | 40–69 | 24h | Refer |
+| Low | 0–39 | 48h | Accept |
+
+- **Auto-decline:** alerts scoring 85+ are declined automatically. Shown as a red marker on the score bar.
+- **Adjusting a score:** if the adjusted score falls in another band, show a warning with that band's recommendation. Adjustments of **30+ points or across two bands** show an error and should go to a second reviewer (Refer).
+
 ## Button hierarchy
 
 | Level | SLDS variant | Use | Fraud Signal examples |

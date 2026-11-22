@@ -823,3 +823,14 @@ ul.ds-principles { list-style: disc; }
 .fs-factor-check { margin-top: 2px; flex: none; }
 .fs-factor-check .slds-checkbox__label { display: inline-flex; }
 .factors li > .fs-factor-check { flex: 0 0 auto; width: auto; }
+
+/* Risk thresholds */
+.fs-thresholds { display: grid; gap: 6px; margin-top: var(--slds-g-spacing-2); }
+.fs-thr-head { display: flex; align-items: center; gap: 2px; }
+.fs-thr-table th, .fs-thr-table td { padding-top: 6px; padding-bottom: 6px; font-size: 0.8125rem; }
+.fs-thr-table tr.is-current td { background: var(--primary-soft); }
+.fs-thr-you { margin-left: 8px; font-size: 0.75rem; color: var(--primary); font-weight: var(--slds-g-font-weight-6); }
+.fs-thr-foot { margin: 0; }
+.fs-thresholds.compact .fs-thr-table th, .fs-thresholds.compact .fs-thr-table td { padding-left: 6px; padding-right: 6px; }
+.wf-bar i.auto { background: var(--viz-high); opacity: 1; width: 2px; }
+.wf-scale span.auto { color: var(--risk-high); white-space: nowrap; }

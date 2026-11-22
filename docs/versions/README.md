@@ -27,6 +27,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [15](#round-15-button-hierarchy-and-choosing-controls) | When to use radio vs dropdown? Should Record buttons differ in colour? Primary vs secondary | One primary Record button; button hierarchy and control-choice rules documented | [`round-15`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-15) |
 | [16](#round-16-scoped-notifications) | Apply SLDS 2 scoped notifications with their icons where needed | Info, warning, error, success and default notifications across Overview, queue and case | [`round-16`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-16) |
 | [17](#round-17-adjust-score-not-edit) | The Fraud summary has an Edit button but I can't edit anything | Renamed to Adjust score, explained, SLDS checkboxes, adjustment saved with the decision | [`round-17`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-17) |
+| [18](#round-18-risk-thresholds-on-screen) | What's the threshold when adjusting the score? Show it so the user knows | Risk thresholds table, auto-decline marker, threshold-crossing and large-adjustment notices | [`round-18`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-18) |
 
 To run any round locally:
 
@@ -390,6 +391,30 @@ They replace the custom notes, coloured boxes and annotations used before. The c
 | Before ("Edit") | After ("Adjust score") |
 |---|---|
 | ![Before](round-17-edit-before.png) | ![After](round-17-adjust-score.png) |
+
+---
+
+## Round 18: risk thresholds on screen
+
+> **Feedback:** "With adjusting the score, what is the threshold?" … "Maybe best to show that data somewhere so the user knows that."
+
+**What was missing:** the bands (low 0–39, medium 40–69, high 70–100), their SLAs and recommendations, and the auto-decline line (85) were only partly visible. Adjusting a score could change the band without saying so, and there was no guardrail on large adjustments. Medium cases were also randomly recommended Refer or Decline.
+
+**What changed**
+- One source for all thresholds in the code (`THRESHOLDS`), marked as **placeholder values to be confirmed by fraud policy**.
+- A **Risk thresholds** table (band, score, SLA, recommendation, auto-decline) under the score in the Fraud summary, with **this case's band highlighted**, and on the Overview's Risk score distribution card. An ⓘ explains it.
+- An **auto-decline marker at 85** on the "How the score is built" bar.
+- When an adjustment **crosses into another band**: a warning with that band's recommendation, and a line in the Decision panel.
+- **Large adjustments** (30+ points or across two bands): an error suggesting a second reviewer (Refer), repeated in the Decision panel if Accept is chosen.
+- Medium cases now always recommend **Refer**, matching the table.
+
+**Principle:** if a number drives a decision, show the rule behind it where the decision is made.
+
+![Risk thresholds on the case](round-18-thresholds.png)
+
+| Adjusted across a threshold | Overview |
+|---|---|
+| ![Adjusted](round-18-adjusted.png) | ![Overview thresholds](round-18-overview-thresholds.png) |
 
 ---
 

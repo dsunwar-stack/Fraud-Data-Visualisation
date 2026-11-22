@@ -133,6 +133,20 @@ const shuffle = <T,>(a: T[]) => {
   return a
 }
 
+// Risk thresholds: one source for bands, SLAs, recommendations and auto-decline.
+// PLACEHOLDER VALUES for the concept, to be confirmed by fraud policy.
+export interface BandRule { band: Band; label: string; min: number; max: number; slaHours: number; recommendation: Outcome }
+export const THRESHOLDS: { bands: BandRule[]; autoDecline: number; largeAdjustment: number; placeholder: true } = {
+  bands: [
+    { band: 'high', label: 'High', min: 70, max: 100, slaHours: 4, recommendation: 'Decline' },
+    { band: 'medium', label: 'Medium', min: 40, max: 69, slaHours: 24, recommendation: 'Refer' },
+    { band: 'low', label: 'Low', min: 0, max: 39, slaHours: 48, recommendation: 'Accept' },
+  ],
+  autoDecline: 85,
+  largeAdjustment: 30, // points; also any drop across two bands
+  placeholder: true,
+}
+export const bandRule = (b: Band) => THRESHOLDS.bands.find(r => r.band === b)!
 export const bandOf = (score: number): Band => (score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low')
 
 // Fixed "now" so the demo reads the same on every load.
@@ -315,13 +329,14 @@ function makeCase(i: number): FraudCase {
     return [k.id, pts ? Math.min(97, Math.round(pts * 2.4 + baseline)) : 0] // no factors, no score
   })) as Record<Category, number>
   const topCat = CATEGORIES.slice().sort((a, b) => categories[b.id] - categories[a.id])[0]
-  const slaHours = band === 'high' ? 4 : band === 'medium' ? 24 : 48
+  const slaHours = bandRule(band).slaHours
   const status: Status = rnd() < 0.18 ? 'Decided' : pick(['New', 'New', 'In review', 'Awaiting info'] as const)
   // Open cases mostly sit inside their SLA; about 1 in 12 has slipped past it.
   const ageMin = status === 'Decided' ? int(60, 60 * 47) : rnd() < 0.08 ? int(slaHours * 60 + 5, slaHours * 60 + 180) : int(4, slaHours * 60 - 5)
   const createdAt = new Date(NOW.getTime() - ageMin * 60_000)
   const slaDueAt = new Date(createdAt.getTime() + slaHours * 3600_000)
-  const recommended: Outcome = band === 'high' ? 'Decline' : band === 'medium' ? (rnd() < 0.5 ? 'Refer' : 'Decline') : 'Accept'
+  if (band === 'medium') rnd() // keeps the seeded data identical to earlier rounds
+  const recommended: Outcome = bandRule(band).recommendation
   const c: FraudCase = {
     id: `FR-${(104200 + i * 7 + int(0, 6)).toString()}`,
     customer: profile, type, score, band, categories,

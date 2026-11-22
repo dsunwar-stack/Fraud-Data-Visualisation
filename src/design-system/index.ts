@@ -23,3 +23,6 @@ export type { HourPoint } from '../components/charts'
 
 // AI (agentic) patterns: use only on AI-generated content
 export { AgenticCard, AgenticIcon, FeedbackGroup } from '../components/slds'
+
+// Domain
+export { RiskThresholds } from '../components/RiskThresholds'

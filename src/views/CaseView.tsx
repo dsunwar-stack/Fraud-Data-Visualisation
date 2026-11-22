@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import {
-  CASES, CATEGORIES, NOW, SOURCES, SOURCE_HEALTH, bandOf, categoryName, fmtDateTime, fmtDur, fmtMoney, fmtTime, sourceName, sourceShort,
+  CASES, CATEGORIES, NOW, SOURCES, SOURCE_HEALTH, THRESHOLDS, bandOf, bandRule, categoryName, fmtDateTime, fmtDur, fmtMoney, fmtTime, sourceName, sourceShort,
   type Category, type FraudCase, type Finding, type Outcome, type SourceId,
 } from '../data'
 import { RiskGauge, bandText, bandVar } from '../components/charts'
 import { Switch } from '../components/Filters'
 import { InfoTip } from '../components/InfoTip'
+import { RiskThresholds } from '../components/RiskThresholds'
 import { ActivityTimeline, AgenticCard, AgenticIcon, Breadcrumb, FeedbackGroup, Icon, PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification, type TimelineKind } from '../components/slds'
 
 const STEPS = ['Triage', 'Evidence', 'Review', 'Decision', 'Closed']
@@ -57,6 +58,8 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
 
   const adjScore = useMemo(() => Math.max(1, c.score - c.factors.filter(f => excluded.has(f.label)).reduce((s, f) => s + f.points, 0)), [c, excluded])
   const adjBand = bandOf(adjScore)
+  const bandOrder = { low: 0, medium: 1, high: 2 } as const
+  const largeAdjustment = c.score - adjScore >= THRESHOLDS.largeAdjustment || bandOrder[c.band] - bandOrder[adjBand] >= 2
   const base = c.score - c.factors.reduce((s, f) => s + f.points, 0)
   const left = c.slaDueAt.getTime() - NOW.getTime()
   const stepIdx = recorded ? 4 : c.status === 'New' ? 1 : 2
@@ -86,7 +89,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
         ]} />
 
       {!recorded && left < 0 && (
-        <ScopedNotification variant="error">This case breached its {c.band === 'high' ? '4h' : c.band === 'medium' ? '24h' : '48h'} SLA {fmtDur(-left)} ago (due {fmtTime(c.slaDueAt)} UTC). Record a decision or refer it now.</ScopedNotification>
+        <ScopedNotification variant="error">This case breached its {bandRule(c.band).slaHours}h SLA {fmtDur(-left)} ago (due {fmtTime(c.slaDueAt)} UTC). Record a decision or refer it now.</ScopedNotification>
       )}
       {!recorded && left >= 0 && left < 3600_000 && (
         <ScopedNotification variant="warning">SLA due in {fmtDur(left)}, at {fmtTime(c.slaDueAt)} UTC.</ScopedNotification>
@@ -202,6 +205,16 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <b>Adjusting the score.</b> Untick a factor you've checked and found doesn't apply, and the score updates. The AI's text isn't edited; to correct it, use 👎 below. Excluded factors are saved with your decision.
               </ScopedNotification>
             )}
+            {adjBand !== c.band && (
+              <ScopedNotification variant="warning">
+                Your adjusted score (<b>{adjScore}</b>) is <b>{bandRule(adjBand).label}</b> ({bandRule(adjBand).min}–{bandRule(adjBand).max}), not {bandRule(c.band).label}. For {bandRule(adjBand).label} the recommendation is <b>{bandRule(adjBand).recommendation}</b>; the model recommended <b>{c.recommended}</b>.
+              </ScopedNotification>
+            )}
+            {largeAdjustment && (
+              <ScopedNotification variant="error">
+                Large adjustment ({c.score} → {adjScore}). Adjustments of {THRESHOLDS.largeAdjustment}+ points or across two bands should be checked by a second reviewer. Choose <b>Refer</b> to send it to one.
+              </ScopedNotification>
+            )}
             {filtering && (
               <ScopedNotification variant="info" link={{ label: 'Show everything', onClick: () => { setCat('all'); setSrcFilter('all') } }}>
                 Showing {cat !== 'all' && <b title={CATEGORIES.find(k => k.id === cat)!.plain}>{categoryName(cat)}</b>}{cat !== 'all' && srcFilter !== 'all' && ' from '}{srcFilter !== 'all' && <b>{sourceName(srcFilter)}</b>} only.
@@ -250,10 +263,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 {c.factors.filter(f => !excluded.has(f.label)).map(f => (
                   <span key={f.label} style={{ width: `${f.points}%`, background: bandVar(adjBand), opacity: filtering && !factorsShown.includes(f) ? 0.3 : 1 }} title={`${f.label} +${f.points}`} />
                 ))}
-                <i style={{ left: '40%' }} /><i style={{ left: '70%' }} />
+                <i style={{ left: '40%' }} /><i style={{ left: '70%' }} /><i className="auto" style={{ left: `${THRESHOLDS.autoDecline}%` }} />
               </div>
-              <div className="wf-scale num"><span>0</span><span style={{ left: '40%' }}>40</span><span style={{ left: '70%' }}>70</span><span>100</span></div>
-              <p className="muted small">Baseline {base} for every case, plus the points from each factor. Bands: low 0–39, medium 40–69, high 70–100.</p>
+              <div className="wf-scale num"><span>0</span><span style={{ left: '40%' }}>40</span><span style={{ left: '70%' }}>70</span><span className="auto" style={{ left: `${THRESHOLDS.autoDecline}%` }}>85 auto-decline</span><span>100</span></div>
+              <p className="muted small">Baseline {base} for every case, plus the points from each factor.</p>
+              <RiskThresholds current={adjBand} />
             </div>
 
             <footer className="agentic-foot">
@@ -387,7 +401,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <RadioButtonGroup name="outcome" legend="Outcome" value={choice}
                   onChange={o => { setChoice(o); if (!REASONS[o].includes(reason)) setReason('') }}
                   options={(['Decline', 'Refer', 'Accept'] as Outcome[]).map(o => ({ value: o, label: o }))} />
-                <p className="muted small fs-rec-line">Recommended: <b className={`txt-${c.recommended.toLowerCase()}`}>{c.recommended}</b>, based on risk score {c.score}.</p>
+                <p className="muted small fs-rec-line">Recommended: <b className={`txt-${c.recommended.toLowerCase()}`}>{c.recommended}</b>, based on risk score {c.score} ({bandRule(c.band).label}).
+                  {adjBand !== c.band && <> Your adjusted score {adjScore} ({bandRule(adjBand).label}) would suggest <b>{bandRule(adjBand).recommendation}</b>.</>}</p>
+                {largeAdjustment && choice === 'Accept' && (
+                  <ScopedNotification variant="error">You've adjusted the score by {c.score - adjScore} points. Accepting after a large adjustment needs a second reviewer; consider <b>Refer</b>.</ScopedNotification>
+                )}
                 {overriding && (
                   <ScopedNotification variant="warning">You're choosing <b>{choice}</b> instead of the recommended <b>{c.recommended}</b>. Explain why below, as this will be reviewed.</ScopedNotification>
                 )}

@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
-import { ALERTS, CASES, CASE_TYPES, NOW, SOURCE_HEALTH, fmtDateTime, fmtDur, fmtTime, sourceName, type CaseType, type FraudCase } from '../data'
+import { ALERTS, CASES, CASE_TYPES, NOW, SOURCE_HEALTH, THRESHOLDS, fmtDateTime, fmtDur, fmtTime, sourceName, type CaseType, type FraudCase } from '../data'
 import { AlertVolume, BarList, ScoreCell, ScoreHistogram, Sparkline, bandVar, type HourPoint } from '../components/charts'
 import { FilterBar, Switch, matchCase, type Filters } from '../components/Filters'
 import { PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification } from '../components/slds'
 import { InfoTip } from '../components/InfoTip'
+import { RiskThresholds } from '../components/RiskThresholds'
 
-const AUTO_DECLINE = 85
+const AUTO_DECLINE = THRESHOLDS.autoDecline
 
 // Flatten the per-type hourly buckets into one series that respects the type and band filters.
 function series(f: Filters): HourPoint[] {
@@ -115,11 +116,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
         <div className="slds-card card">
           <header className="card-h"><div><h2>Risk score distribution</h2><p className="sub">{cases.length} cases, scored 0–100</p></div></header>
           {cases.length ? <ScoreHistogram scores={cases.map(c => c.score)} threshold={AUTO_DECLINE} /> : <Empty />}
-          <dl className="bands">
-            <div><dt><i className="dot" style={{ background: bandVar('high') }} />High</dt><dd>70–100 · SLA 4h</dd></div>
-            <div><dt><i className="dot" style={{ background: bandVar('medium') }} />Medium</dt><dd>40–69 · SLA 24h</dd></div>
-            <div><dt><i className="dot" style={{ background: bandVar('low') }} />Low</dt><dd>0–39 · SLA 48h</dd></div>
-          </dl>
+          <RiskThresholds compact />
         </div>
       </section>
 
