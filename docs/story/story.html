@@ -96,9 +96,9 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="wrap">
   <header class="hero">
     <span class="eyebrow">Design story · Fraud data visualisation</span>
-    <h1>Fraud Signal: how ten rounds of feedback shaped it</h1>
+    <h1>Fraud Signal: how eleven rounds of feedback shaped it</h1>
     <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
-    <div class="facts"><span><b>10</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="facts"><span><b>11</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
     <div class="links">
       <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
       <a href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation">Code on GitHub</a>
@@ -120,6 +120,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-8"><b>8</b> Case snapshot</a></li>
       <li><a href="#round-9"><b>9</b> SLDS 2</a></li>
       <li><a href="#round-10"><b>10</b> SLDS 2 rules</a></li>
+      <li><a href="#round-11"><b>11</b> Navigation</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -305,6 +306,22 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     <div class="shots one"><figure><img src="../versions/round-10-overview.png" alt="Overview in SLDS 2 Cosmos" width="1440" height="1000" loading="lazy"><figcaption>Overview in SLDS 2 Cosmos</figcaption></figure></div>
   </section>
 
+  <section class="round" id="round-11">
+    <div class="round-head"><span class="num">11</span><h2>Navigation active state</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-11">Code: round-11</a><span class="kicker">Don't restyle what the system already draws</span></div>
+    <blockquote><cite>Feedback</cite>"Why do we have this half circle on the side? Can you align with SLDS 2?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>SLDS 2 marks the active item with a full-width tint and a <b>straight 4px bar</b>. Our pill shape had bent that bar into a half circle.</li>
+        <li>Removed the custom styling, so SLDS 2 draws the active, hover and section-title states itself.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Set layout only on system components</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure class="narrow"><img src="../versions/round-11-nav-before.png" alt="Navigation with a half-circle active marker" width="400" height="200" loading="lazy"><figcaption><span class="tag before">Before</span>Half-circle marker</figcaption></figure>
+      <figure class="narrow"><img src="../versions/round-11-nav-after.png" alt="Navigation with SLDS 2 straight active bar" width="464" height="1200" loading="lazy" style="max-width:220px"><figcaption><span class="tag after">After</span>SLDS 2 active bar</figcaption></figure>
+    </div>
+  </section>
+
   <section class="close" id="principles">
     <h2>The principles we ended up with</h2>
     <ol>
@@ -320,7 +337,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><b>Follow the design system's rules,</b> not just its colours: SLDS 2 Cosmos components, type and layout, plus the Agentic Experiences patterns for AI.</li>
     </ol>
     <div class="next">
-      <p><b>Next, proposed for round 11:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+      <p><b>Next, proposed for round 12:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
     </div>
   </section>
 
