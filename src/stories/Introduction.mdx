@@ -1,0 +1,29 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Introduction" />
+
+# Fraud Signal design system
+
+Live components and rules for the Fraud Signal fraud observability dashboard. Built on **SLDS 2 (Cosmos)** and the **SLDS 2 Agentic Experiences** patterns for AI content.
+
+- **Designers:** use the toolbar to switch light and dark mode, and the **Controls** panel under each story to try different values.
+- **Developers:** import everything from `src/design-system`. Each story's **Docs** tab shows the props and the code.
+- **Rules:** `DESIGN_SYSTEM.md` in the repository.
+
+## Principles for observability
+
+1. **Big picture first, then evidence.** Overview → queue → case.
+2. **Exact figures, not vague words.** Counts and time windows, never "recent".
+3. **Explain every number.** Say what it measures and where it comes from; use an info icon if it needs more than a few words.
+4. **Colour has meaning.** Red, orange and teal are risk levels. Purple is only for AI. Blue is for actions and links.
+5. **Show related numbers together**, and each piece of information once.
+6. **Buttons say what happens.** "Show 3 factors", not "Go".
+7. **The person decides, not the AI.** Mark AI content and collect feedback on it.
+8. **Use the SLDS 2 component;** set layout only, never restyle its colours or shape.
+
+## Sections
+
+- **Foundations:** colour tokens, typography, spacing and shape.
+- **Components:** cards, metric cards, info icon, badges, buttons, filters, page header, progress bar, tables, activity timeline.
+- **Charts:** trend line, alert volume, score distribution, risk gauge, bar list.
+- **AI patterns:** agentic card, AI label, human feedback.

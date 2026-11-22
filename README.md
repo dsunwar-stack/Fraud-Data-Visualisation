@@ -21,6 +21,10 @@ All data is synthetic and generated in the browser from a fixed seed. No real cu
 - **Case queue:** search, sort, due within 1 hour or breached, show or hide the signals column, and compact rows.
 - **Case investigation:** **Show factors** on a fraud type narrows the summary and findings to it, findings can be filtered by source, and there are toggles to hide fraud types with no signals and show flagged signals only.
 
+## Design system
+
+See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md). Run `npm run storybook` for live components with controls, or `npm run dev:ds` for the design system site. Once GitHub Pages is on, they're also at `/storybook/` and `/design-system.html` on the live site.
+
 ## Versions
 
 See the [design history and feedback log](docs/versions/README.md) for every round of feedback, what changed, screenshots, and a branch with the code for each round.

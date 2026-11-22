@@ -65,7 +65,10 @@ export function AlertVolume({ data, showAuto = false }: { data: HourPoint[]; sho
   const [ref, w] = useWidth<HTMLDivElement>()
   const [hover, setHover] = useState<number | null>(null)
   const H = 220, padL = 32, padB = 22, padT = 8
-  const max = Math.max(10, Math.ceil(Math.max(...data.map(d => d.high + d.medium + d.low)) / 10) * 10)
+  // Axis runs to 4 × a "nice" step so every tick label is a whole number.
+  const rawMax = Math.max(1, ...data.map(d => d.high + d.medium + d.low))
+  const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500].find(n => n * 4 >= rawMax) ?? Math.ceil(rawMax / 4)
+  const max = step * 4
   const iw = Math.max(0, w - padL), ih = H - padB - padT
   const bw = iw / data.length
   const y = (v: number) => padT + ih - (v / max) * ih

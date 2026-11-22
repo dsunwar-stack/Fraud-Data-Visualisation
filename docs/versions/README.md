@@ -22,6 +22,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [10](#round-10-slds-2-component-rules) | Follow SLDS 2 component rules for everything | Cosmos theme, page headers, vertical navigation, button groups, SLDS cards, progress bars, activity timeline, SLDS typography | [`round-10`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-10) |
 | [11](#round-11-navigation-active-state) | Why is there a half circle beside the active menu item? | Let SLDS 2 draw the vertical navigation's active state | [`round-11`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-11) |
 | [12](#round-12-top-risk-factors-explained) | What do Cases and Points mean in Top risk factors? | Both measures on every row, "Most common / Biggest impact" sort, info icon | [`round-12`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-12) |
+| [13](#round-13-design-system-and-storybook) | A design system in GitHub that designers and developers can use in live code, with separate documentation | Storybook, a separate design system site, DESIGN_SYSTEM.md, one import point | [`round-13`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-13) |
 
 To run any round locally:
 
@@ -269,6 +270,26 @@ The original terms were kept because fraud specialists use them; the plain label
 | Sorted by most common | Info popup |
 |---|---|
 | ![Top risk factors](round-12-top-risk-factors.png) | ![Top risk factors help](round-12-top-risk-factors-help.png) |
+
+---
+
+## Round 13: design system and Storybook
+
+> **Feedback:** "Is it possible to create a design system file in GitHub on typography, colour, card and info icon, whatever is relevant for observability, so developers and designers can work in live code?" … "Also have documentation like the story, a storybook for the design system, which is separate?"
+
+**What we built**
+- **Storybook** (`npm run storybook`): Introduction, Foundations (colour, typography, spacing and shape), Components (card, metric card, info icon, badges, button, filters, page header, progress bar, risk score cell, activity timeline), Charts and AI patterns. Each story has **editable controls**, a docs tab, and a **light/dark switch** in the toolbar. Telemetry is turned off.
+- **A separate design system site** (`npm run dev:ds`, and its own shareable link): every foundation and component rendered live, **copyable code**, and **do / don't rules**. Colour swatches read their values from the running page, so they're always current in both themes.
+- **`DESIGN_SYSTEM.md`**: principles, token tables mapped to SLDS 2 hooks, typography, a component table with rules, writing guidance, and how to add a component.
+- **`src/design-system/index.ts`**: one import point for every shared component.
+- The GitHub Pages deploy now also publishes Storybook at `/storybook/` and the design system site at `/design-system.html`.
+- Fixed while building the chart stories: the alert chart's y-axis could show decimal labels on small data; it now always uses whole numbers.
+
+| Design system site | Storybook |
+|---|---|
+| ![Design system site](round-13-design-system-site.png) | ![Storybook info icon story](round-13-storybook.png) |
+
+![Storybook colour tokens in dark mode](round-13-storybook-colour-dark.png)
 
 ---
 
