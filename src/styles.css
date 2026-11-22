@@ -489,3 +489,9 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .note-box[open] summary::before { transform: rotate(45deg); }
 .note-src { margin: 0; padding: 8px 10px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
 .note-src b { color: var(--text); font-weight: 600; }
+
+/* ---------- case snapshot ---------- */
+.decision textarea#case-notes { font-family: var(--font); font-size: 13px; line-height: 1.5; background: var(--surface); }
+.note-view .ai-badge { margin-right: 6px; font-size: 9.5px; vertical-align: 1px; }
+.note-src .ai-badge { font-size: 9.5px; margin: 0 2px; vertical-align: 1px; }
+.decision textarea, .note-view { scrollbar-color: var(--track-strong) transparent; }

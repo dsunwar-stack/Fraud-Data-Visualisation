@@ -34,14 +34,15 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const [mitigated, setMitigated] = useState<Set<string>>(new Set())
   const [feedback, setFeedback] = useState<null | 'correct' | 'incorrect'>(null)
   const [choice, setChoice] = useState<Outcome>(c.recommended)
-  const [note, setNote] = useState(() => noteTemplate(c))
+  const [notes, setNotes] = useState('')
+  const snapshot = useMemo(() => caseSnapshot(c), [c])
   const [reason, setReason] = useState('')
   const [rationale, setRationale] = useState('')
   const [tried, setTried] = useState(false)
-  const [showNote, setShowNote] = useState(false)
+  const [showSnap, setShowSnap] = useState(false)
   const [recorded, setRecorded] = useState<null | DecisionRecord>(c.status === 'Decided' ? {
     outcome: c.recommended, at: c.events[c.events.length - 1].at, by: c.owner, overrode: false,
-    reason: REASONS[c.recommended][0], rationale: 'Evidence reviewed and consistent with the recommended outcome.', note: noteTemplate(c),
+    reason: REASONS[c.recommended][0], rationale: 'Evidence reviewed and consistent with the recommended outcome.', notes: '', snapshot: caseSnapshot(c),
   } : null)
   const overriding = choice !== c.recommended
   const rationaleOk = rationale.trim().length >= 20
@@ -49,7 +50,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const record = () => {
     setTried(true)
     if (!canRecord) return
-    setRecorded({ outcome: choice, at: NOW, by: 'You', overrode: overriding, reason, rationale: rationale.trim(), note })
+    setRecorded({ outcome: choice, at: NOW, by: 'You', overrode: overriding, reason, rationale: rationale.trim(), notes: notes.trim(), snapshot })
   }
 
   const adjScore = useMemo(() => Math.max(1, c.score - c.factors.filter(f => excluded.has(f.label)).reduce((s, f) => s + f.points, 0)), [c, excluded])
@@ -230,7 +231,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <span className="small">Is this summary accurate?</span>
               {feedback ? (
                 <span className={`small ${feedback === 'correct' ? 'txt-accept' : 'txt-refer'}`} role="status">
-                  {feedback === 'correct' ? 'Marked as correct. Thanks, this helps train the summary.' : 'Flagged for review. Add what was wrong in your note.'}
+                  {feedback === 'correct' ? 'Marked as correct. Thanks, this helps train the summary.' : 'Flagged for review. Say what was wrong in Additional notes.'}
                   <button className="link small" onClick={() => setFeedback(null)}>Undo</button>
                 </span>
               ) : (
@@ -343,9 +344,10 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <dl className="kv compact">
                   <div><dt>Reason</dt><dd>{recorded.reason}</dd></div>
                   <div><dt>Why</dt><dd className="pre">{recorded.rationale}</dd></div>
+                  {recorded.notes && <div><dt>Notes</dt><dd className="pre">{recorded.notes}</dd></div>}
                 </dl>
-                <button className="link small" aria-expanded={showNote} onClick={() => setShowNote(v => !v)}>{showNote ? 'Hide investigation note' : 'View investigation note'}</button>
-                {showNote && <pre className="note-view">{recorded.note}</pre>}
+                <button className="link small" aria-expanded={showSnap} onClick={() => setShowSnap(v => !v)}>{showSnap ? 'Hide case snapshot' : 'View case snapshot attached to this decision'}</button>
+                {showSnap && <Snapshot text={recorded.snapshot} />}
                 {c.status !== 'Decided' && (
                   <button className="link small" onClick={() => { setRecorded(null); setTried(false) }}>Undo and change decision</button>
                 )}
@@ -383,13 +385,16 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                   <span className="muted small num">{rationale.trim().length}</span>
                 </div>
 
+                <label htmlFor="case-notes" className="kpi-label">Additional notes <span className="req">optional</span></label>
+                <textarea id="case-notes" rows={3} value={notes} onChange={e => setNotes(e.target.value)}
+                  placeholder="Anything else you found or did, e.g. Called the customer at 14:10, no answer. Left a voicemail." />
+
                 <details className="note-box">
-                  <summary><span className="kpi-label">Investigation note</span> <span className="muted small">optional, pre-filled from case data</span></summary>
+                  <summary><span className="kpi-label">Case snapshot</span> <span className="muted small">attached to your decision automatically</span></summary>
                   <p className="note-src small">
-                    <b>Filled in automatically by Fraud Signal</b> from this case's score, sources and top evidence. Nobody has written it. Add anything else you found; your decision reason goes in the fields above.
+                    <b>Built by a fixed template from the case data, not by AI and not by a person.</b> The only AI-written line is marked <span className="ai-badge">AI</span>. It's saved with your decision so reviewers can see what you saw. You don't need to edit it.
                   </p>
-                  <textarea id="case-note" value={note} onChange={e => setNote(e.target.value)} rows={10} aria-label="Investigation note" />
-                  <button className="link small" onClick={() => setNote(noteTemplate(c))}>Reset to template</button>
+                  <Snapshot text={snapshot} />
                 </details>
 
                 <button className={`btn solid ob-${choice.toLowerCase()} record-btn`} onClick={record} aria-disabled={!canRecord}>
@@ -446,7 +451,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   )
 }
 
-interface DecisionRecord { outcome: Outcome; at: Date; by: string; overrode: boolean; reason: string; rationale: string; note: string }
+interface DecisionRecord { outcome: Outcome; at: Date; by: string; overrode: boolean; reason: string; rationale: string; notes: string; snapshot: string }
 
 // Reason codes keep decisions consistent and countable for reporting and audit.
 const REASONS: Record<Outcome, string[]> = {
@@ -487,20 +492,27 @@ function FindingHead({ k, count }: { k: keyof typeof FINDING_TYPES; count: numbe
   )
 }
 
-function noteTemplate(c: FraudCase) {
+// A read-only record of what the case looked like when the decision was made.
+function caseSnapshot(c: FraudCase) {
   return [
-    '[Auto-filled from case data. Edit or add to it.]',
     `Case ${c.id}, ${c.type}`,
     `Score: ${c.score}/100 (${c.band}). Recommended: ${c.recommended}.`,
-    `At a glance: ${c.glance}`,
+    `[AI] At a glance: ${c.glance}`,
     '',
     'Checks completed:',
     ...SOURCES.map(s => `- ${s.name}: ${c.factors.some(f => f.source === s.id) ? 'adverse, see summary' : 'reviewed, no adverse findings'}`),
     '',
     'Key evidence:',
     ...c.factors.slice(0, 3).map(f => `- ${f.label}: ${f.detail}`),
-    '',
-    'Further notes:',
-    '',
   ].join('\n')
+}
+
+function Snapshot({ text }: { text: string }) {
+  return (
+    <div className="note-view" aria-label="Case snapshot">
+      {text.split('\n').map((line, i) => line.startsWith('[AI] ')
+        ? <div key={i}><span className="ai-badge">AI</span>{line.slice(5)}</div>
+        : <div key={i}>{line || '\u00a0'}</div>)}
+    </div>
+  )
 }
