@@ -59,6 +59,18 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
 
   const urgent = open.filter(c => c.band === 'high' || !f.bands.has('high')).sort((a, b) => a.slaDueAt.getTime() - b.slaDueAt.getTime()).slice(0, 6)
   const spikeVisible = f.range >= 12 && (f.type === 'all' || f.type === 'Account takeover') && f.bands.has('high')
+  // Real hourly series for the case-based cards, worked out from the cases themselves.
+  const history = useMemo(() => {
+    const base = CASES.filter(c => matchCase(c, { ...f, includeDecided: true }))
+    const decidedAt = (c: FraudCase) => (c.status === 'Decided' ? c.events[c.events.length - 1].at.getTime() : Infinity)
+    return cur.map(h => {
+      const t = h.t.getTime() + 3600_000
+      const openNow = base.filter(c => c.createdAt.getTime() <= t && decidedAt(c) > t)
+      return { open: openNow.length, slaRisk: openNow.filter(c => c.slaDueAt.getTime() - t < 3600_000).length }
+    })
+  }, [f, cur])
+  const hourLabels = cur.map(h => `${fmtTime(h.t)}–${fmtTime(new Date(h.t.getTime() + 3600_000))} UTC`)
+  const endLabels = cur.map(h => `at ${fmtTime(new Date(h.t.getTime() + 3600_000))} UTC`)
   const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0)
   const counts = { high: 0, medium: 0, low: 0 }
   CASES.filter(c => matchCase(c, { ...f, bands: new Set(['high', 'medium', 'low']) })).forEach(c => counts[c.band]++)
@@ -69,14 +81,14 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
 
       <section className="kpis" aria-label={`Key metrics, last ${f.range} hours`}>
         <Kpi label={`Alerts (${f.range}h)`} value={alerts.toLocaleString()} tone={delta != null && delta > 10 ? 'bad' : 'neutral'}
-          delta={delta == null ? 'No prior period in range' : `${delta > 0 ? '+' : ''}${delta}% vs prior ${f.range}h`} spark={cur.map(h => h.high + h.medium + h.low)} />
+          delta={delta == null ? 'No prior period in range' : `${delta > 0 ? '+' : ''}${delta}% vs prior ${f.range}h`} spark={cur.map(h => h.high + h.medium + h.low)} labels={hourLabels} unit="alerts" />
         <Kpi label="High-risk alerts" value={String(high)} delta={f.bands.has('high') ? `${pct(high, alerts)}% of volume` : 'High band hidden'} tone="bad"
-          spark={cur.map(h => h.high)} color={bandVar('high')} />
-        <Kpi label="Auto-declined" value={String(auto)} delta={`Score ≥ ${AUTO_DECLINE}`} tone="neutral" spark={cur.map(h => h.autoDeclined)} />
+          spark={cur.map(h => h.high)} color={bandVar('high')} labels={hourLabels} unit="high-risk alerts" />
+        <Kpi label="Auto-declined" value={String(auto)} delta={`Score ≥ ${AUTO_DECLINE}`} tone="neutral" spark={cur.map(h => h.autoDeclined)} labels={hourLabels} unit="auto-declined" />
         <Kpi label={f.includeDecided ? 'Cases' : 'Open cases'} value={String(cases.length)} delta={cases.length ? `Average score ${avgScore}` : 'None match filters'} tone="neutral"
-          spark={cur.map((_, i) => cases.length + Math.round(Math.sin(i / 3) * Math.max(2, cases.length / 12)))} />
+          spark={history.map(h => h.open)} labels={endLabels} unit="open cases" />
         <Kpi label="SLA due < 1h" value={String(slaRisk.length)} delta={`${open.filter(c => c.slaDueAt < NOW).length} already breached`}
-          tone={slaRisk.length ? 'bad' : 'good'} spark={cur.map((_, i) => 3 + Math.round(Math.cos(i / 3) * 2))} color={bandVar('medium')} />
+          tone={slaRisk.length ? 'bad' : 'good'} spark={history.map(h => h.slaRisk)} color={bandVar('medium')} labels={endLabels} unit="due < 1h or breached" />
       </section>
 
       <section className="grid-2-1">
@@ -195,13 +207,14 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
 
 const Empty = () => <p className="muted small empty-inline">Nothing matches these filters. Clear a filter to see data.</p>
 
-function Kpi({ label, value, delta, tone, spark, color }: { label: string; value: string; delta: string; tone: 'good' | 'bad' | 'neutral'; spark: number[]; color?: string }) {
+function Kpi({ label, value, delta, tone, spark, color, labels, unit }: { label: string; value: string; delta: string; tone: 'good' | 'bad' | 'neutral'; spark: number[]; color?: string; labels: string[]; unit: string }) {
   return (
     <div className="card kpi">
       <span className="kpi-label">{label}</span>
       <span className="kpi-value num">{value}</span>
       <span className={`kpi-delta ${tone}`}>{delta}</span>
-      <Sparkline values={spark} color={color} />
+      <Sparkline values={spark} color={color} labels={labels} unit={unit} />
+      <span className="spark-hint">Hover or tap for hourly values</span>
     </div>
   )
 }
