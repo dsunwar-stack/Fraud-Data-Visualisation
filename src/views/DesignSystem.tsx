@@ -1,7 +1,7 @@
 // Live design system reference. Every example renders the real component from src/design-system.
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
-  ActivityTimeline, AgenticCard, AgenticIcon, BarList, CheckboxButtonGroup, FeedbackGroup, InfoTip, PageHeader, ProgressBar,
+  ActivityTimeline, AgenticCard, AgenticIcon, BarList, CheckboxButtonGroup, FeedbackGroup, InfoTip, PageHeader, ProgressBar, ScopedNotification,
   RadioButtonGroup, RiskGauge, ScoreCell, Sparkline, Toggle, bandText, bandVar, useToast,
 } from '../design-system'
 import type { Band } from '../data'
@@ -10,7 +10,7 @@ const SECTIONS = [
   ['principles', 'Principles'], ['colour', 'Colour'], ['type', 'Typography'], ['space', 'Spacing and shape'],
   ['cards', 'Cards'], ['metrics', 'Metric cards'], ['info', 'Info icon'], ['badges', 'Badges and labels'],
   ['buttons', 'Buttons'], ['filters', 'Filters'], ['charts', 'Charts and meters'], ['tables', 'Tables'],
-  ['timeline', 'Activity timeline'], ['ai', 'AI content'], ['writing', 'Writing'],
+  ['timeline', 'Activity timeline'], ['notifications', 'Scoped notifications'], ['ai', 'AI content'], ['writing', 'Writing'],
 ] as const
 
 export function DesignSystem() {
@@ -201,6 +201,34 @@ export function DesignSystem() {
           { time: '11:21', kind: 'task', title: 'AI summary generated from 4 sources', detail: 'Summary model' },
           { time: '11:11', kind: 'event', title: 'Event received', detail: 'Intake' },
         ]} />
+      </Section>
+
+      <Section id="notifications" title="Scoped notifications" intro="Advisory status bar inside a card or panel. Not dismissible. Utility icon, message and an optional link. For anything urgent enough to interrupt, use a toast instead.">
+        <Example code={`<ScopedNotification variant="warning"
+  link={{ label: 'Show affected cases', onClick: () => setSource('identity') }}>
+  ID document verification is degraded. Checks that rely on it may be incomplete.
+</ScopedNotification>`}>
+          <div className="stack">
+            <ScopedNotification>Built by a fixed template from the case data, not by AI.</ScopedNotification>
+            <ScopedNotification variant="info">You make the final decision. The recommendation comes from the risk score.</ScopedNotification>
+            <ScopedNotification variant="warning" link={{ label: 'Show affected cases', onClick: () => {} }}>ID document verification is degraded.</ScopedNotification>
+            <ScopedNotification variant="error">This case breached its 4h SLA 1h 25m ago.</ScopedNotification>
+            <ScopedNotification variant="success"><b>Decline</b> recorded by You at 15:00 UTC.</ScopedNotification>
+          </div>
+        </Example>
+        <div className="table-wrap">
+          <table className="slds-table slds-table_cell-buffer slds-table_bordered data ds-choose">
+            <thead><tr><th>Variant</th><th>Use for</th><th>In Fraud Signal</th></tr></thead>
+            <tbody>
+              <tr><td>Default</td><td>Neutral notes about content</td><td>Case snapshot origin, empty filter results</td></tr>
+              <tr><td>Info</td><td>Helpful context or a current state</td><td>Who decides, summary filtered by type, alert spike</td></tr>
+              <tr><td>Warning</td><td>Something may be wrong or needs care</td><td>Degraded data source, SLA due within 1h, overriding the recommendation</td></tr>
+              <tr><td>Error</td><td>Something has gone wrong and needs action</td><td>SLA breached (case and queue)</td></tr>
+              <tr><td>Success</td><td>A completed action, shown where it happened</td><td>Decision recorded</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <Rule do="Keep it to one or two lines. Say what happened and what to do, and add one link if there's a direct next step. Place it at the top of the card it's about." dont="Make it dismissible, stack several in one card, or use it for decoration or for every piece of help text." />
       </Section>
 
       <Section id="ai" title="AI content" intro="From the SLDS 2 Agentic Experiences library. Use only where AI wrote the content, and sparingly.">

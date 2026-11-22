@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import {
-  CASES, CATEGORIES, NOW, SOURCES, bandOf, categoryName, fmtDateTime, fmtDur, fmtMoney, fmtTime, sourceName, sourceShort,
+  CASES, CATEGORIES, NOW, SOURCES, SOURCE_HEALTH, bandOf, categoryName, fmtDateTime, fmtDur, fmtMoney, fmtTime, sourceName, sourceShort,
   type Category, type FraudCase, type Finding, type Outcome, type SourceId,
 } from '../data'
 import { RiskGauge, bandText, bandVar } from '../components/charts'
 import { Switch } from '../components/Filters'
 import { InfoTip } from '../components/InfoTip'
-import { ActivityTimeline, AgenticCard, AgenticIcon, Breadcrumb, FeedbackGroup, Icon, PageHeader, ProgressBar, RadioButtonGroup, type TimelineKind } from '../components/slds'
+import { ActivityTimeline, AgenticCard, AgenticIcon, Breadcrumb, FeedbackGroup, Icon, PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification, type TimelineKind } from '../components/slds'
 
 const STEPS = ['Triage', 'Evidence', 'Review', 'Decision', 'Closed']
 
@@ -60,6 +60,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const left = c.slaDueAt.getTime() - NOW.getTime()
   const stepIdx = recorded ? 4 : c.status === 'New' ? 1 : 2
   const usedSources = new Set(c.factors.map(f => f.source))
+  const degraded = SOURCE_HEALTH.filter(h => h.status === 'degraded').map(h => h.id)
   const cats = CATEGORIES.slice().sort((a, b) => c.categories[b.id] - c.categories[a.id])
   const shownCats = hideZero ? cats.filter(k => c.factors.some(f => f.category === k.id)) : cats
 
@@ -83,6 +84,12 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           { label: 'SLA', value: <span className={`num ${recorded ? '' : left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>{recorded ? 'Met' : left < 0 ? `Breached ${fmtDur(-left)} ago` : `${fmtDur(left)} left`} <span className="muted">· due {fmtTime(c.slaDueAt)} UTC</span></span> },
         ]} />
 
+      {!recorded && left < 0 && (
+        <ScopedNotification variant="error">This case breached its {c.band === 'high' ? '4h' : c.band === 'medium' ? '24h' : '48h'} SLA {fmtDur(-left)} ago (due {fmtTime(c.slaDueAt)} UTC). Record a decision or refer it now.</ScopedNotification>
+      )}
+      {!recorded && left >= 0 && left < 3600_000 && (
+        <ScopedNotification variant="warning">SLA due in {fmtDur(left)}, at {fmtTime(c.slaDueAt)} UTC.</ScopedNotification>
+      )}
       <AgenticCard as="div" className="glance">
         <AgenticIcon size={32} />
         <div className="glance-body">
@@ -190,10 +197,9 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             </header>
 
             {filtering && (
-              <div className="focus-bar">
-                Showing {cat !== 'all' && <b title={CATEGORIES.find(k => k.id === cat)!.plain}>{categoryName(cat)}</b>}{cat !== 'all' && srcFilter !== 'all' && ' from '}{srcFilter !== 'all' && <b>{sourceName(srcFilter)}</b>} only
-                <button className="slds-button" onClick={() => { setCat('all'); setSrcFilter('all') }}>Show everything</button>
-              </div>
+              <ScopedNotification variant="info" link={{ label: 'Show everything', onClick: () => { setCat('all'); setSrcFilter('all') } }}>
+                Showing {cat !== 'all' && <b title={CATEGORIES.find(k => k.id === cat)!.plain}>{categoryName(cat)}</b>}{cat !== 'all' && srcFilter !== 'all' && ' from '}{srcFilter !== 'all' && <b>{sourceName(srcFilter)}</b>} only.
+              </ScopedNotification>
             )}
 
             <div className="summary">
@@ -313,6 +319,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <div><h2>Source evidence</h2><p className="sub">Raw signals behind the summary, so you can check them without switching systems</p></div>
               <Switch id="ev-flagged" checked={flaggedOnly} onChange={setFlaggedOnly} label="Flagged signals only" />
             </header>
+            {degraded.filter(id => usedSources.has(id) || tab === id).map(id => (
+              <ScopedNotification key={id} variant="warning" link={tab === id ? undefined : { label: `View ${sourceShort(id)}`, onClick: () => setTab(id) }}>
+                {sourceName(id)} was degraded when this case was checked. Its results may be incomplete; check them before you decide.
+              </ScopedNotification>
+            ))}
             <div className="slds-tabs_default fs-tabs">
               <ul className="slds-tabs_default__nav" role="tablist">
                 {SOURCES.map(src => (
@@ -344,11 +355,8 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             <h2>Decision</h2>
             {recorded ? (
               <div className="decision-record" role="status">
-                <div className={`recorded outcome-bg-${recorded.outcome.toLowerCase()}`}>
-                  <b>{recorded.outcome}</b>
-                  <span>recorded by {recorded.by} at {fmtTime(recorded.at)} UTC</span>
-                </div>
-                {recorded.overrode && <p className="override small">Overrode the recommendation ({c.recommended})</p>}
+                <ScopedNotification variant="success"><b>{recorded.outcome}</b> recorded by {recorded.by} at {fmtTime(recorded.at)} UTC.</ScopedNotification>
+                {recorded.overrode && <ScopedNotification variant="warning">Overrode the recommendation ({c.recommended}). This decision will be reviewed.</ScopedNotification>}
                 <dl className="kv compact">
                   <div><dt>Reason</dt><dd>{recorded.reason}</dd></div>
                   <div><dt>Why</dt><dd className="pre">{recorded.rationale}</dd></div>
@@ -362,16 +370,16 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               </div>
             ) : (
               <>
-                <p className="who-decides small">
+                <ScopedNotification variant="info">
                   <b>You make the final decision.</b> The AI summarises the evidence. The recommendation comes from the risk score ({c.score}), not from the AI.
-                </p>
+                </ScopedNotification>
                 <span className="kpi-label">Outcome</span>
                 <RadioButtonGroup name="outcome" legend="Outcome" value={choice}
                   onChange={o => { setChoice(o); if (!REASONS[o].includes(reason)) setReason('') }}
                   options={(['Decline', 'Refer', 'Accept'] as Outcome[]).map(o => ({ value: o, label: o }))} />
                 <p className="muted small fs-rec-line">Recommended: <b className={`txt-${c.recommended.toLowerCase()}`}>{c.recommended}</b>, based on risk score {c.score}.</p>
                 {overriding && (
-                  <p className="override small" role="note">You're choosing <b>{choice}</b> instead of the recommended <b>{c.recommended}</b>. Explain why below, as this will be reviewed.</p>
+                  <ScopedNotification variant="warning">You're choosing <b>{choice}</b> instead of the recommended <b>{c.recommended}</b>. Explain why below, as this will be reviewed.</ScopedNotification>
                 )}
 
                 <label htmlFor="case-reason" className="kpi-label">Reason <span className="req">required</span></label>
@@ -396,9 +404,9 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
 
                 <details className="note-box">
                   <summary><span className="kpi-label">Case snapshot</span> <span className="muted small">attached to your decision automatically</span></summary>
-                  <p className="note-src small">
-                    <b>Built by a fixed template from the case data, not by AI and not by a person.</b> The only AI-written line is marked <span className="ai-label">AI</span>. It's saved with your decision so reviewers can see what you saw. You don't need to edit it.
-                  </p>
+                  <ScopedNotification>
+                    <b>Built by a fixed template from the case data, not by AI and not by a person.</b> The only AI-written line is marked <span className="ai-label">AI</span>. It's saved with your decision so reviewers can see what you saw.
+                  </ScopedNotification>
                   <Snapshot text={snapshot} />
                 </details>
 

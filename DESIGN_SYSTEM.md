@@ -102,6 +102,7 @@ Import from `src/design-system`. Each has a Storybook story with controls.
 | **Charts** (`AlertVolume`, `ScoreHistogram`, `RiskGauge`, `BarList`, `Sparkline`) | Trends and distributions | Hover values on every chart; a caption for anything unusual. |
 | **AgenticCard**, **AgenticIcon**, **FeedbackGroup** | AI-generated content only | AI label, disclaimer and feedback (helpful, not helpful with reasons, copy) on every AI output. |
 | **Toast** (`useToast`) | Confirming an action | Short and specific: "Thanks for your feedback." |
+| **ScopedNotification** | Advisory status inside a card or panel | Not dismissible. Icon + one or two lines + at most one link. Default = neutral note; Info = context (who decides, filtered view, alert spike); Warning = needs care (degraded source, SLA due within 1h, override); Error = needs action (SLA breached); Success = completed action (decision recorded). Put it at the top of the card it's about. |
 
 ## Button hierarchy
 

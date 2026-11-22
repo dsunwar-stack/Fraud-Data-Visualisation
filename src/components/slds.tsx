@@ -328,3 +328,33 @@ export function ActivityTimeline({ items }: { items: { time: string; title: stri
     </ul>
   )
 }
+
+// ---------- Scoped notification (SLDS 2) ----------
+// Advisory status bar scoped to its container. Not dismissible. Utility icon + message + optional link.
+export type NotificationVariant = 'default' | 'info' | 'warning' | 'error' | 'success'
+const notifIcons: Record<NotificationVariant, { d: string; label: string }> = {
+  default: { label: 'Note', d: 'M11 21h-1l1-7H7.5c-.6 0-.9-.6-.6-1.1L13 3h1l-1 7h3.5c.6 0 .9.6.6 1.1L11 21Z' },
+  info: { label: 'Information', d: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z' },
+  warning: { label: 'Warning', d: 'M12 2.5 1.5 21h21L12 2.5ZM13 18h-2v-2h2v2Zm0-4h-2V9h2v5Z' },
+  error: { label: 'Error', d: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 0 1 6.3 12.9L7.1 5.7A8 8 0 0 1 12 4Zm0 16a8 8 0 0 1-6.3-12.9l11.2 11.2A8 8 0 0 1 12 20Z' },
+  success: { label: 'Success', d: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.4 14.2-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4-7 7Z' },
+}
+export function ScopedNotification({ variant = 'default', children, link }: {
+  variant?: NotificationVariant; children: ReactNode; link?: { label: string; onClick: () => void }
+}) {
+  const icon = notifIcons[variant]
+  const theme = variant === 'default' ? 'slds-scoped-notification_light' : `slds-theme_${variant}`
+  return (
+    <div className={`slds-scoped-notification slds-media slds-media_center ${theme} fs-scoped`} role="status">
+      <div className="slds-media__figure">
+        <span className="slds-icon_container" title={icon.label}>
+          <svg className="slds-icon slds-icon_x-small fs-scoped-icon" viewBox="0 0 24 24" aria-hidden="true"><path d={icon.d} fillRule="evenodd" /></svg>
+          <span className="slds-assistive-text">{icon.label}</span>
+        </span>
+      </div>
+      <div className="slds-media__body">
+        <p>{children}{link && <> <button type="button" className="fs-scoped-link" onClick={link.onClick}>{link.label}</button></>}</p>
+      </div>
+    </div>
+  )
+}

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { CASES, NOW, fmtDateTime, fmtDur, fmtMoney, type FraudCase } from '../data'
 import { ScoreCell } from '../components/charts'
 import { FilterBar, Switch, activeCount, matchCase, type Filters } from '../components/Filters'
-import { PageHeader } from '../components/slds'
+import { PageHeader, ScopedNotification } from '../components/slds'
 
 type SortKey = 'score' | 'sla' | 'created'
 
@@ -28,6 +28,7 @@ export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) =>
     return list.sort(by[sort])
   }, [q, filters, urgentOnly, sort])
 
+  const breached = CASES.filter(c => matchCase(c, filters) && c.status !== 'Decided' && c.slaDueAt.getTime() < NOW.getTime()).length
   const counts = { high: 0, medium: 0, low: 0 }
   CASES.filter(c => matchCase(c, { ...filters, bands: new Set(['high', 'medium', 'low']) })).forEach(c => counts[c.band]++)
   const cols = showSignals ? 9 : 8
@@ -44,6 +45,13 @@ export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) =>
       </FilterBar>
 
       <section className="slds-card card flush">
+        {breached > 0 && (
+          <div className="fs-scoped-wrap">
+            <ScopedNotification variant="error" link={urgentOnly ? undefined : { label: 'Show urgent cases only', onClick: () => setUrgentOnly(true) }}>
+              {breached} case{breached > 1 ? 's have' : ' has'} breached {breached > 1 ? 'their' : 'its'} SLA and need{breached > 1 ? '' : 's'} a decision now.
+            </ScopedNotification>
+          </div>
+        )}
         <div className="table-head">
           <span className="muted small">{rows.length} of {CASES.length} cases shown</span>
           <div className="toolbar">

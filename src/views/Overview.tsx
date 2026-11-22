@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ALERTS, CASES, CASE_TYPES, NOW, SOURCE_HEALTH, fmtDateTime, fmtDur, fmtTime, sourceName, type CaseType, type FraudCase } from '../data'
 import { AlertVolume, BarList, ScoreCell, ScoreHistogram, Sparkline, bandVar, type HourPoint } from '../components/charts'
 import { FilterBar, Switch, matchCase, type Filters } from '../components/Filters'
-import { PageHeader, ProgressBar, RadioButtonGroup } from '../components/slds'
+import { PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification } from '../components/slds'
 import { InfoTip } from '../components/InfoTip'
 
 const AUTO_DECLINE = 85
@@ -106,9 +106,10 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
           </header>
           <AlertVolume data={cur} showAuto={showAuto} />
           {spikeVisible && (
-            <p className="annotation"><span className="dot" style={{ background: bandVar('high') }} />
+            <ScopedNotification variant="info"
+              link={f.type === 'Account takeover' ? undefined : { label: 'Show account takeover only', onClick: () => setFilters({ ...f, type: 'Account takeover' }) }}>
               Spike on {ALERTS[39].t.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}, {fmtTime(ALERTS[39].t)}–{fmtTime(new Date(ALERTS[40].t.getTime() + 3600_000))} UTC: {ALERTS[39].byType['Account takeover'].high + ALERTS[40].byType['Account takeover'].high} high-risk account takeover alerts from one device cluster.
-            </p>
+            </ScopedNotification>
           )}
         </div>
         <div className="slds-card card">
@@ -186,7 +187,10 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
               })}
             </tbody>
           </table>
-          <p className="annotation"><span className="status-dot degraded" />ID document verification is degraded: 98.2% uptime, slower responses since 09:40.</p>
+          <ScopedNotification variant="warning"
+            link={f.source === 'identity' ? undefined : { label: 'Show affected cases', onClick: () => setFilters({ ...f, source: 'identity' }) }}>
+            ID document verification is degraded (98.2% uptime, slower since 09:40). Checks that rely on it may be incomplete.
+          </ScopedNotification>
         </div>
       </section>
 
@@ -220,7 +224,7 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
   )
 }
 
-const Empty = () => <p className="muted small empty-inline">Nothing matches these filters. Clear a filter to see data.</p>
+const Empty = () => <ScopedNotification>Nothing matches these filters. Clear a filter to see data.</ScopedNotification>
 
 function Kpi({ label, value, delta, tone, spark, color, labels, unit }: { label: string; value: string; delta: string; tone: 'good' | 'bad' | 'neutral'; spark: number[]; color?: string; labels: string[]; unit: string }) {
   return (

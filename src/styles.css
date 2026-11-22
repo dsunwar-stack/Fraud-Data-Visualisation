@@ -809,3 +809,14 @@ ul.ds-principles { list-style: disc; }
 .ds-btn-level { display: grid; grid-template-columns: 110px 180px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
 @media (max-width: 640px) { .ds-btn-level { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
 .ds-choose td { white-space: normal; vertical-align: top; }
+
+/* Scoped notification (SLDS 2): theme classes give the fill and text colour; layout only here */
+.fs-scoped { display: flex; gap: var(--slds-g-spacing-2); align-items: flex-start; font-size: 0.8125rem; line-height: 1.45; }
+.fs-scoped .slds-media__figure { margin: 1px 0 0; flex: none; }
+.fs-scoped p { margin: 0; }
+.fs-scoped-icon { width: 1rem; height: 1rem; fill: currentColor; }
+.slds-scoped-notification_light .fs-scoped-icon { fill: var(--slds-g-color-on-surface-1); }
+.fs-scoped-link { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
+.fs-scoped-link:hover { text-decoration: none; }
+.fs-scoped-wrap { padding: var(--slds-g-spacing-3) var(--slds-g-spacing-3) 0; }
+.decision-record .fs-scoped { justify-self: stretch; width: 100%; }

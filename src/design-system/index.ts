@@ -12,7 +12,8 @@ export { FilterBar } from '../components/Filters'
 
 // Feedback and help
 export { InfoTip } from '../components/InfoTip'
-export { ToastProvider, useToast } from '../components/slds'
+export { ToastProvider, useToast, ScopedNotification } from '../components/slds'
+export type { NotificationVariant } from '../components/slds'
 
 // Data display
 export { ProgressBar, ActivityTimeline, Icon } from '../components/slds'

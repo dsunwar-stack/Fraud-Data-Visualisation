@@ -25,6 +25,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [13](#round-13-design-system-and-storybook) | A design system in GitHub that designers and developers can use in live code, with separate documentation | Storybook, a separate design system site, DESIGN_SYSTEM.md, one import point | [`round-13`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-13) |
 | [14](#round-14-decision-buttons-follow-slds-2) | Are the Decline / Refer / Accept colours from SLDS 2? | SLDS radio button group for the choice; SLDS destructive / brand / success for Record | [`round-14`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-14) |
 | [15](#round-15-button-hierarchy-and-choosing-controls) | When to use radio vs dropdown? Should Record buttons differ in colour? Primary vs secondary | One primary Record button; button hierarchy and control-choice rules documented | [`round-15`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-15) |
+| [16](#round-16-scoped-notifications) | Apply SLDS 2 scoped notifications with their icons where needed | Info, warning, error, success and default notifications across Overview, queue and case | [`round-16`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-16) |
 
 To run any round locally:
 
@@ -333,6 +334,40 @@ The original terms were kept because fraud specialists use them; the plain label
 | Button hierarchy | Choosing a control |
 |---|---|
 | ![Button hierarchy](round-15-button-hierarchy.png) | ![Choosing controls](round-15-choosing-controls.png) |
+
+---
+
+## Round 16: scoped notifications
+
+> **Feedback:** "Here is the scoped notification. Can you please apply it where necessary, with the icons?" (SLDS 2 Components for Web, Scoped Notifications)
+
+**SLDS 2 rule:** advisory information that isn't important enough for an alert, shown as a status bar inside its container. Not dismissible. Utility icon + message + optional link. Five variants: default, info, warning, error, success.
+
+**Where we applied it**
+
+| Variant | Where | Message (and link) |
+|---|---|---|
+| Info | Overview · Alert volume | Spike explanation (*Show account takeover only*) |
+| Warning | Overview · Data source health | ID document verification degraded (*Show affected cases*) |
+| Error | Case queue | N cases have breached their SLA (*Show urgent cases only*) |
+| Error / Warning | Case page, top | SLA breached, or due within 1 hour |
+| Info | AI fraud summary | Showing one fraud type or source only (*Show everything*) |
+| Warning | Source evidence | A source this case relies on was degraded (*View ID check*) |
+| Info | Decision | You make the final decision |
+| Warning | Decision | Choosing a different outcome from the recommendation |
+| Success / Warning | Decision, after recording | Decision recorded; overrode the recommendation |
+| Default | Case snapshot, empty states | Where the snapshot comes from; nothing matches the filters |
+
+They replace the custom notes, coloured boxes and annotations used before. The component is in the design system (`ScopedNotification`), on the design system site, in Storybook and in DESIGN_SYSTEM.md.
+
+**Principle:** one standard way to show status inside a container, with an icon and a next step.
+
+![Scoped notification variants](round-16-scoped-notifications.png)
+![SLA breached on a case](round-16-case-sla-error.png)
+
+| Decision recorded | Degraded source (dark mode) |
+|---|---|
+| ![Decision recorded](round-16-decision-recorded.png) | ![Degraded source](round-16-degraded-source-dark.png) |
 
 ---
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { ActivityTimeline, CheckboxButtonGroup, InfoTip, PageHeader, ProgressBar, RadioButtonGroup, ScoreCell, Sparkline, Toggle, bandVar } from '../design-system'
+import { ActivityTimeline, CheckboxButtonGroup, InfoTip, PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification, ScoreCell, Sparkline, Toggle, bandVar, type NotificationVariant } from '../design-system'
 import type { Band } from '../data'
 
 const meta: Meta = { title: 'Components' }
@@ -141,4 +141,18 @@ export const ActivityTimelineStory: StoryObj = {
       ]} />
     </div>
   ),
+}
+
+// ---------- Scoped notification ----------
+type NotifArgs = { variant: NotificationVariant; message: string; linkLabel: string }
+export const ScopedNotificationStory: StoryObj<NotifArgs> = {
+  name: 'Scoped notification',
+  args: { variant: 'warning', message: 'ID document verification is degraded. Checks that rely on it may be incomplete.', linkLabel: 'Show affected cases' },
+  argTypes: { variant: { control: 'inline-radio', options: ['default', 'info', 'warning', 'error', 'success'] } },
+  render: a => (
+    <div style={{ maxWidth: 560 }}>
+      <ScopedNotification variant={a.variant} link={a.linkLabel ? { label: a.linkLabel, onClick: () => {} } : undefined}>{a.message}</ScopedNotification>
+    </div>
+  ),
+  parameters: { docs: { description: { story: 'Advisory status bar scoped to its container; not dismissible. Default = neutral note, Info = context, Warning = needs care (degraded source, SLA due soon, override), Error = needs action (SLA breached), Success = completed action (decision recorded). One or two lines, at the top of the card it is about, with at most one link.' } } },
 }
