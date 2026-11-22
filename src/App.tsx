@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react'
-import { CASES } from './data'
+import { CASES, NOW } from './data'
 import { Overview } from './views/Overview'
 import { Queue } from './views/Queue'
 import { CaseView } from './views/CaseView'
+import { Observability } from './views/Observability'
+import { AssignmentProvider } from './ops'
 import { DEFAULT_FILTERS, type Filters } from './components/Filters'
 import { RadioButtonGroup, ToastProvider } from './components/slds'
 import { VariantProvider, useVariant } from './variant'
 
-type Route = { view: 'overview' } | { view: 'queue' } | { view: 'case'; id: string }
+type Route = { view: 'overview' } | { view: 'queue' } | { view: 'observability' } | { view: 'case'; id: string }
 
 const parse = (h: string): Route => {
   const s = h.replace(/^#/, '')
   if (s.startsWith('case-')) return { view: 'case', id: s.slice(5) }
   if (s === 'queue') return { view: 'queue' }
+  if (s === 'observability') return { view: 'observability' }
   return { view: 'overview' }
 }
 
@@ -39,11 +42,13 @@ export default function App() {
 
   const go = (h: string) => { location.hash = h }
   const open = CASES.filter(c => c.status !== 'Decided')
+  const breachedN = open.filter(c => c.slaDueAt.getTime() < NOW.getTime()).length
   const lastCase = route.view === 'case' ? route.id : null
 
   return (
     <VariantProvider>
     <ToastProvider>
+    <AssignmentProvider>
     <div className="shell">
       <aside className="nav">
         <div className="brand">
@@ -63,6 +68,17 @@ export default function App() {
                 <a href="#queue" className="slds-nav-vertical__action" aria-current={route.view === 'queue' ? 'page' : undefined}>
                   <Icon d="M3 4h14M3 9h14M3 14h9" stroke />Case queue
                   <span className="slds-badge slds-col_bump-left fs-count">{open.length}</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div className="slds-nav-vertical__section">
+            <h2 className="slds-nav-vertical__title">Team lead</h2>
+            <ul>
+              <li className={`slds-nav-vertical__item ${route.view === 'observability' ? 'slds-is-active' : ''}`}>
+                <a href="#observability" className="slds-nav-vertical__action" aria-current={route.view === 'observability' ? 'page' : undefined}>
+                  <Icon d="M2 10h3l2-5 3 10 2-6 2 3h4" stroke />Observability
+                  {breachedN > 0 && <span className="slds-badge slds-col_bump-left fs-count fs-count-bad" title={`${breachedN} cases breached SLA`}>{breachedN}</span>}
                 </a>
               </li>
             </ul>
@@ -91,9 +107,11 @@ export default function App() {
       <main className="main">
         {route.view === 'overview' && <Overview onOpen={id => go(`case-${id}`)} filters={filters} setFilters={setFilters} />}
         {route.view === 'queue' && <Queue onOpen={id => go(`case-${id}`)} filters={filters} setFilters={setFilters} />}
+        {route.view === 'observability' && <Observability onOpen={id => go(`case-${id}`)} />}
         {route.view === 'case' && <CaseView id={route.id} onBack={() => go('queue')} />}
       </main>
     </div>
+    </AssignmentProvider>
     </ToastProvider>
     </VariantProvider>
   )

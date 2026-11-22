@@ -129,6 +129,13 @@ Bring data from every platform into **one card grouped by the specialist's quest
 - **One record, no contradictions.** The AI summary, factor details and findings are written from the same figures the Evidence card shows. Every Unusual row is backed by a risk factor; every finding has **See in Evidence: <row>**, which scrolls to and highlights the row.
 - Show the **platforms strip** (each source with "N unusual", "checked" or "degraded") so the aggregation is visible.
 
+## Observability (team lead)
+
+- Lead with **what needs action**: an error notification for SLA breaches, a warning for degraded systems, each with a link to the affected cases.
+- Every late case shows **why** (a cause badge with an ⓘ saying what to do) and **one obvious action** (Assign / Reassign to the suggested specialist).
+- Bulk actions appear only when rows are selected: **Assign** is the brand button; **Assign to suggested** is neutral; **Clear** is a base button.
+- Use counts ("30 of 36 agreed"), not percentages. Capacity bars turn amber above 80% and red when over capacity.
+
 ## Button hierarchy
 
 | Level | SLDS variant | Use | Fraud Signal examples |

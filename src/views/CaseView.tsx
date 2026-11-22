@@ -8,6 +8,7 @@ import { Switch } from '../components/Filters'
 import { InfoTip } from '../components/InfoTip'
 import { RiskThresholds } from '../components/RiskThresholds'
 import { useVariant } from '../variant'
+import { specialist, useAssignments } from '../ops'
 import { EvidenceCard, type EvidenceRequest } from './EvidenceCard'
 import { caseRecord } from '../activity'
 import { ActivityTimeline, AgenticCard, AgenticIcon, Breadcrumb, FeedbackGroup, Icon, PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification, type TimelineKind } from '../components/slds'
@@ -84,6 +85,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const mitig = [...c.findings.mitigation.filter(inScope), ...c.findings.substantiation.filter(f => mitigated.has(f.id) && inScope(f)).map(f => ({ ...f, byAnalyst: true }))]
   const unal = c.findings.unaligned.filter(inScope)
   const filtering = cat !== 'all' || srcFilter !== 'all'
+  const assignedTo = specialist(useAssignments().assignee(c.id))
 
   return (
     <div className="stack">
@@ -93,6 +95,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           { label: 'Case number', value: <span className="mono">{c.id}</span> },
           { label: 'Status', value: <span className={`slds-badge status status-${(recorded ? 'Decided' : c.status).replace(' ', '-').toLowerCase()}`}>{recorded ? 'Decided' : c.status}</span> },
           { label: 'Queue', value: c.owner },
+          { label: 'Assigned to', value: assignedTo ? assignedTo.name : <span className="muted">Nobody</span> },
           { label: 'Opened', value: `${fmtDateTime(c.createdAt)} UTC` },
           ...(c.amount ? [{ label: 'Amount at risk', value: <span className="num">{fmtMoney(c.amount)}</span> }] : []),
           { label: 'SLA', value: <span className={`num ${recorded ? '' : left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>{recorded ? 'Met' : left < 0 ? `Breached ${fmtDur(-left)} ago` : `${fmtDur(left)} left`} <span className="muted">· due {fmtTime(c.slaDueAt)} UTC</span></span> },

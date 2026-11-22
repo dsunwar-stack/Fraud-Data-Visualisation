@@ -30,6 +30,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [18](#round-18-risk-thresholds-on-screen) | What's the threshold when adjusting the score? Show it so the user knows | Risk thresholds table, auto-decline marker, threshold-crossing and large-adjustment notices | [`round-18`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-18) |
 | [19](#round-19-version-b-integrated-evidence) | Did we cater for the first Fraud Data Visualisation design? Make a Version B integrated, keep the current one | Version B: integrated Evidence card; Version A kept; A/B switch | [`round-19`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-19) |
 | [20](#round-20-one-record-the-summary-follows-the-data) | Is the Evidence data part of the graphs and the summary? Make it real and follow the data | Version B: one record per case; summary, factors and findings written from the Evidence figures; See in Evidence; platforms strip | [`round-20`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-20) |
+| [21](#round-21-observability-for-the-team-lead) | What is observability in a case manager? Where are the SLA breaches we need to act on? A new screen for the team lead to assign cases | New Observability screen: act now list with causes, assign and reassign, team workload, why cases are late, where they wait, system health, AI agreement | [`round-21`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-21) |
 
 To run any round locally:
 
@@ -470,6 +471,36 @@ The Overview graphs are unchanged. They count alerts across the team, not one cu
 | ![Findings](round-20-findings.png) | ![Jump to row](round-20-jump.png) |
 
 ![Evidence with the platforms strip](round-20-evidence.png)
+
+---
+
+## Round 21: Observability for the team lead
+
+> **Feedback:** "Is this a case study of observability?" … "What is the use case of observability in a case manager?" … "Where are the fraud SLA breaches where we need to take action?" … "Can I have a new screen for the team lead, based on observability, so they can assign the task to the fraud specialist?"
+
+**Answer:** the case page is a **decision tool** for the specialist. Observability is about **the work and the systems**: is work flowing, why is it late, are the systems feeding cases healthy, and are decisions good? SLA information existed but was spread across 4 places and said *that* a case was late, not *why* or *what to do*.
+
+**New screen: Team lead › Observability** (`#observability`, in both Version A and B). The sidebar badge shows breached cases.
+- **Alerts at the top:** breached and due-within-1-hour counts, how many breached cases have no owner, and which degraded system affects how many cases. Each has a link to those cases.
+- **Status tiles:** SLA breached, due within 1 hour, unassigned, team capacity (free slots and who's available), AI recommendation agreed (in numbers, not %).
+- **Act now:** open cases sorted by SLA, each with its step, time in step and **why it's at risk** (Unassigned, Specialist unavailable, Specialist overloaded, System degraded, Waiting on customer, In progress), with an ⓘ that says what to do.
+  - **Assign / Reassign to [suggested]** on each row: the suggestion is an available specialist with the right skills and the most free capacity.
+  - **Bulk assign:** select cases, then **Assign** to a chosen specialist (primary button) or **Assign to suggested** (secondary).
+  - Filter by Breached, Due < 4h, Unassigned or All, and by cause or specialist.
+- **Team workload:** each specialist's open cases against capacity (bar turns red when overloaded), breached, due < 1h, average time to decide, decided today. Updates as you assign; select a name to see their cases.
+- **Why cases are late** (by cause), **Where cases wait** (time in each step; the slowest is highlighted), **Systems feeding cases** (health of the 5 platforms).
+- **AI recommendation: agreed or overridden** by outcome, to spot when the model needs review.
+- **Your assignments:** a log saved for audit. The case page header now shows **Assigned to**.
+
+Fictional team and synthetic data, seeded separately so the existing cases don't change.
+
+![Observability: alerts and status](round-21-top.png)
+
+![Act now with two cases selected for bulk assign](round-21-actnow.png)
+
+![Team workload](round-21-workload.png)
+
+![Why cases are late, where they wait, systems](round-21-why.png)
 
 ---
 

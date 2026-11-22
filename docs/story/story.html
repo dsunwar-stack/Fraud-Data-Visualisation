@@ -131,6 +131,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-18"><b>18</b> Thresholds</a></li>
       <li><a href="#round-19"><b>19</b> Version B</a></li>
       <li><a href="#round-20"><b>20</b> One record</a></li>
+      <li><a href="#round-21"><b>21</b> Observability</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -479,6 +480,23 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     <div class="shots"><figure><img src="img/round-20-summary.png" alt="AI summary quoting the same amounts as the evidence" width="1984" height="186" loading="lazy"><figcaption>The summary quotes the evidence's numbers</figcaption></figure></div>
     <div class="shots"><figure><img src="img/round-20-findings.png" alt="Findings, each with a See in Evidence link" width="1204" height="1616" loading="lazy" style="max-width:520px"><figcaption>Each finding links to its row</figcaption></figure>
     <figure><img src="img/round-20-jump.png" alt="Evidence row highlighted after See in Evidence" width="2560" height="1800" loading="lazy"><figcaption>The row is highlighted</figcaption></figure></div>
+  </section>
+
+  <section class="round" id="round-21">
+    <div class="round-head"><span class="num">21</span><h2>Observability for the team lead</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-21">Code: round-21</a><span class="kicker">Say why it's late and what to do, then let them do it</span></div>
+    <blockquote><cite>Feedback</cite>"Is this a case study of observability?" … "Where are the fraud SLA breaches where we need to take action?" … "Can I have a new screen for the team lead so they can assign the task to the fraud specialist?"</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>The case page is a <b>decision tool</b>. Observability watches <b>the work and the systems</b>. SLA was in 4 places and only said a case was late.</li>
+        <li>A new <b>Observability</b> screen for the team lead: alerts for breaches and degraded systems, and tiles for breached, due &lt; 1h, unassigned, capacity and AI agreement.</li>
+        <li><b>Act now:</b> each at-risk case with <b>why</b> (unassigned, specialist unavailable or overloaded, system degraded, waiting on customer) and <b>Assign / Reassign</b> to a suggested specialist with the right skills and free capacity. Bulk assign too.</li>
+        <li><b>Team workload</b> against capacity, <b>why cases are late</b>, <b>where they wait</b>, <b>system health</b>, and an <b>assignment log</b>. The case page shows who it's assigned to.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Action first</li><li>Show the cause, not just the symptom</li><li>One obvious next step</li><li>Counts, not percentages</li></ul></div>
+    </div>
+    <div class="shots"><figure><img src="img/round-21-top.png" alt="Observability screen: alerts and status tiles" width="2880" height="2000" loading="lazy"><figcaption>What needs action, first</figcaption></figure></div>
+    <div class="shots"><figure><img src="img/round-21-actnow.png" alt="Act now table with causes and assign buttons, two rows selected" width="2304" height="1788" loading="lazy"><figcaption>Why each case is late, and who to give it to</figcaption></figure>
+    <figure><img src="img/round-21-workload.png" alt="Team workload against capacity" width="2304" height="1112" loading="lazy"><figcaption>Workload updates as you assign</figcaption></figure></div>
   </section>
 
   <section class="close" id="principles">

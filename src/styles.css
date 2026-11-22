@@ -882,3 +882,19 @@ ul.ds-principles { list-style: disc; }
 .fcol li { min-width: 0; overflow-wrap: anywhere; }
 .fcol .f-actions { flex-wrap: wrap; row-gap: 2px; }
 .fcol .f-actions .slds-button { white-space: normal; text-align: left; line-height: 1.3; }
+
+/* Team lead: Observability */
+.fs-count-bad { background: var(--risk-high-soft); color: var(--risk-high); }
+.fs-tone-bad { color: var(--risk-high); } .fs-tone-warn { color: var(--risk-medium); }
+.fs-obs-filters { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: var(--slds-g-spacing-3); }
+.fs-obs-filters .slds-form-element { min-width: 200px; }
+.fs-obs-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; margin-bottom: var(--slds-g-spacing-3); border-radius: 8px; background: var(--slds-g-color-surface-container-2, rgba(1,118,211,.08)); }
+.fs-obs-bulk .slds-select_container { min-width: 240px; }
+.fs-obs-check { width: 36px; }
+.fs-obs-table td { vertical-align: middle; }
+.fs-obs-load { min-width: 140px; }
+.fs-obs-load .num { display: block; margin-bottom: 4px; }
+.fs-obs-systems { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fs-obs-systems li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 0.8125rem; }
+.fs-obs-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.fs-obs-link { padding: 0; text-align: left; }

@@ -21,6 +21,13 @@ All data is synthetic and generated in the browser from a fixed seed. No real cu
 - **Case queue:** search, sort, due within 1 hour or breached, show or hide the signals column, and compact rows.
 - **Case investigation:** **Show factors** on a fraud type narrows the summary and findings to it, findings can be filtered by source, and there are toggles to hide fraud types with no signals and show flagged signals only.
 
+## Screens
+
+- **Overview:** alert volume, risk spread and SLA for the queue.
+- **Case queue:** every open case, filterable and sortable.
+- **Case:** one view of the customer across 5 systems, with the AI summary, evidence and decision.
+- **Team lead › Observability:** SLA breaches and why, assign and reassign cases, team workload, system health and AI agreement (round 21).
+
 ## Layout versions
 
 | Version | What it is | Open |
