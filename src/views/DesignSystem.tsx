@@ -141,20 +141,32 @@ export function DesignSystem() {
         <Rule do="Risk level badges always show the word, not only colour. Source tags say where a fact came from." dont="Use the AI label on anything a person or rule wrote." />
       </Section>
 
-      <Section id="buttons" title="Buttons" intro="SLDS 2 pill buttons. One brand button per area at most.">
-        <div className="ds-row">
-          <button className="slds-button slds-button_neutral">Show 3 factors</button>
-          <button className="slds-button slds-button_brand">Submit</button>
-          <button className="slds-button slds-button_destructive">Record decline</button>
-          <button className="slds-button slds-button_success">Record accept</button>
-          <button className="slds-button">Show everything</button>
+      <Section id="buttons" title="Buttons" intro="SLDS 2 pill buttons, used by importance. One primary button per area.">
+        <div className="ds-btn-levels">
+          <BtnLevel level="Primary" variant="slds-button_brand" label="Record decline" rule="The one main action in an area. Exactly one per card, panel or dialog." />
+          <BtnLevel level="Secondary" variant="slds-button_neutral" label="Cancel" rule="Other actions next to the primary one, including Cancel." />
+          <BtnLevel level="Tertiary" variant="" label="Show everything" rule="Low-emphasis actions that read like links: Undo, Reset, Show more." />
+          <BtnLevel level="Destructive" variant="slds-button_destructive" label="Delete case" rule="Only for actions that delete or remove something. Not for Decline or Cancel." />
+          <BtnLevel level="Success" variant="slds-button_success" label="Mark complete" rule="Rarely: confirming a positive completion. Not used in Fraud Signal." />
         </div>
-        <Rule do="Labels say what happens. Decision outcomes: pick with a radio button group; Record uses destructive (Decline), brand (Refer) or success (Accept)." dont='Recolour an SLDS button, or use vague labels like "Go" or "OK".' />
+        <Rule do="One primary button per area, with a label that says what happens. Use the same primary button whatever option is chosen (Record decline / refer / accept)." dont="Colour a button by the option chosen, use red for Cancel or Decline, or recolour an SLDS button." />
       </Section>
 
       <Section id="filters" title="Filters" intro="Pick the control by the kind of choice.">
         <DemoFilters />
-        <Rule do="Several at once → checkbox button group. Exactly one → radio button group. On/off → toggle. Long list → select." dont="Use custom chips or segmented controls." />
+        <div className="table-wrap">
+          <table className="slds-table slds-table_cell-buffer slds-table_bordered data ds-choose">
+            <thead><tr><th>Control</th><th>Use when</th><th>Fraud Signal examples</th></tr></thead>
+            <tbody>
+              <tr><td>Radio button group</td><td>Exactly one of 2–4 options with short labels, where seeing all options helps comparison</td><td>Outcome (Decline · Refer · Accept), time range, sort order, theme</td></tr>
+              <tr><td>Radio group (vertical)</td><td>Exactly one of 2–6 options with longer labels that should all be visible</td><td>Not used yet; a candidate for decision reasons</td></tr>
+              <tr><td>Select (dropdown)</td><td>5+ options, long labels, options that change, or limited space</td><td>Reason, case type, data source</td></tr>
+              <tr><td>Checkbox button group</td><td>Several options can be on at once</td><td>Risk levels</td></tr>
+              <tr><td>Toggle</td><td>A single on/off setting</td><td>Include decided, auto-declined line</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <Rule do="Choose the control by how many options there are, how long the labels are, and whether people should see them all at once." dont="Use custom chips or segmented controls, or a dropdown for 2–3 short options people need to compare." />
       </Section>
 
       <Section id="charts" title="Charts and meters" intro="Hand-built SVG charts using the --viz-* palette. Every chart has hover values and a written caption.">
@@ -288,6 +300,16 @@ function Metric({ label, value, delta, tone, values, color }: { label: string; v
     <div className="slds-card card kpi ds-metric">
       <span className="kpi-label">{label}</span><span className="kpi-value num">{value}</span><span className={`kpi-delta ${tone}`}>{delta}</span>
       <Sparkline values={values} labels={values.map((_, i) => `${String(i * 2).padStart(2, '0')}:00 UTC`)} unit={label.toLowerCase()} color={color} />
+    </div>
+  )
+}
+
+function BtnLevel({ level, variant, label, rule }: { level: string; variant: string; label: string; rule: string }) {
+  return (
+    <div className="ds-btn-level">
+      <span className="kpi-label">{level}</span>
+      <div><button className={`slds-button ${variant}`}>{label}</button></div>
+      <span className="small">{rule}</span>
     </div>
   )
 }

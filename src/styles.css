@@ -804,3 +804,8 @@ ul.ds-principles { list-style: disc; }
 .decision .fs-rbg .slds-radio_button { flex: 1 1 0; min-width: 0; }
 .decision .fs-rbg .slds-radio_button__label { width: 100%; justify-content: center; text-align: center; white-space: normal; }
 .fs-rec-line { margin: 0; }
+
+.ds-btn-levels { display: grid; gap: 0; }
+.ds-btn-level { display: grid; grid-template-columns: 110px 180px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+@media (max-width: 640px) { .ds-btn-level { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+.ds-choose td { white-space: normal; vertical-align: top; }

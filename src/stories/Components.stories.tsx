@@ -65,12 +65,12 @@ export const Badges: StoryObj = {
 }
 
 // ---------- Buttons ----------
-type BtnArgs = { label: string; variant: 'neutral' | 'brand' | 'destructive' | 'success' | 'base' }
+type BtnArgs = { label: string; variant: 'brand' | 'neutral' | 'base' | 'destructive' | 'success' }
 export const Button: StoryObj<BtnArgs> = {
-  args: { label: 'Show 3 factors', variant: 'neutral' },
-  argTypes: { variant: { control: 'inline-radio', options: ['neutral', 'brand', 'destructive', 'success', 'base'] } },
+  args: { label: 'Record decline', variant: 'brand' },
+  argTypes: { variant: { control: 'inline-radio', options: ['brand', 'neutral', 'base', 'destructive', 'success'], description: 'brand = primary · neutral = secondary · base = tertiary · destructive = delete/remove only · success = rare' } },
   render: a => <button className={`slds-button ${a.variant === 'base' ? '' : `slds-button_${a.variant}`}`}>{a.label}</button>,
-  parameters: { docs: { description: { story: 'SLDS 2 pill buttons. Labels say what happens. Decision outcomes: Record uses destructive (Decline), brand (Refer) or success (Accept). Never recolour an SLDS button. At most one brand button per area.' } } },
+  parameters: { docs: { description: { story: 'SLDS 2 pill buttons by importance. **Primary** (brand): the one main action per area. **Secondary** (neutral): other actions, including Cancel. **Tertiary** (base): link-like actions such as Undo. **Destructive**: only for delete or remove. **Success**: rare. Use one primary Record button whatever outcome is chosen; never colour a button by the option chosen.' } } },
 }
 
 // ---------- Filters ----------

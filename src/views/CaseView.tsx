@@ -149,7 +149,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                     </div>
                     <div className="hub-act">
                       {n ? (
-                        <button className={`slds-button ${active ? 'slds-button_brand' : 'slds-button_neutral'} hub-btn`} aria-pressed={active} onClick={() => setCat(active ? 'all' : k.id)}>
+                        <button className={`slds-button slds-button_neutral hub-btn ${active ? 'slds-is-selected' : ''}`} aria-pressed={active} onClick={() => setCat(active ? 'all' : k.id)}>
                           {active ? 'Show all evidence' : `Show ${n} factor${n === 1 ? '' : 's'}`}
                         </button>
                       ) : <span className="muted small">No evidence found</span>}
@@ -402,7 +402,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                   <Snapshot text={snapshot} />
                 </details>
 
-                <button className={`slds-button ${choice === 'Decline' ? 'slds-button_destructive' : choice === 'Accept' ? 'slds-button_success' : 'slds-button_brand'} record-btn`} onClick={record} aria-disabled={!canRecord}>
+                <button className="slds-button slds-button_brand record-btn" onClick={record} aria-disabled={!canRecord}>
                   Record {choice.toLowerCase()}
                 </button>
               </>

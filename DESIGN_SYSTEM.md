@@ -89,8 +89,8 @@ Import from `src/design-system`. Each has a Storybook story with controls.
 | **Metric card** (`.kpi` + `Sparkline`) | The 3–6 numbers that answer "is something wrong?" | Always pass `labels` so the trend line shows values on hover. Say what a change compares against. |
 | **InfoTip** (ⓘ) | Specialist terms and numbers whose meaning isn't obvious | Plain meaning first, then an example. Also show a one-line plain label on screen. No links or buttons inside. |
 | **Badges** (`.slds-badge`) | Risk level, status, source, AI | Risk badges show the word, not only colour. The AI label only on AI-written content. |
-| **Buttons** (`slds-button_*`) | Actions | Labels say what happens. One brand button per area. Never recolour an SLDS button. |
-| **Decision outcome** | Choosing Decline, Refer or Accept | Pick the outcome with a **RadioButtonGroup**, with the recommendation on a line below. The **Record** button carries the meaning with SLDS variants: Decline = `slds-button_destructive`, Refer = `slds-button_brand`, Accept = `slds-button_success`. |
+| **Buttons** (`slds-button_*`) | Actions | See *Button hierarchy* below. |
+| **Decision outcome** | Choosing Decline, Refer or Accept | Pick the outcome with a **RadioButtonGroup**, with the recommendation on a line below. Record with **one primary (brand) button** whose label says the outcome: "Record decline". |
 | **CheckboxButtonGroup** | Filters where several can be on | e.g. risk levels |
 | **RadioButtonGroup** | Exactly one choice | e.g. time range, sort order, theme |
 | **Toggle** | On/off settings | e.g. "Include decided" |
@@ -102,6 +102,30 @@ Import from `src/design-system`. Each has a Storybook story with controls.
 | **Charts** (`AlertVolume`, `ScoreHistogram`, `RiskGauge`, `BarList`, `Sparkline`) | Trends and distributions | Hover values on every chart; a caption for anything unusual. |
 | **AgenticCard**, **AgenticIcon**, **FeedbackGroup** | AI-generated content only | AI label, disclaimer and feedback (helpful, not helpful with reasons, copy) on every AI output. |
 | **Toast** (`useToast`) | Confirming an action | Short and specific: "Thanks for your feedback." |
+
+## Button hierarchy
+
+| Level | SLDS variant | Use | Fraud Signal examples |
+|---|---|---|---|
+| **Primary** | `slds-button_brand` | The one main action in an area. Exactly one per card, panel or dialog. | Record decline / refer / accept, Submit (feedback) |
+| **Secondary** | `slds-button_neutral` | Other actions next to the primary, including **Cancel** | Cancel, Edit, Show 3 factors, What do these mean? |
+| **Tertiary** | `slds-button` (base) | Low-emphasis, link-like actions | Show everything, Undo, Reset, View case snapshot |
+| **Destructive** | `slds-button_destructive` | **Only** for actions that delete or remove something | Not used |
+| **Success** | `slds-button_success` | Rarely, to confirm a positive completion | Not used |
+
+- Keep the same primary button whatever option is chosen. Don't colour a button by the option chosen.
+- Cancel is secondary (neutral), never red.
+- An on/off button (like *Show 3 factors* / *Show all evidence*) is secondary with the SLDS selected state, not primary.
+
+## Choosing a selection control
+
+| Control | Use when | Examples |
+|---|---|---|
+| **Radio button group** | Exactly one of 2–4 options with short labels, where seeing them all helps comparison | Outcome, time range, sort order, theme |
+| **Radio group** (vertical) | Exactly one of 2–6 options with longer labels that should all be visible | Candidate for decision reasons |
+| **Select** (dropdown) | 5+ options, long labels, options that change, or limited space | Reason, case type, data source |
+| **Checkbox button group** | Several options can be on at once | Risk levels |
+| **Toggle** | A single on/off setting | Include decided |
 
 ## Writing
 

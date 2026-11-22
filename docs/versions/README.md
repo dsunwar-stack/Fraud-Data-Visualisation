@@ -24,6 +24,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [12](#round-12-top-risk-factors-explained) | What do Cases and Points mean in Top risk factors? | Both measures on every row, "Most common / Biggest impact" sort, info icon | [`round-12`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-12) |
 | [13](#round-13-design-system-and-storybook) | A design system in GitHub that designers and developers can use in live code, with separate documentation | Storybook, a separate design system site, DESIGN_SYSTEM.md, one import point | [`round-13`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-13) |
 | [14](#round-14-decision-buttons-follow-slds-2) | Are the Decline / Refer / Accept colours from SLDS 2? | SLDS radio button group for the choice; SLDS destructive / brand / success for Record | [`round-14`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-14) |
+| [15](#round-15-button-hierarchy-and-choosing-controls) | When to use radio vs dropdown? Should Record buttons differ in colour? Primary vs secondary | One primary Record button; button hierarchy and control-choice rules documented | [`round-15`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-15) |
 
 To run any round locally:
 
@@ -308,6 +309,30 @@ The original terms were kept because fraud specialists use them; the plain label
 **Principle:** keep the research intent (colour shows the outcome) inside the design system's own variants.
 
 ![Decision buttons after](round-14-decision-after.png)
+
+---
+
+## Round 15: button hierarchy and choosing controls
+
+> **Feedback:** "What's the rule on when to use a radio button and a dropdown in this scenario? Also the Record refer and Record accept buttons are different colours." … "I think A if it is the standard design system. Only Cancel is red, right? Also primary vs secondary logic exists too."
+
+**Answers**
+- **Radio button group** for exactly one of 2–4 short options people should compare (Outcome). **Dropdown** for 5+ options, long or changing labels, or limited space (Reason, case type, data source).
+- **Red (destructive) is only for delete or remove.** Cancel is a **secondary** (neutral) button, not red.
+- SLDS has a hierarchy: **primary** (brand, one per area), **secondary** (neutral), **tertiary** (base/link), plus destructive and success for special cases.
+
+**What changed (option A, SLDS-strict)**
+- The **Record** button is now one **primary** button for every outcome; only the label changes: "Record decline", "Record refer", "Record accept".
+- **Show all evidence** in the Risk Hub was turning primary when active, giving the case view two primary buttons. It's now secondary with the SLDS selected state.
+- **DESIGN_SYSTEM.md**, the design system site and Storybook now include a **button hierarchy** table and a **choosing a selection control** table.
+
+**Principles:** one primary action per area; colour carries meaning in badges and text, not in which button you get.
+
+![Decision panel](round-15-decision.png)
+
+| Button hierarchy | Choosing a control |
+|---|---|
+| ![Button hierarchy](round-15-button-hierarchy.png) | ![Choosing controls](round-15-choosing-controls.png) |
 
 ---
 
