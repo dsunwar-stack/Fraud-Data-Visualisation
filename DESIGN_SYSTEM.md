@@ -57,7 +57,11 @@ Tokens are CSS variables in `src/styles.css`. Each points at an SLDS 2 styling h
 | `--viz-high` | Chart fill, high risk | `palette-red-60` |
 | `--viz-medium` | Chart fill, medium risk | `palette-orange-70` |
 | `--viz-low` | Chart fill, low risk | `palette-teal-60` |
-| `--viz-brand` | Chart fill, neutral measures | `palette-blue-60` |
+| `--viz-brand` | Chart fill, neutral measures; series 1 | `palette-blue-60` |
+| `--viz-series-2` | Second series (dashed line or second stack) | `palette-indigo-40` |
+| `--viz-status` | Status bars on a case timeline (Case Tracker) | `palette-neutral-70` |
+| `--viz-sub` | Sub-step bars on the waterfall (Case Tracker) | `palette-blue-70` |
+| `--dept-1` … `--dept-5` | Categories such as departments, in order of first appearance | `palette-blue-50`, `orange-60`, `teal-60`, `pink-50`, `purple-60` |
 | `--ai-fill` / `--ai-ink` / `--ai-line` | AI content only | `palette-purple-95` / `-40` / `-80` |
 
 **Do** use `--viz-*` for chart fills and `--risk-*` for text and badges. **Don't** use a risk colour for decoration, or purple for anything that isn't AI.
@@ -100,10 +104,70 @@ Import from `src/design-system`. Each has a Storybook story with controls.
 | **ProgressBar** | Meters (scores, shares) | Colour by risk only when it shows risk. |
 | **ScoreCell** | Risk in tables | Word, number and bar together. Bands: low 0–39, medium 40–69, high 70–100. |
 | **ActivityTimeline** | What happened on a case | Newest first; titles say what happened, detail says who. |
-| **Charts** (`AlertVolume`, `ScoreHistogram`, `RiskGauge`, `BarList`, `Sparkline`) | Trends and distributions | Hover values on every chart; a caption for anything unusual. |
+| **Charts** (`AlertVolume`, `ScoreHistogram`, `RiskGauge`, `BarList`, `Sparkline`, `TrendChart`, `ColumnChart`) | Trends and distributions | Follow [Charts and graphs](#charts-and-graphs): answer first, one axis, hover values, numbers that agree. |
 | **AgenticCard**, **AgenticIcon**, **FeedbackGroup** | AI-generated content only | AI label, disclaimer and feedback (helpful, not helpful with reasons, copy) on every AI output. |
 | **Toast** (`useToast`) | Confirming an action | Short and specific: "Thanks for your feedback." |
 | **ScopedNotification** | Advisory status inside a card or panel | Not dismissible. Icon + one or two lines + at most one link. Default = neutral note; Info = context (who decides, filtered view, alert spike); Warning = needs care (degraded source, SLA due within 1h, override); Error = needs action (SLA breached); Success = completed action (decision recorded). Put it at the top of the card it's about. |
+
+## Charts and graphs
+
+Rules for every chart in Fraud Signal and [Case Tracker](#chart-components). Colours are SLDS 2 palette tokens, checked as described in [Chart colours](#chart-colours).
+
+### Start with the question, then pick the chart
+
+| Question | Use | Not |
+|---|---|---|
+| Is this number normal? | Metric card with a **Sparkline** | A number on its own |
+| How is it changing over time? | **TrendChart** (line, 1–3 series) or **AlertVolume** (stacked columns per hour) | Pie, donut |
+| How do categories compare? | **BarList** (horizontal bars) or **ColumnChart** | Pie, donut, 3D |
+| What's coming, against capacity? | **ColumnChart** with a capacity line | A gauge |
+| How is a score spread? | **ScoreHistogram** with the threshold marked | |
+| Where did the time go on one case? | **DeptBars**: one total split by status, department and sub-step, waiting shown | Donut, ring gauges |
+| In what order did things happen, and where did it wait? | **Waterfall**: status, step and sub-step on one time axis | Stacked bars that hide order |
+| One score against its bands | **RiskGauge** / score bar with band thresholds | A ring gauge with no target |
+
+**Answer first.** Put a one-line answer in words above the chart ("94h 36m of 144h 38m was waiting, most of it before Treasury"). The chart is the evidence, not the message.
+
+### Rules for every chart
+
+1. **One axis per chart.** Two measures with different units are two charts.
+2. **A real scale:** even steps in one format (`0h, 24h, 48h`). Never a list of values as ticks; minutes never go past 59.
+3. **Numbers must agree.** A total shown in a sentence, a tile, a bar and a legend is the same number. Keep values exact; round only when showing or exporting.
+4. **Don't add nested levels together.** Status, step and sub-step are the same time seen three ways: show them as three rows that each reach the same total, never as parts of one donut.
+5. **Show waiting.** Time when nobody is working (queues, handovers) gets its own hatched part. It's usually where time can be saved.
+6. **Counts and hours, not percentages,** unless the percentage is the measure (it can go in the tooltip).
+7. **Label the data, not only the legend.** Put the name (and value if it fits) on bars; show a legend for 2+ series with real values (never `00:00` for a category that has time). Show only categories present.
+8. **Colour is never the only cue:** labels, a dashed second line, hatching for waiting, an outline for "now".
+9. **Hover or tap shows the exact values** on every chart; hit areas are bigger than the marks.
+10. **Mark what matters:** a dashed red line for a target or alert, a dashed grey marker where an incident started, an outline on the current item.
+11. **No pies, donuts, 3D or ring gauges without a target.** People compare lengths far better than angles.
+
+### Chart colours
+
+| Job | Colours | Rule |
+|---|---|---|
+| Risk level | `--viz-high` / `--viz-medium` / `--viz-low` | Only for risk. Red is also for breaches, alerts and targets. |
+| One measure | `--viz-brand` | Default for any single series. |
+| Two series | `--viz-brand` + `--viz-series-2` (dashed) | Checked for colour-blind separation. |
+| Categories (departments, teams) | `--dept-1` … `--dept-5` | **Maximum 5.** Assign in order of first appearance, never cycled. More than 5: group the rest as "Other" or use labels and one colour. |
+| Status and waiting | `--viz-status` (grey), hatched pattern | Grey for status, stripes for waiting, so they never compete with categories. |
+| AI | Purple (`--ai-*`) | Never in charts. |
+
+- **Why 5, not 8:** eight SLDS palette colours can't be told apart reliably, for colour-blind users or even for everyone (four blues in one chart look the same). Five pass every check.
+- **Text on coloured bars:** white on blue-50 and pink-50; near-black on orange-60, teal-60 and purple-60 (4.5:1 contrast).
+- **Dark mode:** chart colours come from SLDS `light-dark()` tokens, except the categorical set: SLDS swaps orange, teal and purple for darker steps that lose contrast on a dark surface, so dark mode keeps the light-mode steps.
+- **Check new colours** with the palette validator before using them (colour-blind separation, lightness, contrast against the surface), in light and dark mode.
+
+### Chart components
+
+| Component | Where | Notes |
+|---|---|---|
+| `Sparkline` | Both | In metric cards; pass `labels` so hover shows values. |
+| `AlertVolume`, `ScoreHistogram`, `RiskGauge`, `BarList` | Fraud Signal | `src/components/charts.tsx` |
+| `TrendChart` | Both | Lines over time; optional area, threshold line and incident marker. |
+| `ColumnChart` | Both | Stacked counts per bucket; optional capacity line per column. |
+| `Waterfall` | Case Tracker | Status, step and sub-step on one time axis; waiting hatched; current outlined; target line. |
+| `DeptBars` | Case Tracker | One total split three ways (status, department, sub-step) with waiting; totals at the end of each row; legend with real times. |
 
 ## Risk thresholds
 

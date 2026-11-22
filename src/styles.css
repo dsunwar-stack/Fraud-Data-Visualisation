@@ -913,3 +913,16 @@ ul.ds-principles { list-style: disc; }
 /* Metric cards: keep sparklines on one line across a row, even when the note wraps */
 .kpi { grid-template-rows: auto auto auto 1fr auto; }
 .kpi > .spark { align-self: end; }
+
+/* Shared chart tokens (also used in Case Tracker): categorical colours, max 5, in order of first appearance. */
+:root {
+  --viz-status: var(--slds-g-color-palette-neutral-70);
+  --viz-sub: var(--slds-g-color-palette-blue-70);
+  --dept-1: var(--slds-g-color-palette-blue-50);
+  --dept-2: var(--slds-g-color-palette-orange-60);
+  --dept-3: var(--slds-g-color-palette-teal-60);
+  --dept-4: var(--slds-g-color-palette-pink-50);
+  --dept-5: var(--slds-g-color-palette-purple-60);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --dept-2: #dd7a01; --dept-3: #06a59a; --dept-5: #ad7bee; } }
+:root[data-theme="dark"] { --dept-2: #dd7a01; --dept-3: #06a59a; --dept-5: #ad7bee; }
