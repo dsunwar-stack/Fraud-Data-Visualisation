@@ -5,6 +5,7 @@ import {
 } from '../data'
 import { RiskGauge, bandVar } from '../components/charts'
 import { Switch } from '../components/Filters'
+import { InfoTip } from '../components/InfoTip'
 
 const STEPS = ['Triage', 'Evidence', 'Review', 'Decision', 'Closed']
 
@@ -28,6 +29,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const [tab, setTab] = useState<SourceId>(c.factors[0]?.source ?? 'device')
   const [flaggedOnly, setFlaggedOnly] = useState(false)
   const [hideZero, setHideZero] = useState(false)
+  const [explain, setExplain] = useState(false)
   const [examining, setExamining] = useState<string | null>(null)
   const [mitigated, setMitigated] = useState<Set<string>>(new Set())
   const [feedback, setFeedback] = useState<null | 'correct' | 'incorrect'>(null)
@@ -93,9 +95,15 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             <header className="card-h">
               <div>
                 <h2>Risk hub</h2>
-                <p className="sub">Score for each fraud type. Click <b>Go</b> to focus the summary and findings on that type.</p>
+                <p className="sub">How strongly the evidence points to each type of fraud, from 0 to 100. Click <b>Go</b> to focus the summary and findings on one type.</p>
               </div>
-              <Switch id="hub-zero" checked={hideZero} onChange={setHideZero} label="Hide types with no signals" />
+              <div className="hub-tools">
+                <button className="btn ghost" aria-expanded={explain} aria-pressed={explain} onClick={() => setExplain(e => !e)}>
+                  <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="M8 7v4.5M8 4.6v.1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+                  {explain ? 'Hide explanations' : 'What do these mean?'}
+                </button>
+                <Switch id="hub-zero" checked={hideZero} onChange={setHideZero} label="Hide types with no signals" />
+              </div>
             </header>
             <div className="hub">
               <div className="hub-bars">
@@ -103,7 +111,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                   const v = c.categories[k.id], b = bandOf(v)
                   return (
                     <div key={k.id} className={`hub-row ${cat === k.id ? 'active' : ''}`}>
-                      <span>{k.name}</span>
+                      <span className="hub-name">{k.name}<InfoTip label={k.name}><span>{k.meaning}</span><span className="infotip-ex"><b>Example:</b> {k.example}</span></InfoTip></span>
                       <span className="barlist-track"><span className="barlist-fill" style={{ width: `${v}%`, background: bandVar(b) }} /></span>
                       <span className="num hub-v" style={{ color: bandVar(b) }}>{v}</span>
                     </div>
@@ -118,8 +126,9 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                     <div key={k.id} className={`ring-card ${active ? 'active' : ''}`}>
                       <Ring value={v} color={bandVar(b)} />
                       <div className="ring-meta">
-                        <b>{k.name}</b>
-                        <span className="muted small">{n} factor{n === 1 ? '' : 's'}</span>
+                        <span className="ring-name"><b>{k.name}</b><InfoTip label={k.name} align="end"><span>{k.meaning}</span><span className="infotip-ex"><b>Example:</b> {k.example}</span></InfoTip></span>
+                        <span className="ring-def">{k.plain}</span>
+                        <span className="muted small">{n} factor{n === 1 ? '' : 's'} found</span>
                       </div>
                       <button className={`btn go ${active ? 'on' : ''}`} aria-pressed={active} onClick={() => setCat(active ? 'all' : k.id)}>{active ? 'Clear' : 'Go'}</button>
                     </div>
@@ -127,6 +136,22 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 })}
               </div>
             </div>
+            {explain && (
+              <div className="explain" role="region" aria-label="What the fraud types mean">
+                {CATEGORIES.map(k => {
+                  const signals = [...new Set(c.factors.filter(f => f.category === k.id).map(f => f.label))]
+                  return (
+                    <div key={k.id} className="explain-item">
+                      <h3>{k.name} <span className="muted">· {k.plain.toLowerCase()}</span></h3>
+                      <p>{k.meaning}</p>
+                      <p className="muted small"><b>Example:</b> {k.example}</p>
+                      <p className="small">{signals.length ? <><b>In this case:</b> {signals.join(', ')}.</> : <span className="muted">No signals for this type in this case.</span>}</p>
+                    </div>
+                  )
+                })}
+                <p className="muted small explain-foot">Each score is built from the risk factors linked to that type. More factors, and stronger ones, give a higher score. Scores of 70 or more are high risk, 40–69 medium, and below 40 low.</p>
+              </div>
+            )}
           </section>
 
           {/* ---- AI summary ---- */}
@@ -141,7 +166,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
 
             {filtering && (
               <div className="focus-bar">
-                Showing {cat !== 'all' && <b>{categoryName(cat)}</b>}{cat !== 'all' && srcFilter !== 'all' && ' from '}{srcFilter !== 'all' && <b>{sourceName(srcFilter)}</b>} only
+                Showing {cat !== 'all' && <b title={CATEGORIES.find(k => k.id === cat)!.plain}>{categoryName(cat)}</b>}{cat !== 'all' && srcFilter !== 'all' && ' from '}{srcFilter !== 'all' && <b>{sourceName(srcFilter)}</b>} only
                 <button className="link small" onClick={() => { setCat('all'); setSrcFilter('all') }}>Show everything</button>
               </div>
             )}
@@ -167,7 +192,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                             onChange={() => setExcluded(s => { const n = new Set(s); if (n.has(f.label)) n.delete(f.label); else n.add(f.label); return n })} />
                         )}
                         <div>
-                          <div className="factor-h"><b>{f.label}</b><span className="tag src">{sourceShort(f.source)}</span><span className="tag">{categoryName(f.category)}</span><span className="pts num">+{f.points}</span></div>
+                          <div className="factor-h"><b>{f.label}</b><span className="tag src">{sourceShort(f.source)}</span><span className="tag" title={CATEGORIES.find(k => k.id === f.category)!.plain}>{categoryName(f.category)}</span><span className="pts num">+{f.points}</span></div>
                           <div className="factor-d">{f.detail}</div>
                         </div>
                       </li>
@@ -369,8 +394,8 @@ function Ring({ value, color }: { value: number; color: string }) {
   return (
     <svg width="56" height="56" viewBox="0 0 56 56" role="img" aria-label={`${value} out of 100`}>
       <circle cx="28" cy="28" r={r} fill="none" stroke="var(--track)" strokeWidth="6" />
-      <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round"
-        strokeDasharray={`${(C * value) / 100} ${C}`} transform="rotate(-90 28 28)" />
+      {value > 0 && <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round"
+        strokeDasharray={`${(C * value) / 100} ${C}`} transform="rotate(-90 28 28)" />}
       <text x="28" y="32.5" textAnchor="middle" className="ring-num" fill={color}>{value}</text>
     </svg>
   )

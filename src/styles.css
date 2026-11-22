@@ -364,7 +364,7 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .hub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; align-items: start; }
 @media (max-width: 760px) { .hub { grid-template-columns: minmax(0, 1fr); } }
 .hub-bars { display: grid; gap: 12px; }
-.hub-row { display: grid; grid-template-columns: 130px minmax(0, 1fr) 2.5ch; gap: 10px; align-items: center; font-size: 13px; padding: 2px 4px; border-radius: 6px; }
+.hub-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 2.5ch; gap: 10px; align-items: center; font-size: 13px; padding: 2px 4px; border-radius: 6px; }
 .hub-row.active { background: var(--primary-soft); }
 .hub-v { font-weight: 700; text-align: right; }
 .hub-rings { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
@@ -410,3 +410,30 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .spark-hint { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); opacity: 0; transition: opacity .15s; }
 .kpi:hover .spark-hint { opacity: 1; }
 @media (hover: none) { .spark-hint { opacity: 1; } }
+
+/* ---------- fraud type explanations ---------- */
+.hub-tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.hub-tools .btn { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.ring-def { font-size: 12px; line-height: 1.35; color: var(--text); opacity: 0.8; }
+.ring-meta { gap: 2px; }
+.explain { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 14px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); }
+@media (max-width: 760px) { .explain { grid-template-columns: minmax(0, 1fr); } }
+.explain-item { display: grid; gap: 4px; align-content: start; }
+.explain-item h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.explain-item h3 .muted { font-weight: 400; }
+.explain-item p { margin: 0; font-size: 13px; }
+.explain-foot { grid-column: 1 / -1; margin: 0; border-top: 1px dashed var(--border); padding-top: 10px; }
+
+/* ---------- info tips ---------- */
+.infotip { position: relative; display: inline-flex; vertical-align: middle; margin-left: 4px; }
+.infotip-btn { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: help; }
+.infotip-btn:hover, .infotip-btn[aria-expanded='true'] { color: var(--primary); background: var(--primary-soft); }
+.infotip-pop {
+  position: fixed; z-index: 50; width: min(280px, calc(100vw - 16px));
+  display: grid; gap: 6px; padding: 10px 12px; border-radius: 8px; text-align: left;
+  background: var(--text); color: var(--surface); font-size: 12.5px; font-weight: 400; line-height: 1.45;
+  box-shadow: 0 10px 28px rgba(0,0,0,.22); white-space: normal;
+}
+.infotip-pop b { font-weight: 600; }
+.infotip-ex { opacity: 0.85; }
+.hub-name, .ring-name { display: inline-flex; align-items: center; }

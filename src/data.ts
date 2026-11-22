@@ -11,11 +11,38 @@ export type CaseType =
   | 'Synthetic identity'
 
 export type Category = 'impersonation' | 'falseApplication' | 'accountMisuse' | 'falseIdentity'
-export const CATEGORIES: { id: Category; name: string }[] = [
-  { id: 'impersonation', name: 'Impersonation' },
-  { id: 'falseApplication', name: 'False application' },
-  { id: 'accountMisuse', name: 'Account misuse' },
-  { id: 'falseIdentity', name: 'False identity' },
+export interface CategoryInfo {
+  id: Category
+  name: string
+  plain: string   // one line, no jargon
+  meaning: string // fuller explanation
+  example: string
+}
+export const CATEGORIES: CategoryInfo[] = [
+  {
+    id: 'impersonation', name: 'Impersonation',
+    plain: "Someone is using a real person's stolen details",
+    meaning: 'The person exists, but the applicant is not them. A fraudster has their name, date of birth or address and is pretending to be them.',
+    example: "A fraudster applies for an account in your name using details from a data breach.",
+  },
+  {
+    id: 'falseIdentity', name: 'False identity',
+    plain: "The person doesn't exist",
+    meaning: 'The identity is made up, or stitched together from real and invented details (sometimes called a synthetic identity). There is no real victim behind it.',
+    example: 'A new name with a real address and a fake ID document, built up with small credit accounts over a few months.',
+  },
+  {
+    id: 'falseApplication', name: 'False application',
+    plain: 'A real person giving false details about themselves',
+    meaning: 'The applicant is who they say they are, but has lied on the application, for example about their income, job, address or contact details.',
+    example: 'A genuine customer overstates their salary or gives a different phone number to pass checks.',
+  },
+  {
+    id: 'accountMisuse', name: 'Account misuse',
+    plain: 'A genuine account being used for fraud',
+    meaning: 'Either a criminal has taken over a real customer\'s account, or the account holder is letting it be used to move stolen money (a money mule).',
+    example: 'Money arrives from several strangers and is sent straight on to new payees within an hour.',
+  },
 ]
 export const categoryName = (c: Category) => CATEGORIES.find(x => x.id === c)!.name
 
@@ -146,12 +173,12 @@ const FACTORS: FactorTemplate[] = [
     finding: () => `Email address does not contain the customer's first or last name.`,
   },
   {
-    source: 'consortium', label: 'Inconsistent contact details', category: 'impersonation', points: [10, 18], types: ['Onboarding exception', 'Synthetic identity', 'Money mule'],
+    source: 'consortium', label: 'Inconsistent contact details', category: 'falseApplication', points: [10, 18], types: ['Onboarding exception', 'Synthetic identity', 'Money mule'],
     detail: () => `${int(2, 5)} direct clear loadings list different phone numbers. Oldest is ${int(13, 36)} months old, newest ${int(4, 20)} days old.`,
     finding: () => `${int(2, 4)} direct clear loadings (${int(13, 30)}–${int(31, 60)} months old) show contact details that differ from the application.`,
   },
   {
-    source: 'device', label: 'Jailbroken or rooted device', category: 'falseIdentity', points: [12, 20], types: 'all',
+    source: 'device', label: 'Jailbroken or rooted device', category: 'impersonation', points: [12, 20], types: 'all',
     detail: () => `Device integrity check failed with ${int(2, 3)} root indicators. Device seen on ${int(1, 6)} other customer profiles.`,
     finding: () => `The customer's device is jailbroken.`,
   },
@@ -161,7 +188,7 @@ const FACTORS: FactorTemplate[] = [
     finding: () => `Login from a new device ${int(400, 1800)} km from usual location within 2 hours of a password reset.`,
   },
   {
-    source: 'identity', label: 'Document check passed manually', category: 'falseApplication', points: [8, 14], types: ['Onboarding exception', 'Synthetic identity'],
+    source: 'identity', label: 'Document check passed manually', category: 'falseIdentity', points: [8, 14], types: ['Onboarding exception', 'Synthetic identity'],
     detail: () => `A document submission was passed manually with an authenticity score of ${int(62, 86)}/100 (auto-pass is 90).`,
     finding: () => `One document submission was manually passed with a score of ${int(70, 88)}.`,
   },
@@ -176,12 +203,12 @@ const FACTORS: FactorTemplate[] = [
     finding: () => `New payee created within 30 minutes of a credential change.`,
   },
   {
-    source: 'contact', label: 'Recently ported phone number', category: 'falseIdentity', points: [6, 12], types: ['Account takeover', 'Synthetic identity'],
+    source: 'contact', label: 'Recently ported phone number', category: 'accountMisuse', points: [6, 12], types: ['Account takeover', 'Synthetic identity'],
     detail: () => `Mobile number ported to a new network ${int(1, 9)} days ago. SIM age ${int(1, 9)} days.`,
     finding: () => `Mobile number was ported ${int(2, 8)} days before the event.`,
   },
   {
-    source: 'identity', label: 'Thin credit file', category: 'falseApplication', points: [6, 12], types: ['Synthetic identity', 'Onboarding exception'],
+    source: 'identity', label: 'Thin credit file', category: 'falseIdentity', points: [6, 12], types: ['Synthetic identity', 'Onboarding exception'],
     detail: () => `Credit footprint starts ${int(4, 14)} months ago, with ${int(1, 3)} accounts opened in the last 90 days.`,
     finding: () => `Credit history is less than 12 months old.`,
   },
@@ -284,7 +311,8 @@ function makeCase(i: number): FraudCase {
   profile.creditScore = band === 'high' ? int(380, 620) : int(560, 960)
   const categories = Object.fromEntries(CATEGORIES.map(k => {
     const pts = factors.filter(f => f.category === k.id).reduce((s, f) => s + f.points, 0)
-    return [k.id, Math.min(97, Math.round(pts * 2.4 + int(3, 12)))]
+    const baseline = int(3, 12)
+    return [k.id, pts ? Math.min(97, Math.round(pts * 2.4 + baseline)) : 0] // no factors, no score
   })) as Record<Category, number>
   const topCat = CATEGORIES.slice().sort((a, b) => categories[b.id] - categories[a.id])[0]
   const slaHours = band === 'high' ? 4 : band === 'medium' ? 24 : 48
