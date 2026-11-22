@@ -8,14 +8,17 @@ import { Switch } from '../components/Filters'
 import { InfoTip } from '../components/InfoTip'
 import { RiskThresholds } from '../components/RiskThresholds'
 import { useVariant } from '../variant'
-import { EvidenceCard } from './EvidenceCard'
-import { SECTION_FOR_SOURCE, type EvidenceSection } from '../activity'
+import { EvidenceCard, type EvidenceRequest } from './EvidenceCard'
+import { caseRecord } from '../activity'
 import { ActivityTimeline, AgenticCard, AgenticIcon, Breadcrumb, FeedbackGroup, Icon, PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification, type TimelineKind } from '../components/slds'
 
 const STEPS = ['Triage', 'Evidence', 'Review', 'Decision', 'Closed']
 
 export function CaseView({ id, onBack }: { id: string; onBack: () => void }) {
-  const c = CASES.find(x => x.id === id)
+  const { variant } = useVariant()
+  const found = CASES.find(x => x.id === id)
+  // Version B reads one case record: summary, factors and findings are written from the Evidence data.
+  const c = found && variant === 'B' ? caseRecord(found).c : found
   if (!c) return (
     <div className="slds-card card empty-state">
       <h2>Case {id} was not found</h2>
@@ -23,7 +26,7 @@ export function CaseView({ id, onBack }: { id: string; onBack: () => void }) {
       <button className="slds-button slds-button_neutral" onClick={onBack}>Back to queue</button>
     </div>
   )
-  return <CaseBody key={c.id} c={c} onBack={onBack} />
+  return <CaseBody key={c.id + variant} c={c} onBack={onBack} />
 }
 
 function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
@@ -37,7 +40,9 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const [explain, setExplain] = useState(false)
   const [examining, setExamining] = useState<string | null>(null)
   const { variant } = useVariant()
-  const [evidenceReq, setEvidenceReq] = useState<{ section: EvidenceSection; n: number } | undefined>()
+  const [evidenceReq, setEvidenceReq] = useState<EvidenceRequest | undefined>()
+  const refs = variant === 'B' ? caseRecord(CASES.find(x => x.id === c.id)!).refs : {}
+  const examine = (id: string) => { const r = refs[id]; if (r) setEvidenceReq(q => ({ section: r.section, key: r.key, n: (q?.n ?? 0) + 1 })) }
   const [mitigated, setMitigated] = useState<Set<string>>(new Set())
   const [feedback, setFeedback] = useState<null | 'correct' | 'incorrect'>(null)
   const [choice, setChoice] = useState<Outcome>(c.recommended)
@@ -302,7 +307,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                         {f.text}<span className="slds-badge tag src">{sourceShort(f.source)}</span>
                         <div className="f-actions">
                           {variant === 'B'
-                            ? <button className="slds-button small" onClick={() => setEvidenceReq(r => ({ section: SECTION_FOR_SOURCE[f.source], n: (r?.n ?? 0) + 1 }))}>Examine in Evidence</button>
+                            ? <button className="slds-button small" onClick={() => examine(f.id)}>See in Evidence: {refs[f.id]?.label}</button>
                             : <button className="slds-button small" aria-expanded={examining === f.id} onClick={() => setExamining(examining === f.id ? null : f.id)}>{examining === f.id ? 'Close' : 'Examine'}</button>}
                           <button className="slds-button small" onClick={() => { setMitigated(s => new Set(s).add(f.id)); setExamining(null) }}>Mitigate</button>
                         </div>
@@ -325,6 +330,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                     {mitig.map(f => (
                       <li key={f.id}>
                         {f.text}<span className="slds-badge tag src">{sourceShort(f.source)}</span>
+                        {variant === 'B' && !('byAnalyst' in f) && refs[f.id] && <div className="f-actions"><button className="slds-button small" onClick={() => examine(f.id)}>See in Evidence: {refs[f.id].label}</button></div>}
                         {'byAnalyst' in f && (
                           <div className="f-actions"><span className="slds-badge tag mitig">Mitigated by you</span>
                             <button className="slds-button small" onClick={() => setMitigated(s => { const n = new Set(s); n.delete(f.id); return n })}>Undo</button></div>
@@ -337,7 +343,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <div className="fcol fcol-neutral">
                 <FindingHead k="unaligned" count={unal.length} />
                 {unal.length ? (
-                  <ul>{unal.map(f => <li key={f.id}>{f.text}<span className="slds-badge tag src">{sourceShort(f.source)}</span></li>)}</ul>
+                  <ul>{unal.map(f => <li key={f.id}>{f.text}<span className="slds-badge tag src">{sourceShort(f.source)}</span>{variant === 'B' && refs[f.id] && <div className="f-actions"><button className="slds-button small" onClick={() => examine(f.id)}>See in Evidence: {refs[f.id].label}</button></div>}</li>)}</ul>
                 ) : <p className="muted small">No conflicting evidence.</p>}
               </div>
             </div>

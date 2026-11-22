@@ -29,6 +29,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [17](#round-17-adjust-score-not-edit) | The Fraud summary has an Edit button but I can't edit anything | Renamed to Adjust score, explained, SLDS checkboxes, adjustment saved with the decision | [`round-17`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-17) |
 | [18](#round-18-risk-thresholds-on-screen) | What's the threshold when adjusting the score? Show it so the user knows | Risk thresholds table, auto-decline marker, threshold-crossing and large-adjustment notices | [`round-18`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-18) |
 | [19](#round-19-version-b-integrated-evidence) | Did we cater for the first Fraud Data Visualisation design? Make a Version B integrated, keep the current one | Version B: integrated Evidence card; Version A kept; A/B switch | [`round-19`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-19) |
+| [20](#round-20-one-record-the-summary-follows-the-data) | Is the Evidence data part of the graphs and the summary? Make it real and follow the data | Version B: one record per case; summary, factors and findings written from the Evidence figures; See in Evidence; platforms strip | [`round-20`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-20) |
 
 To run any round locally:
 
@@ -442,6 +443,33 @@ They replace the custom notes, coloured boxes and annotations used before. The c
 | ![Evidence: money](round-19-evidence-money.png) | ![Evidence: behaviour](round-19-evidence-behaviour.png) |
 
 ![Evidence in dark mode](round-19-evidence-dark.png)
+
+---
+
+## Round 20: one record, the summary follows the data
+
+> **Feedback:** "Those data, part of previous graphs? And summary?" … "Yes please make it real and follow the data." … "The goal is data aggregated from 4–5+ applications in one, so the fraud specialist can decide quickly without toggling across those applications."
+
+**Problem:** in round 19 the Evidence card used its own data, separate from the AI summary and findings. They could contradict each other (e.g. a finding saying "same device for 600 days" while Evidence showed a new device). If the AI and the evidence disagree, the specialist stops trusting both.
+
+**Version B now uses one record per case** (`src/activity.ts`, `caseRecord`):
+- The rules engine's **risk factors** decide what happened. The customer's activity is built **once** from them: money, payees, logins, device, account changes and identity checks.
+- The **AI summary, factor details and findings are written from those same figures**. For example, "£23,595 came in and £22,420 left within 43 minutes to 4 new payees" matches the Money in row and the four new payees in the table exactly.
+- **Every Unusual row is backed by a risk factor, and every finding points to its Evidence row.** Mitigations only appear when the evidence supports them (no "same device" if the device is new).
+- **See in Evidence: <row>** on each finding opens the section, scrolls to that row and highlights it.
+- **Platforms strip** at the top of Evidence: all 5 platforms with what each contributed ("Account monitoring · 7 unusual", "ID document verification · degraded"). It shows the aggregation, so the specialist knows they don't need to open the other systems.
+- Amounts instead of percentages in the summary.
+- An automated check over all 148 cases confirms there are no contradictions: 0 problems.
+
+The Overview graphs are unchanged. They count alerts across the team, not one customer, and use the same risk factors. Version A is unchanged.
+
+![AI summary written from the evidence](round-20-summary.png)
+
+| Findings link to their evidence | See in Evidence jumps to the row |
+|---|---|
+| ![Findings](round-20-findings.png) | ![Jump to row](round-20-jump.png) |
+
+![Evidence with the platforms strip](round-20-evidence.png)
 
 ---
 

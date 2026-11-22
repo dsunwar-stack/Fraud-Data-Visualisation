@@ -26,7 +26,7 @@ All data is synthetic and generated in the browser from a fixed seed. No real cu
 | Version | What it is | Open |
 |---|---|---|
 | **A · Current** | Case page with *Source evidence* organised by platform (rounds 1–18) | Default build; switch in the sidebar |
-| **B · Integrated** | One *Evidence* card grouped by question (Money, Behaviour, Account changes, Identity), with 7-day and 30-day history against the customer's usual, absolute numbers and plain terms (round 19) | Build with `VITE_VARIANT=B`, or switch in the sidebar; Pages: `/b/` |
+| **B · Integrated** | One *Evidence* card grouped by question (Money, Behaviour, Account changes, Identity), with 7-day and 30-day history against the customer's usual, absolute numbers and plain terms (round 19). The AI summary and findings are written from the same data, and each links to its evidence (round 20) | Build with `VITE_VARIANT=B`, or switch in the sidebar; Pages: `/b/` |
 
 Both live in the same code (`src/variant.tsx`), so they stay in step for A/B testing.
 

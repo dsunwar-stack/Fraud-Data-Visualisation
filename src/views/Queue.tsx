@@ -3,10 +3,13 @@ import { CASES, NOW, fmtDateTime, fmtDur, fmtMoney, type FraudCase } from '../da
 import { ScoreCell } from '../components/charts'
 import { FilterBar, Switch, activeCount, matchCase, type Filters } from '../components/Filters'
 import { PageHeader, ScopedNotification } from '../components/slds'
+import { useVariant } from '../variant'
+import { caseRecord } from '../activity'
 
 type SortKey = 'score' | 'sla' | 'created'
 
 export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) => void; filters: Filters; setFilters: (f: Filters) => void }) {
+  const { variant } = useVariant()
   const [q, setQ] = useState('')
   const [sort, setSort] = useState<SortKey>('score')
   const [urgentOnly, setUrgentOnly] = useState(false)
@@ -81,7 +84,7 @@ export function Queue({ onOpen, filters, setFilters }: { onOpen: (id: string) =>
                     <td>{c.type}</td>
                     <td><ScoreCell score={c.score} band={c.band} /></td>
                     {showSignals && (
-                      <td><span className="signals">{c.factors.slice(0, 2).map(f => <span key={f.label} className="slds-badge slds-badge_lightest tag" title={f.detail}>{f.label}</span>)}{c.factors.length > 2 && <span className="slds-badge slds-badge_lightest tag muted" title={c.factors.slice(2).map(f => f.label).join(', ')}>+{c.factors.length - 2}</span>}</span></td>
+                      <td><span className="signals">{(variant === 'B' ? caseRecord(c).c : c).factors.slice(0, 2).map(f => <span key={f.label} className="slds-badge slds-badge_lightest tag" title={f.detail}>{f.label}</span>)}{c.factors.length > 2 && <span className="slds-badge slds-badge_lightest tag muted" title={c.factors.slice(2).map(f => f.label).join(', ')}>+{c.factors.length - 2}</span>}</span></td>
                     )}
                     <td className="r num">{c.amount ? fmtMoney(c.amount) : '—'}</td>
                     <td className={`r num ${done ? 'muted' : left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>{done ? 'Closed' : left < 0 ? `-${fmtDur(-left)}` : fmtDur(left)}</td>

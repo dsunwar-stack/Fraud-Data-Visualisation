@@ -868,3 +868,17 @@ ul.ds-principles { list-style: disc; }
 .fs-ev-table tr.is-unusual td { background: transparent; }
 .fs-ev-table tr.is-unusual td:first-child { box-shadow: inset 3px 0 0 var(--risk-high); }
 .fs-ev-merchants li.is-unusual { background: transparent; box-shadow: inset 3px 0 0 var(--risk-high); padding-left: 10px; }
+
+/* Version B: Examine jumps to the exact Evidence row and highlights it briefly */
+@keyframes fs-ev-flash { 0%, 60% { background: var(--slds-g-color-surface-container-2, rgba(1,118,211,.12)); outline: 2px solid var(--slds-g-color-accent-1, #0176d3); } 100% { background: transparent; outline-color: transparent; } }
+.fs-ev-target, .fs-ev-target td { animation: fs-ev-flash 2.4s ease-out; }
+.fs-ev-target td { outline: none !important; }
+.fs-ev-device { margin: var(--slds-g-spacing-3) 0 0; }
+.fs-ev-platforms { display: grid; gap: 6px; margin: 0 0 var(--slds-g-spacing-3); }
+.fs-ev-platforms ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.fs-ev-platforms li { margin: 0; }
+.fs-ev-platforms ul li.slds-badge { margin: 0; }
+.fs-ev-table td.num { white-space: nowrap; }
+.fcol li { min-width: 0; overflow-wrap: anywhere; }
+.fcol .f-actions { flex-wrap: wrap; row-gap: 2px; }
+.fcol .f-actions .slds-button { white-space: normal; text-align: left; line-height: 1.3; }

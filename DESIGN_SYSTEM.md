@@ -125,7 +125,9 @@ Bring data from every platform into **one card grouped by the specialist's quest
 - Use **plain terms** ("Money in (credits)", "Moved out of savings") with an ⓘ that says what the measure means and what fraud it can indicate.
 - Mark out-of-character rows with an **Unusual** badge and a red edge bar; offer an **Unusual only** toggle; show each row's **source** as a tag.
 - Open the section that matters for the case type first (Money for mule/payment fraud, Behaviour for account takeover, Identity for onboarding/synthetic identity). **Examine** on a finding jumps to its section.
-- New customers: say there's no history to compare, and don't mark money or behaviour unusual.
+- New customers: say there's no history to compare; mark rows unusual only where a risk factor applies.
+- **One record, no contradictions.** The AI summary, factor details and findings are written from the same figures the Evidence card shows. Every Unusual row is backed by a risk factor; every finding has **See in Evidence: <row>**, which scrolls to and highlights the row.
+- Show the **platforms strip** (each source with "N unusual", "checked" or "degraded") so the aggregation is visible.
 
 ## Button hierarchy
 

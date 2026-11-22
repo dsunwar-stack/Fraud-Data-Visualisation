@@ -130,6 +130,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-17"><b>17</b> Adjust score</a></li>
       <li><a href="#round-18"><b>18</b> Thresholds</a></li>
       <li><a href="#round-19"><b>19</b> Version B</a></li>
+      <li><a href="#round-20"><b>20</b> One record</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -460,6 +461,24 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     </div>
     <div class="shots"><figure><img src="img/round-19-evidence-money.png" alt="Evidence card, Money section open for a money mule case" width="1592" height="1936" loading="lazy" style="max-width:420px"><figcaption>Money mule case: Money opens first</figcaption></figure>
     <figure><img src="img/round-19-evidence-behaviour.png" alt="Evidence card, Behaviour section open for an account takeover case" width="1592" height="1154" loading="lazy"><figcaption>Account takeover: Behaviour opens first</figcaption></figure></div>
+  </section>
+
+  <section class="round" id="round-20">
+    <div class="round-head"><span class="num">20</span><h2>One record: the summary follows the data</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-20">Code: round-20</a><span class="kicker">If the AI and the evidence disagree, nobody trusts either</span></div>
+    <blockquote><cite>Feedback</cite>"Those data, part of previous graphs? And summary?" … "Make it real and follow the data." … "The goal is data aggregated from 4–5+ applications in one, so the specialist can decide quickly without toggling."</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li><b>One record per case.</b> The risk factors decide what happened; money, payees, logins, device, account changes and identity are built once from them.</li>
+        <li>The <b>AI summary, factor details and findings are written from the same figures</b>, so "£22,420 left to 4 new payees" matches the payees table exactly.</li>
+        <li>Every Unusual row is backed by a factor. Every finding has <b>See in Evidence</b>, which jumps to and highlights its row.</li>
+        <li>A <b>platforms strip</b> shows all 5 systems and what each contributed, so the aggregation is visible.</li>
+        <li>A check across all 148 cases finds 0 contradictions.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>One source of truth</li><li>AI shows its evidence</li><li>No toggling between systems</li><li>Amounts, not percentages</li></ul></div>
+    </div>
+    <div class="shots"><figure><img src="img/round-20-summary.png" alt="AI summary quoting the same amounts as the evidence" width="1984" height="186" loading="lazy"><figcaption>The summary quotes the evidence's numbers</figcaption></figure></div>
+    <div class="shots"><figure><img src="img/round-20-findings.png" alt="Findings, each with a See in Evidence link" width="1204" height="1616" loading="lazy" style="max-width:520px"><figcaption>Each finding links to its row</figcaption></figure>
+    <figure><img src="img/round-20-jump.png" alt="Evidence row highlighted after See in Evidence" width="2560" height="1800" loading="lazy"><figcaption>The row is highlighted</figcaption></figure></div>
   </section>
 
   <section class="close" id="principles">
