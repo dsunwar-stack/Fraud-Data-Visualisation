@@ -95,7 +95,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             <header className="card-h">
               <div>
                 <h2>Risk hub</h2>
-                <p className="sub">How strongly the evidence points to each type of fraud, from 0 to 100. Click <b>Go</b> to focus the summary and findings on one type.</p>
+                <p className="sub">How strongly the evidence points to each type of fraud, from 0 (none) to 100. <b>Show factors</b> narrows the summary and findings below to that type.</p>
               </div>
               <div className="hub-tools">
                 <button className="btn ghost" aria-expanded={explain} aria-pressed={explain} onClick={() => setExplain(e => !e)}>
@@ -105,37 +105,32 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <Switch id="hub-zero" checked={hideZero} onChange={setHideZero} label="Hide types with no signals" />
               </div>
             </header>
-            <div className="hub">
-              <div className="hub-bars">
-                {shownCats.map(k => {
-                  const v = c.categories[k.id], b = bandOf(v)
-                  return (
-                    <div key={k.id} className={`hub-row ${cat === k.id ? 'active' : ''}`}>
-                      <span className="hub-name">{k.name}<InfoTip label={k.name}><span>{k.meaning}</span><span className="infotip-ex"><b>Example:</b> {k.example}</span></InfoTip></span>
+            <ul className="hub-list">
+              {shownCats.map(k => {
+                const v = c.categories[k.id], b = bandOf(v), active = cat === k.id
+                const n = c.factors.filter(f => f.category === k.id).length
+                return (
+                  <li key={k.id} className={`hub-item ${active ? 'active' : ''}`}>
+                    <div className="hub-what">
+                      <span className="hub-name"><b>{k.name}</b><InfoTip label={k.name}><span>{k.meaning}</span><span className="infotip-ex"><b>Example:</b> {k.example}</span></InfoTip></span>
+                      <span className="hub-plain">{k.plain}</span>
+                    </div>
+                    <div className="hub-score" aria-label={`${k.name} score ${v} out of 100, ${b} risk`}>
                       <span className="barlist-track"><span className="barlist-fill" style={{ width: `${v}%`, background: bandVar(b) }} /></span>
-                      <span className="num hub-v" style={{ color: bandVar(b) }}>{v}</span>
+                      <span className="num hub-v" style={{ color: v ? bandVar(b) : 'var(--muted)' }}>{v}</span>
+                      <span className={`pill ${v ? `pill-${b}` : 'pill-none'} hub-band`}>{v ? (b === 'high' ? 'High' : b === 'medium' ? 'Medium' : 'Low') : 'None'}</span>
                     </div>
-                  )
-                })}
-              </div>
-              <div className="hub-rings">
-                {shownCats.map(k => {
-                  const v = c.categories[k.id], b = bandOf(v), active = cat === k.id
-                  const n = c.factors.filter(f => f.category === k.id).length
-                  return (
-                    <div key={k.id} className={`ring-card ${active ? 'active' : ''}`}>
-                      <Ring value={v} color={bandVar(b)} />
-                      <div className="ring-meta">
-                        <span className="ring-name"><b>{k.name}</b><InfoTip label={k.name} align="end"><span>{k.meaning}</span><span className="infotip-ex"><b>Example:</b> {k.example}</span></InfoTip></span>
-                        <span className="ring-def">{k.plain}</span>
-                        <span className="muted small">{n} factor{n === 1 ? '' : 's'} found</span>
-                      </div>
-                      <button className={`btn go ${active ? 'on' : ''}`} aria-pressed={active} onClick={() => setCat(active ? 'all' : k.id)}>{active ? 'Clear' : 'Go'}</button>
+                    <div className="hub-act">
+                      {n ? (
+                        <button className={`btn hub-btn ${active ? 'on' : ''}`} aria-pressed={active} onClick={() => setCat(active ? 'all' : k.id)}>
+                          {active ? 'Show all evidence' : `Show ${n} factor${n === 1 ? '' : 's'}`}
+                        </button>
+                      ) : <span className="muted small">No evidence found</span>}
                     </div>
-                  )
-                })}
-              </div>
-            </div>
+                  </li>
+                )
+              })}
+            </ul>
             {explain && (
               <div className="explain" role="region" aria-label="What the fraud types mean">
                 {CATEGORIES.map(k => {
@@ -386,18 +381,6 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
         </aside>
       </div>
     </div>
-  )
-}
-
-function Ring({ value, color }: { value: number; color: string }) {
-  const r = 22, C = 2 * Math.PI * r
-  return (
-    <svg width="56" height="56" viewBox="0 0 56 56" role="img" aria-label={`${value} out of 100`}>
-      <circle cx="28" cy="28" r={r} fill="none" stroke="var(--track)" strokeWidth="6" />
-      {value > 0 && <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round"
-        strokeDasharray={`${(C * value) / 100} ${C}`} transform="rotate(-90 28 28)" />}
-      <text x="28" y="32.5" textAnchor="middle" className="ring-num" fill={color}>{value}</text>
-    </svg>
   )
 }
 

@@ -437,3 +437,23 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .infotip-pop b { font-weight: 600; }
 .infotip-ex { opacity: 0.85; }
 .hub-name, .ring-name { display: inline-flex; align-items: center; }
+
+/* ---------- risk hub: one row per fraud type ---------- */
+.hub-list { list-style: none; margin: 0; padding: 0; display: grid; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.hub-item { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) 170px; gap: 16px; align-items: center; padding: 12px 14px; }
+.hub-item + .hub-item { border-top: 1px solid var(--border); }
+.hub-item.active { background: var(--primary-soft); box-shadow: inset 3px 0 0 var(--primary); }
+.hub-what { display: grid; gap: 2px; min-width: 0; }
+.hub-name { display: inline-flex; align-items: center; font-size: 14px; }
+.hub-plain { font-size: 13px; color: var(--muted); }
+.hub-score { display: grid; grid-template-columns: minmax(0, 1fr) 2.5ch 64px; gap: 10px; align-items: center; }
+.hub-band { justify-self: start; }
+.hub-v { font-weight: 700; text-align: right; font-size: 15px; }
+.hub-act { justify-self: end; }
+.hub-btn { font-weight: 500; white-space: nowrap; }
+.hub-btn.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+@media (max-width: 760px) {
+  .hub-item { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .hub-act { justify-self: start; }
+}
+.pill-none { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }

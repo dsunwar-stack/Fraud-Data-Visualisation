@@ -19,7 +19,7 @@ All data is synthetic and generated in the browser from a fixed seed. No real cu
 - **Shared filters** (Overview and Case queue, kept when you switch between them): risk band, case type, data source, and include decided cases. Click a case type or data source on the Overview to filter by it.
 - **Overview:** time range (12h, 24h or 48h), auto-declined line on the alert chart, and rank risk factors by number of cases or by average points.
 - **Case queue:** search, sort, due within 1 hour or breached, show or hide the signals column, and compact rows.
-- **Case investigation:** **Go** on a fraud type focuses the summary and findings on it, findings can be filtered by source, and there are toggles to hide fraud types with no signals and show flagged signals only.
+- **Case investigation:** **Show factors** on a fraud type narrows the summary and findings to it, findings can be filtered by source, and there are toggles to hide fraud types with no signals and show flagged signals only.
 
 ## Versions
 
