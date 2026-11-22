@@ -18,6 +18,8 @@ export type { NotificationVariant } from '../components/slds'
 // Data display
 export { ProgressBar, ActivityTimeline, Icon } from '../components/slds'
 export type { TimelineKind, IconName } from '../components/slds'
+export { TrendChart, ColumnChart } from '../components/charts'
+export type { TrendSeries, ColumnRow } from '../components/charts'
 export { Sparkline, AlertVolume, ScoreHistogram, RiskGauge, BarList, ScoreCell, bandVar, bandText } from '../components/charts'
 export type { HourPoint } from '../components/charts'
 

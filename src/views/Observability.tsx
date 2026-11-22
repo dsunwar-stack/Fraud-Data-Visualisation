@@ -1,11 +1,11 @@
 // Team lead view: see where the SLA is at risk, why, and act on it by assigning cases.
 import { useMemo, useState } from 'react'
-import { CASES, NOW, SOURCE_HEALTH, fmtDateTime, fmtDur, sourceName, sourceShort, type FraudCase } from '../data'
-import { BarList, ScoreCell, bandVar } from '../components/charts'
+import { CASES, NOW, SOURCES, SOURCE_HEALTH, fmtDateTime, fmtDur, fmtTime, sourceName, sourceShort, type FraudCase, type SourceId } from '../data'
+import { BarList, ColumnChart, ScoreCell, Sparkline, TrendChart, bandVar } from '../components/charts'
 import { InfoTip } from '../components/InfoTip'
 import { PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification, useToast } from '../components/slds'
 import {
-  CAUSE_HELP, DEGRADED, OPEN_CASES, SPECIALISTS, STEPS, caseOps, causeOf, specialist, suggestFor, useAssignments, type Cause,
+  ALERT_MS, CAUSE_HELP, DEGRADED, OPEN_CASES, OUTAGE_AT, SPECIALISTS, STEPS, caseOps, teamHistory, causeOf, specialist, suggestFor, useAssignments, type Cause,
 } from '../ops'
 
 type Show = 'atRisk' | 'breached' | 'unassigned' | 'all'
@@ -22,6 +22,7 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
   const [who, setWho] = useState<string>('all')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulkTo, setBulkTo] = useState('')
+  const [sys, setSys] = useState<SourceId>(DEGRADED[0] ?? 'device')
 
   const breached = OPEN_CASES.filter(c => left(c) < 0)
   const due1h = OPEN_CASES.filter(c => left(c) >= 0 && left(c) < H)
@@ -31,6 +32,27 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
   const freeSlots = available.reduce((n, s) => n + Math.max(0, s.capacity - a.load(s.id)), 0)
   const decided = CASES.filter(c => c.status === 'Decided')
   const agreed = decided.filter(c => caseOps(c).aiAgreed).length
+  const hist = useMemo(() => teamHistory({ open: OPEN_CASES.length, breached: breached.length, due1h: due1h.length, unassigned: unassigned.length, free: freeSlots, decided: decided.length, agreed }),
+    [breached.length, due1h.length, unassigned.length, freeSlots, decided.length, agreed])
+  const hourLabels = hist.hours.map(h => `${fmtTime(h)}–${fmtTime(new Date(h.getTime() + H))} UTC`)
+  const hourTick = (i: number) => i === 23 ? 'Now' : (23 - i) % 6 === 0 ? `−${23 - i}h` : null
+  const outageIdx = 24 - OUTAGE_AT
+  const outageLabel = `${DEGRADED.map(sourceShort).join(', ')} degraded`
+  const dayLabel = (d: Date) => d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' })
+
+  // SLA forecast: open cases by when they're due, against what the team can decide in that window.
+  const perHour = available.reduce((t, s) => t + 60 / s.avgDecisionMin, 0) * 0.6 // ~60% of time goes on deciding
+  const buckets: { label: string; from: number; to: number }[] = [{ label: 'Breached', from: -Infinity, to: 0 }, { label: '0–1h', from: 0, to: 1 }, { label: '1–2h', from: 1, to: 2 }, { label: '2–4h', from: 2, to: 4 }, { label: '4–8h', from: 4, to: 8 }]
+  let capUsed = 0, backlogCarry = 0
+  const forecast = buckets.map(b => {
+    const cs = OPEN_CASES.filter(c => left(c) / H >= b.from && left(c) / H < b.to)
+    const cap = b.from === -Infinity ? undefined : Math.round(perHour * (b.to - b.from))
+    let late = 0
+    if (b.from === -Infinity) backlogCarry = cs.length
+    else { const need = cs.length + backlogCarry; late = Math.max(0, need - (cap ?? 0)); backlogCarry = late; capUsed += cap ?? 0 }
+    return { b, n: cs.length, high: cs.filter(c => c.band === 'high').length, cap, late }
+  })
+  const next2 = forecast.slice(1, 3), likelyLate = forecast[2].late
 
   const rows = useMemo(() => {
     const base = show === 'breached' ? breached : show === 'unassigned' ? unassigned : show === 'atRisk' ? atRisk : OPEN_CASES
@@ -93,12 +115,61 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
       })}
 
       <section className="kpis" aria-label="Team status now">
-        <Tile label="SLA breached" value={breached.length} note={`${breached.filter(c => c.band === 'high').length} high risk`} tone="bad" />
-        <Tile label="Due within 1 hour" value={due1h.length} note={`${atRisk.length} due within 4 hours`} tone={due1h.length ? 'warn' : 'good'} />
-        <Tile label="Unassigned" value={unassigned.length} note={`${unassigned.filter(c => left(c) < 4 * H).length} due within 4 hours`} tone={unassigned.length ? 'warn' : 'good'} />
-        <Tile label="Team capacity" value={freeSlots} note={`free slots · ${available.length} of ${SPECIALISTS.length} specialists available`} tone="neutral" />
+        <Tile label="SLA breached" value={breached.length} note={`${breached.filter(c => c.band === 'high').length} high risk · was ${hist.breached[0]} 24h ago`} tone="bad"
+          spark={hist.breached} labels={hourLabels} unit="breached" color={bandVar('high')} />
+        <Tile label="Due within 1 hour" value={due1h.length} note={`${atRisk.length} due within 4 hours`} tone={due1h.length ? 'warn' : 'good'}
+          spark={hist.due1h} labels={hourLabels} unit="due within 1h" color={bandVar('medium')} />
+        <Tile label="Unassigned" value={unassigned.length} note={`${unassigned.filter(c => left(c) < 4 * H).length} due within 4 hours`} tone={unassigned.length ? 'warn' : 'good'}
+          spark={hist.unassigned} labels={hourLabels} unit="unassigned" />
+        <Tile label="Team capacity" value={freeSlots} note={`free slots · ${available.length} of ${SPECIALISTS.length} specialists available`} tone="neutral"
+          spark={hist.free} labels={hourLabels} unit="free slots" />
         <Tile label="AI recommendation agreed" value={agreed} note={`of ${decided.length} decided cases · ${decided.length - agreed} overridden`} tone="neutral"
-          info="How often specialists decided the same as the AI recommended. Many overrides can mean the model needs review." />
+          info="How often specialists decided the same as the AI recommended. Many overrides can mean the model needs review."
+          spark={hist.dayAgreed} labels={hist.days.map(dayLabel)} unit="agreed" />
+      </section>
+
+      <section className="grid-2-1 fs-obs-charts">
+        <div className="slds-card card">
+          <header className="card-h"><div>
+            <h2 className="fs-h-info">Are we keeping up?<InfoTip label="Are we keeping up?"><span>New cases each hour against cases decided. When the line for new cases stays above decided, the backlog grows and SLA breaches follow.</span></InfoTip></h2>
+            <p className="sub">Cases in against cases decided, per hour, last 24 hours. Hover for values.</p>
+          </div></header>
+          <TrendChart ariaLabel="Cases in and decided per hour, last 24 hours" labels={hourLabels} xTick={hourTick} unit="cases"
+            marker={DEGRADED.length ? { index: outageIdx, label: outageLabel } : undefined}
+            series={[{ name: 'Cases in', values: hist.casesIn, color: 'var(--viz-brand)' }, { name: 'Decided', values: hist.decided, color: 'var(--viz-series-2)', dash: true }]} />
+          <p className="small fs-obs-read">Since {fmtTime(hist.hours[outageIdx])} UTC: <b>{hist.casesIn.slice(outageIdx).reduce((a, b) => a + b, 0)} in</b>, <b>{hist.decided.slice(outageIdx).reduce((a, b) => a + b, 0)} decided</b>. The backlog grew by {hist.backlog[23] - hist.backlog[outageIdx - 1]}.</p>
+        </div>
+        <div className="slds-card card">
+          <header className="card-h"><div>
+            <h2 className="fs-h-info">SLA forecast<InfoTip label="SLA forecast"><span>Open cases by when their SLA is due. The black line is roughly how many the available specialists can decide in that window. Cases above the line, plus any already breached, are likely to breach.</span></InfoTip></h2>
+            <p className="sub">Open cases by SLA due time, against what the team can decide</p>
+          </div></header>
+          <ColumnChart ariaLabel="Open cases by SLA due window, with team capacity" capLabel="Team can decide"
+            rows={forecast.map(f => ({ label: f.b.label, cap: f.cap, note: f.late ? `${f.late} likely to breach` : undefined,
+              segs: [{ name: f.b.label === 'Breached' ? 'Breached' : 'Cases due', value: f.n, color: f.b.label === 'Breached' ? bandVar('high') : 'var(--viz-brand)' }] }))} />
+          {likelyLate > 0
+            ? <ScopedNotification variant="warning">About <b>{likelyLate} more cases</b> will breach in the next 2 hours ({next2.reduce((t, f) => t + f.n, 0)} due, team can decide about {next2.reduce((t, f) => t + (f.cap ?? 0), 0)} after clearing the {breached.length} breached). Free up or add specialists.</ScopedNotification>
+            : <p className="small fs-obs-read">The team can clear what's due in the next 2 hours.</p>}
+        </div>
+      </section>
+
+      <section className="grid-2 fs-obs-charts">
+        <div className="slds-card card">
+          <header className="card-h"><div><h2>Open cases and breaches</h2><p className="sub">Last 24 hours. Breached cases are part of the open total.</p></div></header>
+          <TrendChart ariaLabel="Open cases and breached cases, last 24 hours" labels={hourLabels} xTick={hourTick} unit="cases"
+            marker={DEGRADED.length ? { index: outageIdx, label: outageLabel } : undefined}
+            series={[{ name: 'Open cases', values: hist.backlog, color: 'var(--viz-brand)', area: true }, { name: 'Breached SLA', values: hist.breached, color: bandVar('high') }]} />
+        </div>
+        <div className="slds-card card">
+          <header className="card-h">
+            <div><h2>System response time</h2><p className="sub">Slowest 5% of responses (p95), last 24 hours. Red line: alert at {ALERT_MS.toLocaleString()} ms.</p></div>
+          </header>
+          <RadioButtonGroup name="obs-sys" legend="System" size="small" value={sys} onChange={setSys}
+            options={SOURCES.map(s => ({ value: s.id, label: <>{s.short}{DEGRADED.includes(s.id) ? ' ⚠' : ''}</> }))} />
+          <TrendChart ariaLabel={`${sourceName(sys)} response time, last 24 hours`} labels={hourLabels} xTick={hourTick} unit="ms" height={180}
+            threshold={{ value: ALERT_MS, label: 'Alert' }} marker={DEGRADED.includes(sys) ? { index: outageIdx, label: 'Degraded' } : undefined}
+            series={[{ name: sourceName(sys), values: hist.latency[sys], color: 'var(--viz-brand)' }]} />
+        </div>
       </section>
 
       <section className="slds-card card" aria-label="Act now">
@@ -174,7 +245,7 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
                     <td>
                       {needsMove && sug && sug.id !== owner?.id
                         ? <button className="slds-button slds-button_neutral small" onClick={() => assign([c.id], sug.id)}>{owner ? 'Reassign' : 'Assign'} to {sug.name.split(' ')[0]}</button>
-                        : k === 'System degraded' ? <span className="small muted">Check {DEGRADED.map(d => sourceShort(d)).join(', ')} manually or refer</span>
+                        : k === 'System degraded' ? <span className="small muted">Check {DEGRADED.map(d => sourceShort(d).replace(/ check$/, '')).join(', ')} manually or refer</span>
                         : k === 'Waiting on customer' ? <span className="small muted">Chase customer</span>
                         : needsMove ? <span className="small muted">No one free with these skills</span>
                         : <span className="small muted">Check in with {owner?.name.split(' ')[0]}</span>}
@@ -246,8 +317,24 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
         </div>
       </section>
 
+      <section className="grid-2 fs-obs-charts">
+        <div className="slds-card card">
+          <header className="card-h"><div><h2>Decisions, last 7 days</h2><p className="sub">Cases decided each day: agreed with the AI recommendation, or overridden</p></div></header>
+          <ColumnChart ariaLabel="Decisions per day, agreed or overridden, last 7 days"
+            rows={hist.days.map((d, i) => ({ label: i === 6 ? 'Today' : dayLabel(d), segs: [
+              { name: 'Agreed with AI', value: hist.dayAgreed[i], color: 'var(--viz-brand)' },
+              { name: 'Overridden', value: hist.dayDecided[i] - hist.dayAgreed[i], color: 'var(--viz-series-2)' }] }))} />
+        </div>
+        <div className="slds-card card">
+          <header className="card-h"><div><h2>Average time to decide</h2><p className="sub">Minutes from opening a case to the decision, last 7 days</p></div></header>
+          <TrendChart ariaLabel="Average minutes to decide, last 7 days" labels={hist.days.map(dayLabel)} xTick={i => i === 6 ? 'Today' : dayLabel(hist.days[i])} unit="min" height={200}
+            series={[{ name: 'Average time to decide', values: hist.dayAvgDecide, color: 'var(--viz-brand)', area: true }]} />
+          <p className="small fs-obs-read">Today is <b>{hist.dayAvgDecide[6] - Math.round(hist.dayAvgDecide.slice(0, 6).reduce((a, b) => a + b, 0) / 6)} minutes slower</b> than the 6-day average, since {outageLabel.replace(' degraded', '')} became degraded.</p>
+        </div>
+      </section>
+
       <section className="slds-card card" aria-label="AI recommendation quality">
-        <header className="card-h"><div><h2>AI recommendation: agreed or overridden</h2><p className="sub">Decided cases by recommended outcome. Many overrides for one outcome can mean the model needs review.</p></div></header>
+        <header className="card-h"><div><h2>AI recommendation by outcome</h2><p className="sub">Decided cases by recommended outcome. Many overrides for one outcome can mean the model needs review.</p></div></header>
         <BarList rows={(['Decline', 'Refer', 'Accept'] as const).map(o => {
           const ds = decided.filter(c => c.recommended === o), ok = ds.filter(c => caseOps(c).aiAgreed).length
           return { label: `Recommended ${o}`, value: ds.length ? ok / ds.length * 100 : 0, display: `${ok} of ${ds.length} agreed`, color: 'var(--viz-brand)' }
@@ -269,12 +356,13 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
   )
 }
 
-function Tile({ label, value, note, tone, info }: { label: string; value: number; note: string; tone: 'bad' | 'warn' | 'good' | 'neutral'; info?: string }) {
+function Tile({ label, value, note, tone, info, spark, labels, unit, color }: { label: string; value: number; note: string; tone: 'bad' | 'warn' | 'good' | 'neutral'; info?: string; spark?: number[]; labels?: string[]; unit?: string; color?: string }) {
   return (
     <div className="slds-card card kpi">
       <span className="kpi-label">{label}{info && <InfoTip label={label}><span>{info}</span></InfoTip>}</span>
       <span className={`kpi-value num fs-tone-${tone}`}>{value}</span>
       <span className="kpi-delta neutral">{note}</span>
+      {spark && <><Sparkline values={spark} labels={labels} unit={unit} color={color} /><span className="spark-hint">Hover or tap for values</span></>}
     </div>
   )
 }

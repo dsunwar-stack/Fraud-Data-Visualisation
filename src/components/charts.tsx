@@ -219,3 +219,135 @@ export function ScoreCell({ score, band }: { score: number; band: Band }) {
     </span>
   )
 }
+
+// ---------- Trend chart: 1–3 lines over time, one axis, crosshair + tooltip ----------
+export interface TrendSeries { name: string; values: number[]; color: string; dash?: boolean; area?: boolean }
+export function TrendChart({ series, labels, xTick, unit = '', height = 200, threshold, marker, ariaLabel, fmt = (v: number) => v.toLocaleString('en-GB') }: {
+  series: TrendSeries[]; labels: string[]; xTick: (i: number) => string | null; unit?: string; height?: number
+  threshold?: { value: number; label: string }; marker?: { index: number; label: string }; ariaLabel: string; fmt?: (v: number) => string
+}) {
+  const [ref, w] = useWidth<HTMLDivElement>()
+  const [hover, setHover] = useState<number | null>(null)
+  const H = height, padL = 40, padB = 22, padT = 14
+  const n = labels.length
+  const rawMax = Math.max(1, threshold?.value ?? 0, ...series.flatMap(s => s.values))
+  const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000].find(k => k * 4 >= rawMax) ?? Math.ceil(rawMax / 4)
+  const max = step * 4
+  const iw = Math.max(0, w - padL - 4), ih = H - padB - padT
+  const x = (i: number) => padL + (i / Math.max(1, n - 1)) * iw
+  const y = (v: number) => padT + ih - (v / max) * ih
+  const path = (vs: number[]) => vs.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join('')
+  const at = (clientX: number) => { const r = ref.current!.getBoundingClientRect(); setHover(Math.max(0, Math.min(n - 1, Math.round(((clientX - r.left - padL) / iw) * (n - 1))))) }
+  return (
+    <div className="fs-trend">
+      {series.length > 1 && (
+        <div className="legend fs-trend-legend">
+          {series.map(s => <span key={s.name}><svg width="18" height="8" aria-hidden="true"><line x1="0" x2="18" y1="4" y2="4" stroke={s.color} strokeWidth="2" strokeDasharray={s.dash ? '4 3' : undefined} /></svg>&nbsp;{s.name}</span>)}
+        </div>
+      )}
+      <div ref={ref} className="chart" onPointerMove={e => at(e.clientX)} onPointerDown={e => at(e.clientX)} onPointerLeave={() => setHover(null)}>
+        {w > 0 && (
+          <svg width={w} height={H} role="img" aria-label={ariaLabel}>
+            {[0, 1, 2, 3, 4].map(k => (
+              <g key={k}>
+                <line x1={padL} x2={w} y1={y(k * step)} y2={y(k * step)} className="grid" />
+                <text x={padL - 6} y={y(k * step) + 4} textAnchor="end" className="axis">{fmt(k * step)}</text>
+              </g>
+            ))}
+            {labels.map((_, i) => { const t = xTick(i); return t ? <text key={i} x={x(i)} y={H - 6} textAnchor="middle" className="axis">{t}</text> : null })}
+            {marker && (
+              <g>
+                <line x1={x(marker.index)} x2={x(marker.index)} y1={padT - 4} y2={padT + ih} stroke="var(--muted)" strokeDasharray="3 3" />
+                <text x={x(marker.index) + 4} y={padT + 2} className="axis fs-trend-mark">{marker.label}</text>
+              </g>
+            )}
+            {threshold && (
+              <g>
+                <line x1={padL} x2={w} y1={y(threshold.value)} y2={y(threshold.value)} stroke="var(--risk-high)" strokeDasharray="5 4" />
+                <text x={w - 2} y={y(threshold.value) - 4} textAnchor="end" className="axis fs-trend-thr">{threshold.label}</text>
+              </g>
+            )}
+            {series.map(s => (
+              <g key={s.name}>
+                {s.area && <path d={`${path(s.values)}L${x(n - 1)} ${y(0)}L${x(0)} ${y(0)}Z`} fill={s.color} opacity={0.12} />}
+                <path d={path(s.values)} fill="none" stroke={s.color} strokeWidth={2} strokeDasharray={s.dash ? '5 4' : undefined} strokeLinejoin="round" />
+              </g>
+            ))}
+            {hover != null && <line x1={x(hover)} x2={x(hover)} y1={padT} y2={padT + ih} stroke="var(--border-strong)" />}
+            {series.map(s => {
+              const i = hover ?? n - 1
+              return <circle key={s.name} cx={x(i)} cy={y(s.values[i])} r={4} fill={s.color} stroke="var(--surface)" strokeWidth={2} />
+            })}
+          </svg>
+        )}
+        {hover != null && (
+          <div className="tooltip" style={{ left: Math.min(w - 180, Math.max(0, x(hover) - 80)), top: 0 }} role="status">
+            <b>{labels[hover]}</b>
+            {series.map(s => (
+              <div key={s.name} className="tt-row"><span><i className="dot" style={{ background: s.color }} />{s.name}</span><span className="num">{fmt(s.values[hover])}{unit ? ` ${unit}` : ''}</span></div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ---------- Columns: stacked counts per bucket, optional capacity marker per column ----------
+export interface ColumnRow { label: string; segs: { name: string; value: number; color: string }[]; cap?: number; note?: string }
+export function ColumnChart({ rows, height = 200, capLabel = 'Capacity', ariaLabel }: { rows: ColumnRow[]; height?: number; capLabel?: string; ariaLabel: string }) {
+  const [ref, w] = useWidth<HTMLDivElement>()
+  const [hover, setHover] = useState<number | null>(null)
+  const H = height, padL = 32, padB = 22, padT = 18
+  const tot = (r: ColumnRow) => r.segs.reduce((s, x) => s + x.value, 0)
+  const rawMax = Math.max(1, ...rows.map(r => Math.max(tot(r), r.cap ?? 0)))
+  const step = [1, 2, 5, 10, 20, 25, 50, 100].find(k => k * 4 >= rawMax) ?? Math.ceil(rawMax / 4)
+  const max = step * 4
+  const iw = Math.max(0, w - padL), ih = H - padB - padT
+  const slot = iw / Math.max(1, rows.length), bw = Math.min(56, slot * 0.6)
+  const y = (v: number) => padT + ih - (v / max) * ih
+  const names = [...new Map(rows.flatMap(r => r.segs.map(s => [s.name, s.color] as const))).entries()]
+  return (
+    <div className="fs-trend">
+      <div className="legend fs-trend-legend">
+        {names.length > 1 && names.map(([nm, c]) => <span key={nm}><i className="dot" style={{ background: c }} />{nm}</span>)}
+        {rows.some(r => r.cap != null) && <span><svg width="18" height="8" aria-hidden="true"><line x1="0" x2="18" y1="4" y2="4" stroke="var(--text)" strokeWidth="2" /></svg>&nbsp;{capLabel}</span>}
+      </div>
+      <div ref={ref} className="chart" onPointerLeave={() => setHover(null)}>
+        {w > 0 && (
+          <svg width={w} height={H} role="img" aria-label={ariaLabel}>
+            {[0, 1, 2, 3, 4].map(k => (
+              <g key={k}><line x1={padL} x2={w} y1={y(k * step)} y2={y(k * step)} className="grid" /><text x={padL - 6} y={y(k * step) + 4} textAnchor="end" className="axis">{k * step}</text></g>
+            ))}
+            {rows.map((r, i) => {
+              const cx = padL + slot * i + slot / 2
+              let acc = 0
+              return (
+                <g key={r.label} onPointerEnter={() => setHover(i)} onPointerDown={() => setHover(i)} opacity={hover == null || hover === i ? 1 : 0.5}>
+                  <rect x={padL + slot * i} y={padT} width={slot} height={ih} fill="transparent" />
+                  {r.segs.map((s, k) => {
+                    const top = k === r.segs.length - 1
+                    const el = s.value > 0 ? <rect key={s.name} x={cx - bw / 2} y={y(acc + s.value) + (k ? 0 : 0)} width={bw} height={Math.max(0, (s.value / max) * ih - (k ? 2 : 0))} rx={top ? 3 : 0} fill={s.color} /> : null
+                    acc += s.value
+                    return el
+                  })}
+                  <text x={cx} y={y(Math.max(tot(r), r.cap != null && Math.abs(r.cap - tot(r)) < max * 0.08 ? r.cap : 0)) - 6} textAnchor="middle" className="axis fs-col-val">{tot(r)}</text>
+                  {r.cap != null && <line x1={cx - bw / 2 - 6} x2={cx + bw / 2 + 6} y1={y(r.cap)} y2={y(r.cap)} stroke="var(--text)" strokeWidth={2} />}
+                  <text x={cx} y={H - 6} textAnchor="middle" className="axis">{r.label}</text>
+                </g>
+              )
+            })}
+          </svg>
+        )}
+        {hover != null && (
+          <div className="tooltip" style={{ left: Math.min(w - 190, Math.max(0, padL + slot * hover + slot / 2 - 90)), top: 0 }} role="status">
+            <b>{rows[hover].label}</b>
+            {rows[hover].segs.map(s => <div key={s.name} className="tt-row"><span><i className="dot" style={{ background: s.color }} />{s.name}</span><span className="num">{s.value}</span></div>)}
+            {rows[hover].cap != null && <div className="tt-row"><span>{capLabel}</span><span className="num">{rows[hover].cap}</span></div>}
+            {rows[hover].note && <div className="tt-row muted"><span>{rows[hover].note}</span></div>}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

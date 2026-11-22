@@ -121,3 +121,38 @@ export function suggestFor(c: FraudCase, a: Ctx, extra: Record<string, number> =
     .filter(x => x.free > 0)
     .sort((x, y) => y.free - x.free)[0]?.s ?? null
 }
+
+// ---------- history (last 24 hours, last 7 days) ----------
+// Synthetic trends that end at today's live values. The ID check outage starts OUTAGE_AT hours ago.
+export const OUTAGE_AT = 6
+export const ALERT_MS = 1500 // response-time alert line
+export interface TeamHistory {
+  hours: Date[]; casesIn: number[]; decided: number[]; backlog: number[]; breached: number[]
+  due1h: number[]; unassigned: number[]; free: number[]; latency: Record<SourceId, number[]>
+  days: Date[]; dayDecided: number[]; dayAgreed: number[]; dayAvgDecide: number[]
+}
+export function teamHistory(now: { open: number; breached: number; due1h: number; unassigned: number; free: number; decided: number; agreed: number }): TeamHistory {
+  const r = seeded('team-history')
+  const between = (a: number, b: number) => Math.round(a + r() * (b - a))
+  const hours = Array.from({ length: 24 }, (_, i) => new Date(NOW.getTime() - (23 - i) * 3600_000))
+  const out = (i: number) => i >= 24 - OUTAGE_AT // during the ID check outage
+  const night = (d: Date) => d.getUTCHours() < 7
+  const casesIn = hours.map((d, i) => night(d) ? between(1, 4) : between(5, 9) + (out(i) ? between(1, 3) : 0))
+  const decided = hours.map((d, i) => night(d) ? between(0, 2) : out(i) ? between(3, 5) : between(6, 9))
+  const backlog = Array(24).fill(0); backlog[23] = now.open
+  for (let i = 23; i > 0; i--) backlog[i - 1] = Math.max(0, backlog[i] - casesIn[i] + decided[i])
+  const ramp = (end: number, calm: [number, number]) => hours.map((_, i) => i === 23 ? end : out(i) ? Math.round(calm[1] + (end - calm[1]) * ((i - (24 - OUTAGE_AT)) / OUTAGE_AT)) + between(-1, 1) : between(calm[0], calm[1])).map(v => Math.max(0, v))
+  const latency = Object.fromEntries(SOURCE_HEALTH.map(s => {
+    const base = s.status === 'degraded' ? between(380, 460) : s.latencyP95
+    return [s.id, hours.map((_, i) => i === 23 ? s.latencyP95 : s.status === 'degraded' && out(i) ? between(2300, 3100) : Math.round(base * (0.8 + r() * 0.35)))]
+  })) as Record<SourceId, number[]>
+  const days = Array.from({ length: 7 }, (_, i) => new Date(NOW.getTime() - (6 - i) * 86_400_000))
+  const dayDecided = days.map((_, i) => i === 6 ? now.decided : between(38, 52))
+  const dayAgreed = dayDecided.map((d, i) => i === 6 ? now.agreed : Math.round(d * (0.84 + r() * 0.08)))
+  const dayAvgDecide = days.map((_, i) => i === 6 ? 31 : between(21, 25))
+  return {
+    hours, casesIn, decided, backlog, breached: ramp(now.breached, [0, 2]), due1h: ramp(now.due1h, [4, 8]),
+    unassigned: ramp(now.unassigned, [6, 12]), free: ramp(now.free, [24, 32]),
+    latency, days, dayDecided, dayAgreed, dayAvgDecide,
+  }
+}

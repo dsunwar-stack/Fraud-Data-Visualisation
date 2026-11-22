@@ -135,6 +135,9 @@ Bring data from every platform into **one card grouped by the specialist's quest
 - Every late case shows **why** (a cause badge with an ⓘ saying what to do) and **one obvious action** (Assign / Reassign to the suggested specialist).
 - Bulk actions appear only when rows are selected: **Assign** is the brand button; **Assign to suggested** is neutral; **Clear** is a base button.
 - Use counts ("30 of 36 agreed"), not percentages. Capacity bars turn amber above 80% and red when over capacity.
+- **Show trends, not just now:** a sparkline in each status tile; 24-hour trends with a dashed marker where an incident started; a red dashed alert line for thresholds; a forecast against capacity.
+- **Chart colours:** series 1 `--viz-brand` (SLDS blue-60), series 2 `--viz-series-2` (SLDS indigo-40, dashed), checked for colour-blind separation. Red (`--viz-high`) is reserved for breaches and alerts. One axis per chart; a legend for 2+ series; hover tooltips on every chart.
+- Components: `TrendChart` (lines over time, optional area, threshold and marker) and `ColumnChart` (stacked counts, optional capacity line) in `src/components/charts.tsx`.
 
 ## Button hierarchy
 

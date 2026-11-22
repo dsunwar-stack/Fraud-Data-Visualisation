@@ -27,6 +27,7 @@
   --viz-medium: var(--slds-g-color-palette-orange-70);
   --viz-low: var(--slds-g-color-palette-teal-60);
   --viz-brand: var(--slds-g-color-palette-blue-60);
+  --viz-series-2: var(--slds-g-color-palette-indigo-40); /* second series; validated with blue-60 for colour-blind separation */
   --track: var(--slds-g-color-surface-container-3);
   --track-strong: var(--slds-g-color-border-1);
   --shadow: none;
@@ -898,3 +899,13 @@ ul.ds-principles { list-style: disc; }
 .fs-obs-systems li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 0.8125rem; }
 .fs-obs-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .fs-obs-link { padding: 0; text-align: left; }
+.fs-trend { display: grid; gap: 6px; min-width: 0; }
+.fs-trend-legend { flex-wrap: wrap; }
+.fs-trend-legend .dot { margin-right: 6px; }
+.fs-trend-mark { fill: var(--muted); text-anchor: start; }
+.fs-trend-thr { fill: var(--risk-high); }
+.fs-col-val { fill: var(--text); font-weight: 600; }
+.fs-obs-read { margin: 8px 0 0; color: var(--muted); }
+.fs-obs-charts .slds-radio_button-group, .fs-obs-charts fieldset { margin-bottom: 8px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 980px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }

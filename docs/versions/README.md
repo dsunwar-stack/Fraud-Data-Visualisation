@@ -31,6 +31,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [19](#round-19-version-b-integrated-evidence) | Did we cater for the first Fraud Data Visualisation design? Make a Version B integrated, keep the current one | Version B: integrated Evidence card; Version A kept; A/B switch | [`round-19`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-19) |
 | [20](#round-20-one-record-the-summary-follows-the-data) | Is the Evidence data part of the graphs and the summary? Make it real and follow the data | Version B: one record per case; summary, factors and findings written from the Evidence figures; See in Evidence; platforms strip | [`round-20`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-20) |
 | [21](#round-21-observability-for-the-team-lead) | What is observability in a case manager? Where are the SLA breaches we need to act on? A new screen for the team lead to assign cases | New Observability screen: act now list with causes, assign and reassign, team workload, why cases are late, where they wait, system health, AI agreement | [`round-21`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-21) |
+| [22](#round-22-observability-graphs-trends-and-forecast) | Should observability have graphs and visuals? Yes, all in SLDS 2 | Trends over 24h and 7 days, SLA forecast against capacity, system response time with alert line, sparklines in tiles | [`round-22`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-22) |
 
 To run any round locally:
 
@@ -501,6 +502,33 @@ Fictional team and synthetic data, seeded separately so the existing cases don't
 ![Team workload](round-21-workload.png)
 
 ![Why cases are late, where they wait, systems](round-21-why.png)
+
+---
+
+## Round 22: Observability graphs, trends and forecast
+
+> **Feedback:** "Should the observability have graphs and visuals? What is it just asking?" … "Yes." … "All SLDS 2, like what we have been using, from the design principles we have."
+
+**Problem:** the Observability screen was a to-do list showing only *now*. A team lead couldn't tell whether things were getting better or worse, when a problem started, or whether the team would breach soon.
+
+**What changed** (SLDS 2 cards, radio button groups, scoped notifications and palette tokens; charts follow the existing chart rules):
+- **Sparklines in every status tile** (last 24 hours; AI agreement over 7 days), so each number has its normal range beside it.
+- **Are we keeping up?** Cases in against cases decided per hour, with a marker where the ID check became degraded, plus a one-line reading ("Since 10:00 UTC: 48 in, 26 decided. The backlog grew by 22").
+- **SLA forecast:** open cases by when they're due (breached, 0–1h, 1–2h, 2–4h, 4–8h) against what the available team can decide (black line). A warning says how many more will likely breach in the next 2 hours.
+- **Open cases and breaches** over 24 hours, with the outage marker.
+- **System response time:** pick a system (SLDS radio group; ⚠ on the degraded one), with the p95 line, a red alert line at 1,500 ms and the "Degraded" marker.
+- **Decisions, last 7 days:** agreed with AI against overridden, stacked by day. **Average time to decide** over 7 days, with the slowdown called out.
+- Order of the page: **what's happening → why → what to do** (charts, then Act now and team workload).
+
+**Chart rules applied:** one axis per chart; counts, not percentages; a legend for 2+ series plus a dashed second line, so colour is never the only cue; hover or tap tooltips; status red only for breaches and alerts. The second series colour is SLDS indigo-40, checked with the colour-blind palette validator against blue-60 (pass). Dark mode uses SLDS's own light-dark tokens.
+
+![Status tiles with sparklines](round-22-tiles.png)
+
+![Are we keeping up, and SLA forecast](round-22-keepingup.png)
+
+![Open cases and breaches, system response time](round-22-backlog-systems.png)
+
+![Decisions and time to decide, last 7 days](round-22-7days.png)
 
 ---
 

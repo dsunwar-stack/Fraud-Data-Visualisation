@@ -132,6 +132,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-19"><b>19</b> Version B</a></li>
       <li><a href="#round-20"><b>20</b> One record</a></li>
       <li><a href="#round-21"><b>21</b> Observability</a></li>
+      <li><a href="#round-22"><b>22</b> Trends</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -497,6 +498,24 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     <div class="shots"><figure><img src="img/round-21-top.png" alt="Observability screen: alerts and status tiles" width="2880" height="2000" loading="lazy"><figcaption>What needs action, first</figcaption></figure></div>
     <div class="shots"><figure><img src="img/round-21-actnow.png" alt="Act now table with causes and assign buttons, two rows selected" width="2304" height="1788" loading="lazy"><figcaption>Why each case is late, and who to give it to</figcaption></figure>
     <figure><img src="img/round-21-workload.png" alt="Team workload against capacity" width="2304" height="1112" loading="lazy"><figcaption>Workload updates as you assign</figcaption></figure></div>
+  </section>
+
+  <section class="round" id="round-22">
+    <div class="round-head"><span class="num">22</span><h2>Observability graphs: trends and forecast</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-22">Code: round-22</a><span class="kicker">Better or worse? Since when? Will we breach?</span></div>
+    <blockquote><cite>Feedback</cite>"Should the observability have graphs and visuals? What is it just asking?" … "Yes, all SLDS 2, like what we have been using."</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li><b>Sparklines</b> in every status tile, so each number has its normal range beside it.</li>
+        <li><b>Are we keeping up?</b> Cases in against decided per hour, marking when the ID check became degraded.</li>
+        <li><b>SLA forecast:</b> cases due in the next 1, 2, 4 and 8 hours against what the team can decide, with a warning of how many will likely breach.</li>
+        <li><b>Open cases and breaches</b>, <b>system response time</b> with an alert line, <b>decisions</b> and <b>time to decide</b> over 7 days.</li>
+        <li>All SLDS 2: cards, radio groups, notifications and palette tokens. Colour-blind checked, with legends, dashed second lines and tooltips.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Trends, not snapshots</li><li>Link the symptom to its cause</li><li>Act before the breach</li><li>One axis, counts, colour never alone</li></ul></div>
+    </div>
+    <div class="shots"><figure><img src="img/round-22-keepingup.png" alt="Cases in versus decided per hour, and SLA forecast against team capacity" width="2304" height="890" loading="lazy"><figcaption>Keeping up, and what's coming</figcaption></figure></div>
+    <div class="shots"><figure><img src="img/round-22-backlog-systems.png" alt="Open cases and breaches over 24 hours; ID check response time with alert line" width="2304" height="666" loading="lazy"><figcaption>The outage, and the backlog that followed</figcaption></figure></div>
+    <div class="shots"><figure><img src="img/round-22-7days.png" alt="Decisions per day agreed or overridden; average time to decide" width="2304" height="660" loading="lazy"><figcaption>The last 7 days</figcaption></figure></div>
   </section>
 
   <section class="close" id="principles">
