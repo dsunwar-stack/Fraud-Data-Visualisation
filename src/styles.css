@@ -820,3 +820,6 @@ ul.ds-principles { list-style: disc; }
 .fs-scoped-link:hover { text-decoration: none; }
 .fs-scoped-wrap { padding: var(--slds-g-spacing-3) var(--slds-g-spacing-3) 0; }
 .decision-record .fs-scoped { justify-self: stretch; width: 100%; }
+.fs-factor-check { margin-top: 2px; flex: none; }
+.fs-factor-check .slds-checkbox__label { display: inline-flex; }
+.factors li > .fs-factor-check { flex: 0 0 auto; width: auto; }

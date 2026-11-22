@@ -26,6 +26,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [14](#round-14-decision-buttons-follow-slds-2) | Are the Decline / Refer / Accept colours from SLDS 2? | SLDS radio button group for the choice; SLDS destructive / brand / success for Record | [`round-14`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-14) |
 | [15](#round-15-button-hierarchy-and-choosing-controls) | When to use radio vs dropdown? Should Record buttons differ in colour? Primary vs secondary | One primary Record button; button hierarchy and control-choice rules documented | [`round-15`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-15) |
 | [16](#round-16-scoped-notifications) | Apply SLDS 2 scoped notifications with their icons where needed | Info, warning, error, success and default notifications across Overview, queue and case | [`round-16`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-16) |
+| [17](#round-17-adjust-score-not-edit) | The Fraud summary has an Edit button but I can't edit anything | Renamed to Adjust score, explained, SLDS checkboxes, adjustment saved with the decision | [`round-17`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-17) |
 
 To run any round locally:
 
@@ -368,6 +369,27 @@ They replace the custom notes, coloured boxes and annotations used before. The c
 | Decision recorded | Degraded source (dark mode) |
 |---|---|
 | ![Decision recorded](round-16-decision-recorded.png) | ![Degraded source](round-16-degraded-source-dark.png) |
+
+---
+
+## Round 17: "Adjust score", not "Edit"
+
+> **Feedback:** "In the Fraud summary we have an Edit button but I cannot edit anything?"
+
+**Cause:** the button worked, but not as its label promised. It let you untick risk factors to take them out of the score; it never edited the summary text. The checkboxes were also plain browser checkboxes.
+
+**What changed**
+- Renamed to **Adjust score** ("Done adjusting" while active).
+- An **info notification** explains what you can do, and that the AI's text isn't edited (corrections go through 👎).
+- **SLDS checkboxes** beside each factor; excluded factors are greyed and struck through, and the gauge shows "Model score 90, adjusted by you (−20)".
+- The adjustment is **saved with the decision** ("Score adjusted: 90 → 70. Excluded: Jailbroken or rooted device (−20)") and shown in the activity timeline.
+- Design system writing rule: name a button after what it changes.
+
+**Why the AI text stays read-only:** editing what the AI wrote would blur who said what in the audit trail.
+
+| Before ("Edit") | After ("Adjust score") |
+|---|---|
+| ![Before](round-17-edit-before.png) | ![After](round-17-adjust-score.png) |
 
 ---
 

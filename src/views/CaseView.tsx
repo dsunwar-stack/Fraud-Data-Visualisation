@@ -51,7 +51,8 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const record = () => {
     setTried(true)
     if (!canRecord) return
-    setRecorded({ outcome: choice, at: NOW, by: 'You', overrode: overriding, reason, rationale: rationale.trim(), notes: notes.trim(), snapshot })
+    setRecorded({ outcome: choice, at: NOW, by: 'You', overrode: overriding, reason, rationale: rationale.trim(), notes: notes.trim(), snapshot,
+      excluded: c.factors.filter(f => excluded.has(f.label)).map(f => `${f.label} (−${f.points})`), adjustedScore: adjScore })
   }
 
   const adjScore = useMemo(() => Math.max(1, c.score - c.factors.filter(f => excluded.has(f.label)).reduce((s, f) => s + f.points, 0)), [c, excluded])
@@ -193,9 +194,14 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <p className="sub">Compiled from {usedSources.size} of {SOURCES.length} sources at {fmtTime(c.events[3]?.at ?? c.createdAt)} UTC · model confidence {Math.round(c.confidence * 100)}%</p>
                 </div>
               </div>
-              <button className={`slds-button slds-button_neutral ${editing ? 'slds-is-selected' : ''}`} aria-pressed={editing} onClick={() => setEditing(e => !e)}>{editing ? 'Done editing' : 'Edit'}</button>
+              <button className={`slds-button slds-button_neutral ${editing ? 'slds-is-selected' : ''}`} aria-pressed={editing} onClick={() => setEditing(e => !e)}>{editing ? 'Done adjusting' : 'Adjust score'}</button>
             </header>
 
+            {editing && (
+              <ScopedNotification variant="info">
+                <b>Adjusting the score.</b> Untick a factor you've checked and found doesn't apply, and the score updates. The AI's text isn't edited; to correct it, use 👎 below. Excluded factors are saved with your decision.
+              </ScopedNotification>
+            )}
             {filtering && (
               <ScopedNotification variant="info" link={{ label: 'Show everything', onClick: () => { setCat('all'); setSrcFilter('all') } }}>
                 Showing {cat !== 'all' && <b title={CATEGORIES.find(k => k.id === cat)!.plain}>{categoryName(cat)}</b>}{cat !== 'all' && srcFilter !== 'all' && ' from '}{srcFilter !== 'all' && <b>{sourceName(srcFilter)}</b>} only.
@@ -206,12 +212,12 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <div className="summary-score">
                 <RiskGauge score={adjScore} band={adjBand} />
                 <span className={`slds-badge pill pill-${adjBand} lg`}>{adjBand === 'high' ? 'High risk' : adjBand === 'medium' ? 'Medium risk' : 'Low risk'}</span>
-                {adjScore !== c.score && <span className="muted small">Model score {c.score}, adjusted by analyst</span>}
+                {adjScore !== c.score && <span className="muted small">Model score {c.score}, adjusted by you (−{c.score - adjScore})</span>}
               </div>
               <div className="summary-body">
                 <p className="lede">
                   {factorsShown.length} of {c.factors.length} factors shown.
-                  {editing && ' Untick a factor to leave it out of the score.'}
+                  {excluded.size > 0 && ` ${excluded.size} excluded from the score.`}
                 </p>
                 <ul className="factors">
                   {factorsShown.map(f => {
@@ -219,8 +225,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                     return (
                       <li key={f.label} className={off ? 'off' : ''}>
                         {editing && (
-                          <input type="checkbox" id={`f-${f.label}`} checked={!off} aria-label={`Include ${f.label}`}
-                            onChange={() => setExcluded(s => { const n = new Set(s); if (n.has(f.label)) n.delete(f.label); else n.add(f.label); return n })} />
+                          <div className="slds-checkbox fs-factor-check">
+                            <input type="checkbox" id={`f-${f.label}`} checked={!off}
+                              onChange={() => setExcluded(s => { const n = new Set(s); if (n.has(f.label)) n.delete(f.label); else n.add(f.label); return n })} />
+                            <label className="slds-checkbox__label" htmlFor={`f-${f.label}`}><span className="slds-checkbox_faux" /><span className="slds-assistive-text">Include {f.label} in the score</span></label>
+                          </div>
                         )}
                         <div>
                           <div className="factor-h"><b>{f.label}</b><span className="slds-badge tag src">{sourceShort(f.source)}</span><span className="slds-badge slds-badge_lightest tag" title={CATEGORIES.find(k => k.id === f.category)!.plain}>{categoryName(f.category)}</span><span className="pts num">+{f.points}</span></div>
@@ -360,6 +369,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <dl className="kv compact">
                   <div><dt>Reason</dt><dd>{recorded.reason}</dd></div>
                   <div><dt>Why</dt><dd className="pre">{recorded.rationale}</dd></div>
+                  {recorded.excluded && recorded.excluded.length > 0 && <div><dt>Score adjusted</dt><dd>{c.score} → {recorded.adjustedScore}. Excluded: {recorded.excluded.join(', ')}</dd></div>}
                   {recorded.notes && <div><dt>Notes</dt><dd className="pre">{recorded.notes}</dd></div>}
                 </dl>
                 <button className="slds-button small" aria-expanded={showSnap} onClick={() => setShowSnap(v => !v)}>{showSnap ? 'Hide case snapshot' : 'View case snapshot attached to this decision'}</button>
@@ -446,7 +456,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             <h2>Activity</h2>
             <ActivityTimeline items={[
               ...(recorded && c.status !== 'Decided' ? [{ time: fmtTime(recorded.at), kind: 'task' as const, isNew: true,
-                title: `Outcome recorded: ${recorded.outcome}${recorded.overrode ? ' (overrode recommendation)' : ''}`, detail: `You · ${recorded.reason}`,
+                title: `Outcome recorded: ${recorded.outcome}${recorded.overrode ? ' (overrode recommendation)' : ''}`, detail: `You · ${recorded.reason}${recorded.excluded?.length ? ` · score adjusted ${c.score} → ${recorded.adjustedScore}` : ''}`,
                 extra: <p className="tl-why">"{recorded.rationale}"</p> }] : []),
               ...(feedback ? [{ time: fmtTime(NOW), kind: 'task' as const, isNew: true, title: `Summary marked ${feedback === 'correct' ? 'helpful' : 'for review'}`, detail: 'You' }] : []),
               ...[...c.events].reverse().map(e => ({ time: fmtTime(e.at), title: e.label, detail: e.actor,
@@ -459,7 +469,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   )
 }
 
-interface DecisionRecord { outcome: Outcome; at: Date; by: string; overrode: boolean; reason: string; rationale: string; notes: string; snapshot: string }
+interface DecisionRecord { outcome: Outcome; at: Date; by: string; overrode: boolean; reason: string; rationale: string; notes: string; snapshot: string; excluded?: string[]; adjustedScore?: number }
 
 // Reason codes keep decisions consistent and countable for reporting and audit.
 const REASONS: Record<Outcome, string[]> = {
