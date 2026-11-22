@@ -89,7 +89,8 @@ Import from `src/design-system`. Each has a Storybook story with controls.
 | **Metric card** (`.kpi` + `Sparkline`) | The 3–6 numbers that answer "is something wrong?" | Always pass `labels` so the trend line shows values on hover. Say what a change compares against. |
 | **InfoTip** (ⓘ) | Specialist terms and numbers whose meaning isn't obvious | Plain meaning first, then an example. Also show a one-line plain label on screen. No links or buttons inside. |
 | **Badges** (`.slds-badge`) | Risk level, status, source, AI | Risk badges show the word, not only colour. The AI label only on AI-written content. |
-| **Buttons** (`slds-button_*`) | Actions | Labels say what happens. Decline = destructive, Accept = success. One brand button per area. |
+| **Buttons** (`slds-button_*`) | Actions | Labels say what happens. One brand button per area. Never recolour an SLDS button. |
+| **Decision outcome** | Choosing Decline, Refer or Accept | Pick the outcome with a **RadioButtonGroup**, with the recommendation on a line below. The **Record** button carries the meaning with SLDS variants: Decline = `slds-button_destructive`, Refer = `slds-button_brand`, Accept = `slds-button_success`. |
 | **CheckboxButtonGroup** | Filters where several can be on | e.g. risk levels |
 | **RadioButtonGroup** | Exactly one choice | e.g. time range, sort order, theme |
 | **Toggle** | On/off settings | e.g. "Include decided" |

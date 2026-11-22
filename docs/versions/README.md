@@ -23,6 +23,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [11](#round-11-navigation-active-state) | Why is there a half circle beside the active menu item? | Let SLDS 2 draw the vertical navigation's active state | [`round-11`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-11) |
 | [12](#round-12-top-risk-factors-explained) | What do Cases and Points mean in Top risk factors? | Both measures on every row, "Most common / Biggest impact" sort, info icon | [`round-12`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-12) |
 | [13](#round-13-design-system-and-storybook) | A design system in GitHub that designers and developers can use in live code, with separate documentation | Storybook, a separate design system site, DESIGN_SYSTEM.md, one import point | [`round-13`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-13) |
+| [14](#round-14-decision-buttons-follow-slds-2) | Are the Decline / Refer / Accept colours from SLDS 2? | SLDS radio button group for the choice; SLDS destructive / brand / success for Record | [`round-14`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-14) |
 
 To run any round locally:
 
@@ -290,6 +291,23 @@ The original terms were kept because fraud specialists use them; the plain label
 | ![Design system site](round-13-design-system-site.png) | ![Storybook info icon story](round-13-storybook.png) |
 
 ![Storybook colour tokens in dark mode](round-13-storybook-colour-dark.png)
+
+---
+
+## Round 14: decision buttons follow SLDS 2
+
+> **Feedback:** "In the Decision section, is the colour of the Decline, Refer and Accept buttons based on the SLDS 2 design system?"
+
+**The answer:** only partly. Record decline (destructive) and Record accept (success) were SLDS 2. Record refer was a brand button **recoloured orange**, because SLDS 2 has no warning button. The Decline / Refer / Accept choice used neutral buttons **recoloured** red, orange and green. Both broke our own rule: never restyle an SLDS component.
+
+**What changed**
+- The choice is now an SLDS 2 **radio button group**, the control for "pick exactly one". The recommendation sits on a line below it ("Recommended: Decline, based on risk score 90").
+- The **Record** button carries the meaning with SLDS 2 variants only: **destructive** for Decline, **brand** for Refer, **success** for Accept.
+- DESIGN_SYSTEM.md, the design system site and Storybook now state this rule.
+
+**Principle:** keep the research intent (colour shows the outcome) inside the design system's own variants.
+
+![Decision buttons after](round-14-decision-after.png)
 
 ---
 

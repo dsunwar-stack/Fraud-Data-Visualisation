@@ -518,7 +518,6 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .slds-button.back { justify-self: start; padding: 0; }
 .ob.slds-button { display: grid; justify-items: center; gap: 2px; padding: 10px 4px 8px; line-height: 1.2; height: auto; }
 .record-btn { width: 100%; justify-content: center; padding-block: 10px; }
-.slds-button.slds-button_brand.ob-refer-solid { background-color: var(--slds-g-color-warning-base-50); border-color: var(--slds-g-color-warning-base-50); color: #fff; }
 .hub-btn.slds-button { font-weight: 500; }
 
 /* Select and textarea fill their column */
@@ -799,3 +798,9 @@ tr.clickable:hover .fs-link { text-decoration: underline; }
 .ds-site-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 ol.ds-principles { list-style: decimal; }
 ul.ds-principles { list-style: disc; }
+
+/* Decision outcome: SLDS radio button group stretched to the panel width */
+.decision .fs-rbg .slds-radio_button-group { display: flex; width: 100%; flex-wrap: nowrap; }
+.decision .fs-rbg .slds-radio_button { flex: 1 1 0; min-width: 0; }
+.decision .fs-rbg .slds-radio_button__label { width: 100%; justify-content: center; text-align: center; white-space: normal; }
+.fs-rec-line { margin: 0; }

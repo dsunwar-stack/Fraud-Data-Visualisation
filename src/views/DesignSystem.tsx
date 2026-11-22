@@ -149,7 +149,7 @@ export function DesignSystem() {
           <button className="slds-button slds-button_success">Record accept</button>
           <button className="slds-button">Show everything</button>
         </div>
-        <Rule do="Labels say what happens. Decline uses destructive (red), Accept uses success (green), matching risk colours." dont='Use vague labels like "Go" or "OK".' />
+        <Rule do="Labels say what happens. Decision outcomes: pick with a radio button group; Record uses destructive (Decline), brand (Refer) or success (Accept)." dont='Recolour an SLDS button, or use vague labels like "Go" or "OK".' />
       </Section>
 
       <Section id="filters" title="Filters" intro="Pick the control by the kind of choice.">

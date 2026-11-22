@@ -365,14 +365,11 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <p className="who-decides small">
                   <b>You make the final decision.</b> The AI summarises the evidence. The recommendation comes from the risk score ({c.score}), not from the AI.
                 </p>
-                <div className="outcomes" role="radiogroup" aria-label="Outcome">
-                  {(['Decline', 'Refer', 'Accept'] as Outcome[]).map(o => (
-                    <button key={o} role="radio" aria-checked={choice === o} className={`slds-button slds-button_neutral ob ob-${o.toLowerCase()}`}
-                      onClick={() => { setChoice(o); if (!REASONS[o].includes(reason)) setReason('') }}>
-                      {o}{o === c.recommended && <span className="rec">Recommended</span>}
-                    </button>
-                  ))}
-                </div>
+                <span className="kpi-label">Outcome</span>
+                <RadioButtonGroup name="outcome" legend="Outcome" value={choice}
+                  onChange={o => { setChoice(o); if (!REASONS[o].includes(reason)) setReason('') }}
+                  options={(['Decline', 'Refer', 'Accept'] as Outcome[]).map(o => ({ value: o, label: o }))} />
+                <p className="muted small fs-rec-line">Recommended: <b className={`txt-${c.recommended.toLowerCase()}`}>{c.recommended}</b>, based on risk score {c.score}.</p>
                 {overriding && (
                   <p className="override small" role="note">You're choosing <b>{choice}</b> instead of the recommended <b>{c.recommended}</b>. Explain why below, as this will be reviewed.</p>
                 )}
@@ -405,7 +402,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                   <Snapshot text={snapshot} />
                 </details>
 
-                <button className={`slds-button ${choice === 'Decline' ? 'slds-button_destructive' : choice === 'Accept' ? 'slds-button_success' : 'slds-button_brand ob-refer-solid'} record-btn`} onClick={record} aria-disabled={!canRecord}>
+                <button className={`slds-button ${choice === 'Decline' ? 'slds-button_destructive' : choice === 'Accept' ? 'slds-button_success' : 'slds-button_brand'} record-btn`} onClick={record} aria-disabled={!canRecord}>
                   Record {choice.toLowerCase()}
                 </button>
               </>

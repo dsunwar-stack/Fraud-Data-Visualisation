@@ -70,7 +70,7 @@ export const Button: StoryObj<BtnArgs> = {
   args: { label: 'Show 3 factors', variant: 'neutral' },
   argTypes: { variant: { control: 'inline-radio', options: ['neutral', 'brand', 'destructive', 'success', 'base'] } },
   render: a => <button className={`slds-button ${a.variant === 'base' ? '' : `slds-button_${a.variant}`}`}>{a.label}</button>,
-  parameters: { docs: { description: { story: 'SLDS 2 pill buttons. Labels say what happens. Decline uses destructive, Accept uses success. At most one brand button per area.' } } },
+  parameters: { docs: { description: { story: 'SLDS 2 pill buttons. Labels say what happens. Decision outcomes: Record uses destructive (Decline), brand (Refer) or success (Accept). Never recolour an SLDS button. At most one brand button per area.' } } },
 }
 
 // ---------- Filters ----------
