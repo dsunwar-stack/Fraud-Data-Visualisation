@@ -33,7 +33,8 @@ These come from user research on an earlier LLM fraud summary concept:
 2. **Explain the score.** The *How the score is built* bar shows the baseline plus the points each factor adds, against the band thresholds (low 0–39, medium 40–69, high 70–100).
 3. **Evidence in one place.** Source evidence tabs show the raw signals from each data source, so analysts don't need to switch between systems.
 4. **Analyst control.** *Edit* (rather than "Manual adjustment") lets the analyst exclude a factor and see the adjusted score. *Mitigate* moves a finding to the Mitigation column, and *This is correct* records feedback on the AI summary.
-5. **Notes built in.** The investigation note is pre-filled from a template using the case's findings.
+5. **Every decision has a recorded reason.** Recording an outcome needs a reason code and a written explanation. Overriding the recommendation is flagged, and the decision, reason and investigation note stay visible on the case and in its timeline.
+7. **The specialist decides, not the AI.** The AI summarises the evidence. The recommendation comes from the risk score, and the specialist makes the final call.
 6. **Colour carries meaning.** Decline is red, refer is amber and accept is green, and risk markers appear inside tables.
 
 ## Run locally

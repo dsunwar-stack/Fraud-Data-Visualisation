@@ -35,7 +35,22 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const [feedback, setFeedback] = useState<null | 'correct' | 'incorrect'>(null)
   const [choice, setChoice] = useState<Outcome>(c.recommended)
   const [note, setNote] = useState(() => noteTemplate(c))
-  const [recorded, setRecorded] = useState<null | { outcome: Outcome; at: Date }>(c.status === 'Decided' ? { outcome: c.recommended, at: c.events[c.events.length - 1].at } : null)
+  const [reason, setReason] = useState('')
+  const [rationale, setRationale] = useState('')
+  const [tried, setTried] = useState(false)
+  const [showNote, setShowNote] = useState(false)
+  const [recorded, setRecorded] = useState<null | DecisionRecord>(c.status === 'Decided' ? {
+    outcome: c.recommended, at: c.events[c.events.length - 1].at, by: c.owner, overrode: false,
+    reason: REASONS[c.recommended][0], rationale: 'Evidence reviewed and consistent with the recommended outcome.', note: noteTemplate(c),
+  } : null)
+  const overriding = choice !== c.recommended
+  const rationaleOk = rationale.trim().length >= 20
+  const canRecord = !!reason && rationaleOk
+  const record = () => {
+    setTried(true)
+    if (!canRecord) return
+    setRecorded({ outcome: choice, at: NOW, by: 'You', overrode: overriding, reason, rationale: rationale.trim(), note })
+  }
 
   const adjScore = useMemo(() => Math.max(1, c.score - c.factors.filter(f => excluded.has(f.label)).reduce((s, f) => s + f.points, 0)), [c, excluded])
   const adjBand = bandOf(adjScore)
@@ -319,26 +334,64 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           <section className="card decision">
             <h2>Decision</h2>
             {recorded ? (
-              <div className={`recorded outcome-bg-${recorded.outcome.toLowerCase()}`} role="status">
-                <b>{recorded.outcome}</b> recorded at {fmtTime(recorded.at)} UTC
-                {c.status !== 'Decided' && <button className="link" onClick={() => setRecorded(null)}>Undo</button>}
+              <div className="decision-record" role="status">
+                <div className={`recorded outcome-bg-${recorded.outcome.toLowerCase()}`}>
+                  <b>{recorded.outcome}</b>
+                  <span>recorded by {recorded.by} at {fmtTime(recorded.at)} UTC</span>
+                </div>
+                {recorded.overrode && <p className="override small">Overrode the recommendation ({c.recommended})</p>}
+                <dl className="kv compact">
+                  <div><dt>Reason</dt><dd>{recorded.reason}</dd></div>
+                  <div><dt>Why</dt><dd className="pre">{recorded.rationale}</dd></div>
+                </dl>
+                <button className="link small" aria-expanded={showNote} onClick={() => setShowNote(v => !v)}>{showNote ? 'Hide investigation note' : 'View investigation note'}</button>
+                {showNote && <pre className="note-view">{recorded.note}</pre>}
+                {c.status !== 'Decided' && (
+                  <button className="link small" onClick={() => { setRecorded(null); setTried(false) }}>Undo and change decision</button>
+                )}
               </div>
             ) : (
               <>
-                <p className="muted small">Recommended: <b className={`txt-${c.recommended.toLowerCase()}`}>{c.recommended}</b>, based on score {c.score}.</p>
+                <p className="who-decides small">
+                  <b>You make the final decision.</b> The AI summarises the evidence. The recommendation comes from the risk score ({c.score}), not from the AI.
+                </p>
                 <div className="outcomes" role="radiogroup" aria-label="Outcome">
                   {(['Decline', 'Refer', 'Accept'] as Outcome[]).map(o => (
-                    <button key={o} role="radio" aria-checked={choice === o} className={`ob ob-${o.toLowerCase()}`} onClick={() => setChoice(o)}>
+                    <button key={o} role="radio" aria-checked={choice === o} className={`ob ob-${o.toLowerCase()}`}
+                      onClick={() => { setChoice(o); if (!REASONS[o].includes(reason)) setReason('') }}>
                       {o}{o === c.recommended && <span className="rec">Recommended</span>}
                     </button>
                   ))}
                 </div>
-                <label htmlFor="case-note" className="kpi-label">Investigation note</label>
-                <textarea id="case-note" value={note} onChange={e => setNote(e.target.value)} rows={11} />
+                {overriding && (
+                  <p className="override small" role="note">You're choosing <b>{choice}</b> instead of the recommended <b>{c.recommended}</b>. Explain why below, as this will be reviewed.</p>
+                )}
+
+                <label htmlFor="case-reason" className="kpi-label">Reason <span className="req">required</span></label>
+                <select id="case-reason" value={reason} onChange={e => setReason(e.target.value)} aria-invalid={tried && !reason} className={tried && !reason ? 'invalid' : ''}>
+                  <option value="">Choose a reason for {choice.toLowerCase()}…</option>
+                  {REASONS[choice].map(x => <option key={x}>{x}</option>)}
+                </select>
+                {tried && !reason && <span className="field-err">Choose a reason.</span>}
+
+                <label htmlFor="case-rationale" className="kpi-label">Why did you make this decision? <span className="req">required</span></label>
+                <textarea id="case-rationale" rows={4} value={rationale} onChange={e => setRationale(e.target.value)}
+                  placeholder={choice === 'Accept' ? 'e.g. Customer confirmed the new device by phone; the payee is their own savings account.' : choice === 'Refer' ? 'e.g. ID check service was degraded; need a fresh document check before deciding.' : 'e.g. Device is rooted and linked to 4 other profiles; email reported for impersonation twice this month.'}
+                  aria-invalid={tried && !rationaleOk} className={tried && !rationaleOk ? 'invalid' : ''} />
                 <div className="row-between">
-                  <button className="link small" onClick={() => setNote(noteTemplate(c))}>Reset to template</button>
-                  <button className={`btn solid ob-${choice.toLowerCase()}`} onClick={() => setRecorded({ outcome: choice, at: NOW })}>Record {choice.toLowerCase()}</button>
+                  {tried && !rationaleOk ? <span className="field-err">Write at least 20 characters so reviewers understand your decision.</span> : <span className="muted small">Saved with the decision and shown in the case history.</span>}
+                  <span className="muted small num">{rationale.trim().length}</span>
                 </div>
+
+                <details className="note-box">
+                  <summary><span className="kpi-label">Investigation note</span> <span className="muted small">checks done and evidence, pre-filled</span></summary>
+                  <textarea id="case-note" value={note} onChange={e => setNote(e.target.value)} rows={10} aria-label="Investigation note" />
+                  <button className="link small" onClick={() => setNote(noteTemplate(c))}>Reset to template</button>
+                </details>
+
+                <button className={`btn solid ob-${choice.toLowerCase()} record-btn`} onClick={record} aria-disabled={!canRecord}>
+                  Record {choice.toLowerCase()}
+                </button>
               </>
             )}
           </section>
@@ -371,7 +424,13 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           <section className="card">
             <h2>Timeline</h2>
             <ol className="timeline">
-              {recorded && c.status !== 'Decided' && <li className="new"><span className="num t">{fmtTime(recorded.at)}</span><div><div>Outcome recorded: {recorded.outcome}</div><div className="muted small">You</div></div></li>}
+              {recorded && c.status !== 'Decided' && (
+                <li className="new"><span className="num t">{fmtTime(recorded.at)}</span><div>
+                  <div>Outcome recorded: {recorded.outcome}{recorded.overrode && ' (overrode recommendation)'}</div>
+                  <div className="muted small">You · {recorded.reason}</div>
+                  <div className="small tl-why">"{recorded.rationale}"</div>
+                </div></li>
+              )}
               {feedback && <li className="new"><span className="num t">{fmtTime(NOW)}</span><div><div>Summary marked {feedback === 'correct' ? 'correct' : 'for review'}</div><div className="muted small">You</div></div></li>}
               {[...c.events].reverse().map((e, i) => (
                 <li key={i}><span className="num t">{fmtTime(e.at)}</span><div><div>{e.label}</div><div className="muted small">{e.actor}</div></div></li>
@@ -382,6 +441,15 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
       </div>
     </div>
   )
+}
+
+interface DecisionRecord { outcome: Outcome; at: Date; by: string; overrode: boolean; reason: string; rationale: string; note: string }
+
+// Reason codes keep decisions consistent and countable for reporting and audit.
+const REASONS: Record<Outcome, string[]> = {
+  Decline: ['Confirmed impersonation', 'Confirmed false identity', 'False details on application', 'Account misuse or mule activity', "Customer couldn't verify their identity", 'Other (explain below)'],
+  Refer: ['Need more information from the customer', 'Need a senior specialist to review', 'Refer to financial crime team', 'A data source was unavailable or degraded', 'Other (explain below)'],
+  Accept: ['Identity verified', 'Risk factors explained by the customer', 'False positive: genuine activity', 'Other (explain below)'],
 }
 
 const FINDING_TYPES = {
@@ -428,7 +496,7 @@ function noteTemplate(c: FraudCase) {
     'Key evidence:',
     ...c.factors.slice(0, 3).map(f => `- ${f.label}: ${f.detail}`),
     '',
-    'Analyst rationale:',
+    'Further notes:',
     '',
   ].join('\n')
 }

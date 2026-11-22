@@ -462,3 +462,28 @@ select { border: 1px solid var(--border-strong); border-radius: 8px; padding: 7p
 .fcol-head .infotip { margin-left: 0; }
 .fcol-plain { font-size: 12.5px; color: var(--muted); }
 .infotip-pop { text-transform: none; letter-spacing: normal; }
+
+/* ---------- decision reasons ---------- */
+.decision label.kpi-label { display: flex; gap: 6px; align-items: baseline; margin-top: 4px; }
+.req { font-size: 10.5px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); }
+.decision select, .decision textarea { width: 100%; }
+.decision textarea#case-rationale { font-family: var(--font); font-size: 13px; line-height: 1.5; background: var(--surface); }
+.invalid { border-color: var(--risk-high) !important; outline-color: var(--risk-high); }
+.field-err { color: var(--risk-high); font-size: 12px; }
+.who-decides { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--primary-soft); color: var(--text); }
+.override { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--risk-medium-soft); color: var(--text); border-left: 3px solid var(--risk-medium); }
+.note-box { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: grid; gap: 8px; }
+.note-box summary { cursor: pointer; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; list-style-position: inside; }
+.note-box[open] summary { margin-bottom: 4px; }
+.record-btn { width: 100%; padding: 10px; font-size: 14px; }
+.record-btn[aria-disabled='true'] { opacity: 0.55; }
+.decision-record { display: grid; gap: 10px; justify-items: start; }
+.decision-record .recorded { width: 100%; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.decision-record .kv { width: 100%; }
+.pre { white-space: pre-wrap; }
+.note-view { margin: 0; width: 100%; max-height: 260px; overflow: auto; white-space: pre-wrap; font: 12px/1.55 var(--mono); background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+.tl-why { margin-top: 2px; font-style: italic; color: var(--text); }
+.note-box summary { list-style: none; }
+.note-box summary::-webkit-details-marker { display: none; }
+.note-box summary::before { content: ''; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); margin-right: 2px; transition: transform .15s; align-self: center; }
+.note-box[open] summary::before { transform: rotate(45deg); }
