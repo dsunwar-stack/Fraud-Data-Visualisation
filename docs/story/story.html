@@ -96,9 +96,9 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="wrap">
   <header class="hero">
     <span class="eyebrow">Design story · Fraud data visualisation</span>
-    <h1>Fraud Signal: how seventeen rounds of feedback shaped it</h1>
+    <h1>Fraud Signal: how eighteen rounds of feedback shaped it</h1>
     <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
-    <div class="facts"><span><b>17</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="facts"><span><b>18</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
     <div class="links">
       <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
       <a href="https://claude.ai/artifact/RG7ujThqcfG1f7GyPyddaq">Design system</a>
@@ -128,6 +128,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-15"><b>15</b> Button hierarchy</a></li>
       <li><a href="#round-16"><b>16</b> Notifications</a></li>
       <li><a href="#round-17"><b>17</b> Adjust score</a></li>
+      <li><a href="#round-18"><b>18</b> Thresholds</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -427,6 +428,22 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     <figure><img src="../versions/round-17-adjust-score.png" alt="After: Adjust score with info note and SLDS checkboxes" width="1592" height="1510" loading="lazy"><figcaption><span class="tag after">After</span>"Adjust score"</figcaption></figure></div>
   </section>
 
+  <section class="round" id="round-18">
+    <div class="round-head"><span class="num">18</span><h2>Risk thresholds on screen</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-18">Code: round-18</a><span class="kicker">Show the rule where the decision is made</span></div>
+    <blockquote><cite>Feedback</cite>"With adjusting the score, what is the threshold?" … "Maybe best to show that data somewhere so the user knows."</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li>A <b>Risk thresholds</b> table (band, score, SLA, recommendation) on the case, with <b>this case's band highlighted</b>, and on the Overview.</li>
+        <li>An <b>auto-decline marker at 85</b> on the score bar.</li>
+        <li>Warnings when an adjustment <b>crosses a band</b>, and an error for <b>large adjustments</b> suggesting a second reviewer.</li>
+        <li>Values are placeholders until fraud policy confirms them.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>Show the rule behind a number</li><li>Guardrails on judgement calls</li></ul></div>
+    </div>
+    <div class="shots"><figure><img src="../versions/round-18-thresholds.png" alt="Score bar with auto-decline marker and risk thresholds table" width="1524" height="580" loading="lazy"><figcaption>Thresholds under the score, this case highlighted</figcaption></figure>
+    <figure><img src="../versions/round-18-adjusted.png" alt="Adjusted score crossing into Medium with warning and large-adjustment error" width="1592" height="2400" loading="lazy" style="max-width:420px"><figcaption>Crossing a threshold while adjusting</figcaption></figure></div>
+  </section>
+
   <section class="close" id="principles">
     <h2>The principles we ended up with</h2>
     <ol>
@@ -442,7 +459,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><b>Follow the design system's rules,</b> not just its colours: SLDS 2 Cosmos components, type and layout, plus the Agentic Experiences patterns for AI.</li>
     </ol>
     <div class="next">
-      <p><b>Next, proposed for round 18:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+      <p><b>Next, proposed for round 19:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
     </div>
   </section>
 
