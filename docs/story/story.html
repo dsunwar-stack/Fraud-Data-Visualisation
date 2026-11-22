@@ -96,9 +96,9 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="wrap">
   <header class="hero">
     <span class="eyebrow">Design story · Fraud data visualisation</span>
-    <h1>Fraud Signal: how fourteen rounds of feedback shaped it</h1>
+    <h1>Fraud Signal: how fifteen rounds of feedback shaped it</h1>
     <p>From a concept slide to a working fraud investigation tool. Each round below starts with the designer's feedback, then shows what changed, the UX principle behind it, and the screens.</p>
-    <div class="facts"><span><b>14</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
+    <div class="facts"><span><b>15</b> rounds of feedback</span><span><b>3</b> views: overview, queue, case</span><span>All data is synthetic</span></div>
     <div class="links">
       <a href="https://claude.ai/artifact/UiRmeAGsw99U1kaQ9DVvWT">Open the live dashboard</a>
       <a href="https://claude.ai/artifact/RG7ujThqcfG1f7GyPyddaq">Design system</a>
@@ -125,6 +125,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><a href="#round-12"><b>12</b> Risk factors</a></li>
       <li><a href="#round-13"><b>13</b> Design system</a></li>
       <li><a href="#round-14"><b>14</b> Decision buttons</a></li>
+      <li><a href="#round-15"><b>15</b> Button hierarchy</a></li>
       <li><a href="#principles">Principles</a></li>
     </ol>
   </div>
@@ -374,6 +375,24 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     <div class="shots one"><figure><img src="../versions/round-14-decision-after.png" alt="Decision panel with SLDS radio group and Record decline, refer and accept buttons" width="2080" height="560" loading="lazy"><figcaption>Decline, Refer and Accept selected in turn</figcaption></figure></div>
   </section>
 
+  <section class="round" id="round-15">
+    <div class="round-head"><span class="num">15</span><h2>Button hierarchy and choosing controls</h2><a class="branch" href="https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-15">Code: round-15</a><span class="kicker">One primary action per area</span></div>
+    <blockquote><cite>Feedback</cite>"What's the rule on when to use a radio button and a dropdown?" … "Only Cancel is red, right? Also primary vs secondary logic exists too."</blockquote>
+    <div class="cols">
+      <div><h3>What changed</h3><ul>
+        <li><b>One primary Record button</b> for every outcome; only the label changes.</li>
+        <li>Red is only for delete or remove. <b>Cancel is secondary</b>, never red.</li>
+        <li>The Risk Hub toggle is secondary, so each area has one primary button.</li>
+        <li>Button hierarchy and "choosing a control" rules added to the design system.</li>
+      </ul></div>
+      <div><h3>Why</h3><ul class="principles"><li>One primary action per area</li><li>Pick the control by the choice</li></ul></div>
+    </div>
+    <div class="shots">
+      <figure class="narrow"><img src="../versions/round-15-decision.png" alt="Decision panel with a single primary Record accept button" width="680" height="1746" loading="lazy" style="max-width:300px"><figcaption>One primary Record button</figcaption></figure>
+      <figure><img src="../versions/round-15-button-hierarchy.png" alt="Button hierarchy: primary, secondary, tertiary, destructive, success" width="2200" height="852" loading="lazy"><figcaption>The button hierarchy in the design system</figcaption></figure>
+    </div>
+  </section>
+
   <section class="close" id="principles">
     <h2>The principles we ended up with</h2>
     <ol>
@@ -389,7 +408,7 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
       <li><b>Follow the design system's rules,</b> not just its colours: SLDS 2 Cosmos components, type and layout, plus the Agentic Experiences patterns for AI.</li>
     </ol>
     <div class="next">
-      <p><b>Next, proposed for round 15:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
+      <p><b>Next, proposed for round 16:</b> add KYC / onboarding and bank-wide customer history as labelled sources, show the source and last-updated time on every profile field, list "Sources used" in the case snapshot, and warn when a source was unavailable.</p>
     </div>
   </section>
 
