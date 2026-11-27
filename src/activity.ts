@@ -11,8 +11,8 @@ import { CATEGORIES, NOW, type Band, type FraudCase, type Finding, type Signal, 
 
 export type EvidenceSection = 'money' | 'behaviour' | 'changes' | 'identity'
 export const SECTIONS: { id: EvidenceSection; title: string; question: string }[] = [
-  { id: 'money', title: 'Money', question: "What's happening with their money?" },
-  { id: 'behaviour', title: 'Behaviour', question: 'How are they using the account?' },
+  { id: 'money', title: 'Money · transactional history', question: "What's happening with their money?" },
+  { id: 'behaviour', title: 'Behaviour · behavioural history', question: 'How are they using the account?' },
   { id: 'changes', title: 'Account changes', question: 'What has changed on the account in the last 30 days?' },
   { id: 'identity', title: 'Identity', question: 'Is it really them?' },
 ]

@@ -34,6 +34,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [22](#round-22-observability-graphs-trends-and-forecast) | Should observability have graphs and visuals? Yes, all in SLDS 2 | Trends over 24h and 7 days, SLA forecast against capacity, system response time with alert line, sparklines in tiles | [`round-22`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-22) |
 | [23](#round-23-one-container-style) | Why don't the cards have consistent borders, based on SLDS 2? | Removed the page header's extra border so it matches the cards; sparklines aligned | [`round-23`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-23) |
 | [24](#round-24-the-team-leads-problem-statement) | The team lead must see SLA breaches, who's working on what, who's busy or on holiday, and assign by skills with a recommendation | On leave with return date; Working on now; a reason under every suggestion | [`round-24`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-24) |
+| [25](#round-25-finding-the-transactional-and-behavioural-data) | "Where are the fraud transactional and behavioural data? I didn't see it." | Sections named after the original terms, open by default; a jump button on the case page; a note in layout A | [`round-25`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-25) |
 
 To run any round locally:
 
@@ -561,6 +562,21 @@ Fictional team and synthetic data, seeded separately so the existing cases don't
 ![Team workload with status, return date and working on now](round-24-workload.png)
 
 ![Act now with the reason for each suggestion](round-24-actnow.png)
+
+---
+
+## Round 25: Finding the transactional and behavioural data
+
+> **Feedback:** "In the prototype, where are the fraud transactional and behavioural data? I didn't see it." … "In Overview, Case queue or Observability?"
+
+**Why it was hard to find:** it lived only in layout B, about three screens down the case page, under the names "Money" and "Behaviour", not the terms specialists know from the 2024 release.
+
+**What changed:**
+- Sections renamed **"Money · transactional history"** and **"Behaviour · behavioural history"**, and both open by default.
+- A **"Transactional & behavioural data ↓"** button at the top of the case page jumps straight to them.
+- In layout A, a note explains the data is in layout B, with a one-click **Switch to layout B**.
+
+![Evidence with transactional and behavioural history open](round-25-evidence.png)
 
 ---
 

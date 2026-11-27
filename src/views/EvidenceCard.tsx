@@ -19,7 +19,7 @@ export function EvidenceCard({ c, degraded, openRequest }: { c: FraudCase; degra
   const a = customerActivity(c)
   const [period, setPeriod] = useState<Period>('d7')
   const [unusualOnly, setUnusualOnly] = useState(false)
-  const [open, setOpen] = useState<Set<EvidenceSection>>(new Set([a.defaultSection]))
+  const [open, setOpen] = useState<Set<EvidenceSection>>(new Set<EvidenceSection>(['money', 'behaviour', a.defaultSection]))
   const refs = useRef<Partial<Record<EvidenceSection, HTMLElement | null>>>({})
 
   // Open and scroll to a section when a finding asks for it (Examine).
@@ -143,7 +143,7 @@ export function EvidenceCard({ c, degraded, openRequest }: { c: FraudCase; degra
   }
 
   return (
-    <section className="slds-card card fs-evidence" aria-label="Evidence">
+    <section className="slds-card card fs-evidence" aria-label="Evidence" id="evidence">
       <header className="card-h">
         <div>
           <h2>Evidence</h2>

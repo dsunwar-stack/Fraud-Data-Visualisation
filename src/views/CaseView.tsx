@@ -40,7 +40,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
   const [hideZero, setHideZero] = useState(false)
   const [explain, setExplain] = useState(false)
   const [examining, setExamining] = useState<string | null>(null)
-  const { variant } = useVariant()
+  const { variant, setVariant } = useVariant()
   const [evidenceReq, setEvidenceReq] = useState<EvidenceRequest | undefined>()
   const refs = variant === 'B' ? caseRecord(CASES.find(x => x.id === c.id)!).refs : {}
   const examine = (id: string) => { const r = refs[id]; if (r) setEvidenceReq(q => ({ section: r.section, key: r.key, n: (q?.n ?? 0) + 1 })) }
@@ -100,6 +100,19 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
           ...(c.amount ? [{ label: 'Amount at risk', value: <span className="num">{fmtMoney(c.amount)}</span> }] : []),
           { label: 'SLA', value: <span className={`num ${recorded ? '' : left < 0 ? 'bad' : left < 3600_000 ? 'warn' : ''}`}>{recorded ? 'Met' : left < 0 ? `Breached ${fmtDur(-left)} ago` : `${fmtDur(left)} left`} <span className="muted">· due {fmtTime(c.slaDueAt)} UTC</span></span> },
         ]} />
+
+      {variant === 'B' ? (
+        <div className="fs-jump">
+          <button className="slds-button slds-button_neutral" onClick={() => document.getElementById('evidence')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+            Transactional &amp; behavioural data ↓
+          </button>
+          <span className="muted small">Money, behaviour, account changes and identity for this customer, from all 5 systems</span>
+        </div>
+      ) : (
+        <ScopedNotification variant="info" link={{ label: 'Switch to layout B', onClick: () => setVariant('B') }}>
+          Transactional and behavioural history (money, logins, payees, account changes) is in <b>layout B · Integrated</b>.
+        </ScopedNotification>
+      )}
 
       {!recorded && left < 0 && (
         <ScopedNotification variant="error">This case breached its {bandRule(c.band).slaHours}h SLA {fmtDur(-left)} ago (due {fmtTime(c.slaDueAt)} UTC). Record a decision or refer it now.</ScopedNotification>
