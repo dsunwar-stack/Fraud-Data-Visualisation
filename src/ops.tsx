@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { CASES, NOW, SOURCE_HEALTH, type CaseType, type FraudCase, type Outcome, type SourceId } from './data'
 
 export interface Specialist {
-  id: string; name: string; skills: CaseType[]; status: 'Available' | 'In a meeting' | 'Away'
+  id: string; name: string; skills: CaseType[]; status: 'Available' | 'In a meeting' | 'On leave'
+  backOn?: string        // when someone on leave returns
   capacity: number       // open cases they can hold at once
   avgDecisionMin: number // average time to decide a case, last 7 days
   decidedToday: number
@@ -16,7 +17,7 @@ export const SPECIALISTS: Specialist[] = [
   { id: 'ce', name: 'Chloe Evans', skills: ['Onboarding exception', 'Synthetic identity'], status: 'Available', capacity: 14, avgDecisionMin: 26, decidedToday: 11 },
   { id: 'do', name: 'Daniel Osei', skills: ['Payment fraud', 'Account takeover'], status: 'In a meeting', capacity: 10, avgDecisionMin: 31, decidedToday: 6 },
   { id: 'ek', name: 'Emma Kowalski', skills: ['Synthetic identity', 'Money mule'], status: 'Available', capacity: 13, avgDecisionMin: 24, decidedToday: 12 },
-  { id: 'fn', name: 'Farid Nasser', skills: ['Onboarding exception'], status: 'Away', capacity: 10, avgDecisionMin: 29, decidedToday: 3 },
+  { id: 'fn', name: 'Farid Nasser', skills: ['Onboarding exception'], status: 'On leave', backOn: '18 Nov', capacity: 10, avgDecisionMin: 29, decidedToday: 3 },
   { id: 'gl', name: 'Grace Lin', skills: ['Account takeover', 'Money mule', 'Payment fraud'], status: 'Available', capacity: 15, avgDecisionMin: 20, decidedToday: 15 },
   { id: 'hw', name: 'Harry Walsh', skills: ['Onboarding exception', 'Synthetic identity', 'Account takeover'], status: 'Available', capacity: 12, avgDecisionMin: 35, decidedToday: 7 },
 ]
@@ -27,7 +28,7 @@ export const STEPS: Step[] = ['Triage', 'Evidence', 'Review', 'Decision']
 export type Cause = 'Unassigned' | 'Specialist unavailable' | 'Specialist overloaded' | 'System degraded' | 'Waiting on customer' | 'In progress'
 export const CAUSE_HELP: Record<Cause, { help: string; action: string }> = {
   'Unassigned': { help: 'Nobody owns the case yet.', action: 'Assign it to an available specialist with the right skills.' },
-  'Specialist unavailable': { help: 'The owner is away or in a meeting, so the case isn’t moving.', action: 'Reassign it.' },
+  'Specialist unavailable': { help: 'The owner is on leave or in a meeting, so the case isn’t moving.', action: 'Reassign it.' },
   'Specialist overloaded': { help: 'The owner holds more cases than they can handle.', action: 'Reassign it to someone with free capacity.' },
   'System degraded': { help: 'A system this case relies on is degraded, so its evidence may be incomplete.', action: 'Tell the specialist to check that system manually or refer the case.' },
   'Waiting on customer': { help: 'Waiting for the customer to send information.', action: 'Chase the customer, or refer if the SLA will be missed.' },
@@ -111,6 +112,12 @@ export function causeOf(c: FraudCase, a: Ctx): Cause {
   if (usesDegraded(c)) return 'System degraded'
   if (c.status === 'Awaiting info') return 'Waiting on customer'
   return 'In progress'
+}
+
+// Why the system recommends someone, in plain words (shown under every suggestion).
+export function suggestReason(c: FraudCase, s: Specialist, a: Ctx): string {
+  const free = s.capacity - a.load(s.id)
+  return `${c.type} skill · available · ${free} free slot${free === 1 ? '' : 's'}`
 }
 
 // Best person to take a case: available, has the skill, most free capacity.

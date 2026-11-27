@@ -926,3 +926,4 @@ ul.ds-principles { list-style: disc; }
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --dept-2: #dd7a01; --dept-3: #06a59a; --dept-5: #ad7bee; } }
 :root[data-theme="dark"] { --dept-2: #dd7a01; --dept-3: #06a59a; --dept-5: #ad7bee; }
+.fs-obs-why { margin-top: 4px; max-width: 220px; }

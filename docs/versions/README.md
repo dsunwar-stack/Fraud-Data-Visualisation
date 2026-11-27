@@ -33,6 +33,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [21](#round-21-observability-for-the-team-lead) | What is observability in a case manager? Where are the SLA breaches we need to act on? A new screen for the team lead to assign cases | New Observability screen: act now list with causes, assign and reassign, team workload, why cases are late, where they wait, system health, AI agreement | [`round-21`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-21) |
 | [22](#round-22-observability-graphs-trends-and-forecast) | Should observability have graphs and visuals? Yes, all in SLDS 2 | Trends over 24h and 7 days, SLA forecast against capacity, system response time with alert line, sparklines in tiles | [`round-22`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-22) |
 | [23](#round-23-one-container-style) | Why don't the cards have consistent borders, based on SLDS 2? | Removed the page header's extra border so it matches the cards; sparklines aligned | [`round-23`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-23) |
+| [24](#round-24-the-team-leads-problem-statement) | The team lead must see SLA breaches, who's working on what, who's busy or on holiday, and assign by skills with a recommendation | On leave with return date; Working on now; a reason under every suggestion | [`round-24`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-24) |
 
 To run any round locally:
 
@@ -544,6 +545,22 @@ Fictional team and synthetic data, seeded separately so the existing cases don't
 **Fix:** removed the extra border, so the page header matches the cards on every screen. Also aligned the sparklines in metric cards to the bottom, so they line up across a row when a note wraps to two lines. Documented in `DESIGN_SYSTEM.md`.
 
 ![Page header and cards with one container style](round-23-containers.png)
+
+---
+
+## Round 24: The team lead's problem statement
+
+> **Feedback:** "The team lead's problem statement was to check SLA breaches, who is working on what, who is occupied and who is on holiday, so they can assign cases to the right people based on their skills. The system should recommend based on skills."
+
+**Checked against the Observability screen:** SLA breaches, forecast, assigning and skills-based suggestions were there. Three gaps:
+
+- **On leave:** "Away" became **On leave** with the return date ("Back 18 Nov"), shown in Team workload, next to the owner in Act now, and in the bulk-assign list (unselectable until they're back).
+- **Who is working on what:** a new **Working on now** column shows each available specialist's current case, its type and step, linked to the case.
+- **Why this recommendation:** every suggestion now says why: *"Suggested: Payment fraud skill · available · 8 free slots"*. Like the AI findings, a recommendation people can check is one they'll trust.
+
+![Team workload with status, return date and working on now](round-24-workload.png)
+
+![Act now with the reason for each suggestion](round-24-actnow.png)
 
 ---
 

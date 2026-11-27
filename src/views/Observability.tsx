@@ -5,7 +5,7 @@ import { BarList, ColumnChart, ScoreCell, Sparkline, TrendChart, bandVar } from 
 import { InfoTip } from '../components/InfoTip'
 import { PageHeader, ProgressBar, RadioButtonGroup, ScopedNotification, useToast } from '../components/slds'
 import {
-  ALERT_MS, CAUSE_HELP, DEGRADED, OPEN_CASES, OUTAGE_AT, SPECIALISTS, STEPS, caseOps, teamHistory, causeOf, specialist, suggestFor, useAssignments, type Cause,
+  ALERT_MS, CAUSE_HELP, DEGRADED, suggestReason, OPEN_CASES, OUTAGE_AT, SPECIALISTS, STEPS, caseOps, teamHistory, causeOf, specialist, suggestFor, useAssignments, type Cause,
 } from '../ops'
 
 type Show = 'atRisk' | 'breached' | 'unassigned' | 'all'
@@ -207,7 +207,7 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
             <div className="slds-select_container">
               <select className="slds-select" aria-label="Assign selected cases to" value={bulkTo} onChange={e => setBulkTo(e.target.value)}>
                 <option value="">Choose a specialist…</option>
-                {SPECIALISTS.map(s => <option key={s.id} value={s.id} disabled={s.status !== 'Available'}>{s.name} · {Math.max(0, s.capacity - a.load(s.id))} free{s.status !== 'Available' ? ` · ${s.status}` : ''}</option>)}
+                {SPECIALISTS.map(s => <option key={s.id} value={s.id} disabled={s.status !== 'Available'}>{s.name} · {Math.max(0, s.capacity - a.load(s.id))} free{s.status !== 'Available' ? ` · ${s.status}${s.backOn ? ` until ${s.backOn}` : ''}` : ''}</option>)}
               </select>
             </div>
             <button className="slds-button slds-button_brand" disabled={!bulkTo} onClick={() => assign([...selected], bulkTo)}>Assign</button>
@@ -241,10 +241,11 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
                     <td className="small">{ops.step}<div className="muted">{fmtMin(ops.minutesInStep)} in step</div></td>
                     <td><span className={`slds-badge ${k === 'In progress' ? 'slds-badge_lightest' : k === 'System degraded' || k === 'Waiting on customer' ? 'pill pill-medium' : 'pill pill-high'}`}>{k}</span>
                       <InfoTip label={k}><span>{CAUSE_HELP[k].help} <b>Action:</b> {CAUSE_HELP[k].action}</span></InfoTip></td>
-                    <td className="small">{owner ? <>{owner.name}{owner.status !== 'Available' && <div className="muted">{owner.status}</div>}</> : <span className="muted">Nobody</span>}</td>
+                    <td className="small">{owner ? <>{owner.name}{owner.status !== 'Available' && <div className="muted">{owner.status}{owner.backOn ? ` · back ${owner.backOn}` : ''}</div>}</> : <span className="muted">Nobody</span>}</td>
                     <td>
                       {needsMove && sug && sug.id !== owner?.id
-                        ? <button className="slds-button slds-button_neutral small" onClick={() => assign([c.id], sug.id)}>{owner ? 'Reassign' : 'Assign'} to {sug.name.split(' ')[0]}</button>
+                        ? <><button className="slds-button slds-button_neutral small" onClick={() => assign([c.id], sug.id)}>{owner ? 'Reassign' : 'Assign'} to {sug.name.split(' ')[0]}</button>
+                          <div className="muted small fs-obs-why">Suggested: {suggestReason(c, sug, a)}</div></>
                         : k === 'System degraded' ? <span className="small muted">Check {DEGRADED.map(d => sourceShort(d).replace(/ check$/, '')).join(', ')} manually or refer</span>
                         : k === 'Waiting on customer' ? <span className="small muted">Chase customer</span>
                         : needsMove ? <span className="small muted">No one free with these skills</span>
@@ -261,18 +262,21 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
       </section>
 
       <section className="slds-card card" aria-label="Team workload">
-        <header className="card-h"><div><h2>Team workload</h2><p className="sub">Open cases each specialist holds against what they can handle. Updates as you assign. Select a name to see their cases.</p></div></header>
+        <header className="card-h"><div><h2>Team workload</h2><p className="sub">Who is available, on leave or busy, what they're working on now, and their open cases against what they can handle. Updates as you assign. Select a name to see their cases.</p></div></header>
         <div className="table-wrap">
           <table className="slds-table slds-table_cell-buffer slds-table_bordered data">
-            <thead><tr><th>Specialist</th><th>Skills</th><th>Status</th><th>Open cases</th><th className="r">Breached</th><th className="r">Due &lt; 1h</th><th className="r">Avg time to decide</th><th className="r">Decided today</th></tr></thead>
+            <thead><tr><th>Specialist</th><th>Skills</th><th>Status</th><th>Working on now</th><th>Open cases</th><th className="r">Breached</th><th className="r">Due &lt; 1h</th><th className="r">Avg time to decide</th><th className="r">Decided today</th></tr></thead>
             <tbody>
               {SPECIALISTS.map(s => {
                 const mine = OPEN_CASES.filter(c => a.assignee(c.id) === s.id), load = mine.length, over = load > s.capacity
+                // The case they touched most recently (shortest time in its current step) is what they're working on now.
+                const now = s.status === 'Available' ? mine.filter(c => caseOps(c).step !== 'Triage').sort((x, y) => caseOps(x).minutesInStep - caseOps(y).minutesInStep)[0] : undefined
                 return (
                   <tr key={s.id}>
                     <td><button className="slds-button fs-obs-link" title="Show their cases in Act now" onClick={() => { setWho(s.id); setShow('all'); setCause('all'); document.querySelector('[aria-label="Act now"]')?.scrollIntoView({ behavior: 'smooth' }) }}><b>{s.name}</b></button></td>
                     <td className="small">{s.skills.join(', ')}</td>
-                    <td><span className={`slds-badge ${s.status === 'Available' ? 'pill pill-low' : s.status === 'Away' ? 'pill pill-high' : 'pill pill-medium'}`}>{s.status}</span></td>
+                    <td><span className={`slds-badge ${s.status === 'Available' ? 'pill pill-low' : s.status === 'On leave' ? 'pill pill-high' : 'pill pill-medium'}`}>{s.status}</span>{s.backOn && <div className="muted small">Back {s.backOn}</div>}</td>
+                    <td className="small">{now ? <><a href={`#case-${now.id}`} className="mono" onClick={e => { e.preventDefault(); onOpen(now.id) }}>{now.id}</a><div className="muted">{now.type} · {caseOps(now).step}</div></> : <span className="muted">{s.status === 'Available' ? 'Nothing in progress' : '–'}</span>}</td>
                     <td className="fs-obs-load">
                       <span className={`num ${over ? 'bad' : ''}`}>{load} of {s.capacity}</span>
                       <ProgressBar value={Math.min(100, (load / s.capacity) * 100)} color={over ? bandVar('high') : load / s.capacity > 0.8 ? bandVar('medium') : 'var(--viz-brand)'} label={`${s.name}: ${load} of ${s.capacity} cases`} />
