@@ -136,7 +136,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
         <ScopedNotification variant="warning">SLA due in {fmtDur(left)}, at {fmtTime(c.slaDueAt)} UTC.</ScopedNotification>
       )}
       {aiDown ? (
-        <ScopedNotification variant="warning"><b>AI summary unavailable.</b> The summary service didn't respond. The risk score, risk factors and evidence below come from the rules engine and the source systems, so you can still decide.</ScopedNotification>
+        <ScopedNotification variant="warning"><b>AI summary unavailable.</b> The summary service didn't respond. The risk score and risk factors come from the fraud scoring system, and the evidence from the source systems, so you can still decide.</ScopedNotification>
       ) : (
         <AgenticCard as="div" className="glance">
           <AgenticIcon size={32} />
@@ -247,7 +247,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               <button className={`slds-button slds-button_neutral ${editing ? 'slds-is-selected' : ''}`} aria-pressed={editing} onClick={() => setEditing(e => !e)}>{editing ? 'Done adjusting' : 'Adjust score'}</button>
             </header>
 
-            {aiDown && <ScopedNotification variant="warning">The AI's written summary is unavailable. The score and risk factors below come from the rules engine and are still reliable.</ScopedNotification>}
+            {aiDown && <ScopedNotification variant="warning">The AI's written summary is unavailable. The score and risk factors below come from the fraud scoring system, not the AI, so they're still reliable.</ScopedNotification>}
             {editing && (
               <ScopedNotification variant="info">
                 <b>Adjusting the score.</b> Untick a factor you've checked and found doesn't apply, and the score updates. The AI's text isn't edited; to correct it, use 👎 below. Excluded factors are saved with your decision.

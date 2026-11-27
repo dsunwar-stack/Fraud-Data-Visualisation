@@ -600,7 +600,7 @@ Fictional team and synthetic data, seeded separately so the existing cases don't
 
 | Edge case | What the user sees | Why |
 |---|---|---|
-| **AI unavailable** | "AI summary unavailable" in place of the summary; AI findings replaced by a pointer to the evidence; score and factors still shown | The rules engine and source systems don't depend on the AI, so the specialist can still decide |
+| **AI unavailable** | "AI summary unavailable" in place of the summary; AI findings replaced by a pointer to the evidence; score and factors still shown | The fraud scoring system and source systems don't depend on the AI, so the specialist can still decide |
 | **Low confidence** (below 70%) | A "Low confidence · 62%" badge; the summary is hidden until "Show summary anyway" | A confident-sounding paragraph from an unsure model is worse than none |
 | **Borderline score** (within 2 points of 40, 70 or the auto-decline line) | "Borderline score. 83 is 2 points below the auto-decline threshold (85). Take a second look; if unsure, Refer." | Thresholds are sharp lines; scores near them deserve a second look |
 | **Someone else viewing** | "Priya S. is also viewing this case. If you both record a decision, only the first is saved and the other person is told." | Prevents two conflicting decisions |
