@@ -144,7 +144,8 @@ function DemoSwitches() {
   const { flags, set } = useDemo()
   return (
     <details className="fs-demo">
-      <summary className="kpi-label">Demo: edge cases</summary>
+      <summary className="fs-demo-summary">Demo: edge cases</summary>
+      <p className="muted small fs-demo-hint">Turn one on, then open a case.</p>
       <Toggle id="demo-ai" checked={flags.aiDown} onChange={v => set('aiDown', v)} label="AI unavailable" />
       <Toggle id="demo-conf" checked={flags.lowConfidence} onChange={v => set('lowConfidence', v)} label="Low AI confidence" />
       <Toggle id="demo-viewer" checked={flags.otherViewer} onChange={v => set('otherViewer', v)} label="Someone else viewing" />

@@ -932,3 +932,8 @@ ul.ds-principles { list-style: disc; }
 .fs-demo summary { cursor: pointer; }
 .fs-lowconf { margin-left: 8px; }
 .fs-obs-capacity { flex-basis: 100%; }
+.fs-demo-summary { cursor: pointer; color: var(--primary); font-size: 0.8125rem; font-weight: 600; list-style: none; display: inline-flex; align-items: center; gap: 6px; }
+.fs-demo-summary::-webkit-details-marker { display: none; }
+.fs-demo-summary::before { content: "▸"; display: inline-block; transition: transform .15s; }
+.fs-demo[open] .fs-demo-summary::before { transform: rotate(90deg); }
+.fs-demo-hint { margin: 0; }
