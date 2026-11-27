@@ -928,3 +928,7 @@ ul.ds-principles { list-style: disc; }
 :root[data-theme="dark"] { --dept-2: #dd7a01; --dept-3: #06a59a; --dept-5: #ad7bee; }
 .fs-obs-why { margin-top: 4px; max-width: 220px; }
 .fs-jump { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.fs-demo { display: grid; gap: 6px; margin-bottom: 12px; }
+.fs-demo summary { cursor: pointer; }
+.fs-lowconf { margin-left: 8px; }
+.fs-obs-capacity { flex-basis: 100%; }

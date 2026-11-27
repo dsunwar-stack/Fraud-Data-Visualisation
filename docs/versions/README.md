@@ -36,6 +36,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [24](#round-24-the-team-leads-problem-statement) | The team lead must see SLA breaches, who's working on what, who's busy or on holiday, and assign by skills with a recommendation | On leave with return date; Working on now; a reason under every suggestion | [`round-24`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-24) |
 | [25](#round-25-finding-the-transactional-and-behavioural-data) | "Where are the fraud transactional and behavioural data? I didn't see it." | Sections named after the original terms, open by default; a jump button on the case page; a note in layout A | [`round-25`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-25) |
 | [26](#round-26-explain-every-number) | "Maybe have an info icon to explain what they mean?" (metric tiles) | An ⓘ on every tile on Overview and Observability: what it counts and why it matters | [`round-26`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-26) |
+| [27](#round-27-edge-cases-and-failures) | "What if the graph or the AI fails?" … "Edge cases" | AI unavailable, low-confidence summary, borderline score, someone else viewing, capacity warning on bulk assign; demo switches | [`round-27`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-27) |
 
 To run any round locally:
 
@@ -588,6 +589,30 @@ Fictional team and synthetic data, seeded separately so the existing cases don't
 **What changed:** every metric tile on **Overview** (alerts, high-risk, auto-declined, open cases, SLA due) and **Observability** (SLA breached, due within 1 hour, unassigned, team capacity, AI agreed) has an ⓘ that says **what the number counts** (e.g. "scoring 85 or more", "the deadline to decide") and **why it matters** (e.g. "a sudden rise can mean a fraud attack, or a rule that is too strict").
 
 ![Info on the Auto-declined tile](round-26-tile-info.png)
+
+---
+
+## Round 27: Edge cases and failures
+
+> **Feedback:** "What if the graph fails or the AI fails, what's the solution?" … "Edge case." … "Yes, build the ones worth demoing."
+
+**Principle:** say what's missing, never block a safe decision, and record what happened.
+
+| Edge case | What the user sees | Why |
+|---|---|---|
+| **AI unavailable** | "AI summary unavailable" in place of the summary; AI findings replaced by a pointer to the evidence; score and factors still shown | The rules engine and source systems don't depend on the AI, so the specialist can still decide |
+| **Low confidence** (below 70%) | A "Low confidence · 62%" badge; the summary is hidden until "Show summary anyway" | A confident-sounding paragraph from an unsure model is worse than none |
+| **Borderline score** (within 2 points of 40, 70 or the auto-decline line) | "Borderline score. 83 is 2 points below the auto-decline threshold (85). Take a second look; if unsure, Refer." | Thresholds are sharp lines; scores near them deserve a second look |
+| **Someone else viewing** | "Priya S. is also viewing this case. If you both record a decision, only the first is saved and the other person is told." | Prevents two conflicting decisions |
+| **Over capacity on bulk assign** | "Aisha Rahman has 0 free slots; assigning 4 puts them 4 over. Use Assign to suggested…"; the button becomes "Assign anyway" | Stops the team lead overloading one person by accident |
+
+**Demo switches** in the sidebar (*Demo: edge cases*) turn on AI unavailable, low confidence and someone else viewing. Borderline and capacity appear naturally (e.g. case FR-104341, score 83).
+
+![AI unavailable](round-27-e1-ai-down.png)
+
+![Borderline score](round-27-e3-borderline.png)
+
+![Capacity warning](round-27-e5-capacity.png)
 
 ---
 

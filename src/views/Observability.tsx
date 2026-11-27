@@ -92,6 +92,8 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
     const n = Object.values(plan).flat().length
     toast(n ? 'success' : 'error', n ? `${n} case${n > 1 ? 's' : ''} assigned to ${Object.keys(plan).length} specialist${Object.keys(plan).length > 1 ? 's' : ''} by skill and free capacity` : 'No available specialist with the right skills')
   }
+  const bulkSpec = specialist(bulkTo || null), bulkFree = bulkSpec ? Math.max(0, bulkSpec.capacity - a.load(bulkSpec.id)) : 0
+  const overBy = bulkSpec ? selected.size - bulkFree : 0
   const toggle = (id: string) => setSelected(s => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const allOn = rows.length > 0 && rows.every(c => selected.has(c.id))
 
@@ -210,9 +212,14 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
                 {SPECIALISTS.map(s => <option key={s.id} value={s.id} disabled={s.status !== 'Available'}>{s.name} · {Math.max(0, s.capacity - a.load(s.id))} free{s.status !== 'Available' ? ` · ${s.status}${s.backOn ? ` until ${s.backOn}` : ''}` : ''}</option>)}
               </select>
             </div>
-            <button className="slds-button slds-button_brand" disabled={!bulkTo} onClick={() => assign([...selected], bulkTo)}>Assign</button>
+            <button className="slds-button slds-button_brand" disabled={!bulkTo} onClick={() => assign([...selected], bulkTo)}>{overBy > 0 ? 'Assign anyway' : 'Assign'}</button>
             <button className="slds-button slds-button_neutral" onClick={() => assignSuggested([...selected])}>Assign to suggested</button>
             <button className="slds-button" onClick={() => setSelected(new Set())}>Clear</button>
+            {overBy > 0 && bulkSpec && (
+              <div className="fs-obs-capacity">
+                <ScopedNotification variant="warning"><b>Over capacity.</b> {bulkSpec.name} has {bulkFree} free slot{bulkFree === 1 ? '' : 's'}; assigning {selected.size} puts them {overBy} over. Use <b>Assign to suggested</b> to spread the cases, or assign anyway.</ScopedNotification>
+              </div>
+            )}
           </div>
         )}
 

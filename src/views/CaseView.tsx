@@ -8,6 +8,7 @@ import { Switch } from '../components/Filters'
 import { InfoTip } from '../components/InfoTip'
 import { RiskThresholds } from '../components/RiskThresholds'
 import { useVariant } from '../variant'
+import { BORDERLINE_POINTS, LOW_CONFIDENCE, useDemo } from '../demo'
 import { specialist, useAssignments } from '../ops'
 import { EvidenceCard, type EvidenceRequest } from './EvidenceCard'
 import { caseRecord } from '../activity'
@@ -69,6 +70,17 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
 
   const adjScore = useMemo(() => Math.max(1, c.score - c.factors.filter(f => excluded.has(f.label)).reduce((s, f) => s + f.points, 0)), [c, excluded])
   const adjBand = bandOf(adjScore)
+  const { flags } = useDemo()
+  const aiDown = flags.aiDown
+  const confidence = flags.lowConfidence ? Math.min(c.confidence, 0.58) : c.confidence
+  const lowConf = confidence < LOW_CONFIDENCE
+  const [showLowConf, setShowLowConf] = useState(false)
+  // Borderline: the (adjusted) score sits within a couple of points of a band threshold or the auto-decline line.
+  const lines = [{ at: 40, name: 'Medium' }, { at: 70, name: 'High' }, { at: THRESHOLDS.autoDecline, name: 'auto-decline' }]
+  const near = lines.find(l => Math.abs(adjScore - l.at) <= BORDERLINE_POINTS || (adjScore < l.at && l.at - adjScore <= BORDERLINE_POINTS))
+  const borderline = near ? (adjScore >= near.at
+    ? `${adjScore} is ${adjScore - near.at === 0 ? 'exactly on' : `${adjScore - near.at} point${adjScore - near.at === 1 ? '' : 's'} above`} the ${near.name} threshold (${near.at}).`
+    : `${adjScore} is ${near.at - adjScore} point${near.at - adjScore === 1 ? '' : 's'} below the ${near.name} threshold (${near.at}).`) : null
   const bandOrder = { low: 0, medium: 1, high: 2 } as const
   const largeAdjustment = c.score - adjScore >= THRESHOLDS.largeAdjustment || bandOrder[c.band] - bandOrder[adjBand] >= 2
   const base = c.score - c.factors.reduce((s, f) => s + f.points, 0)
@@ -117,16 +129,25 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
       {!recorded && left < 0 && (
         <ScopedNotification variant="error">This case breached its {bandRule(c.band).slaHours}h SLA {fmtDur(-left)} ago (due {fmtTime(c.slaDueAt)} UTC). Record a decision or refer it now.</ScopedNotification>
       )}
+      {flags.otherViewer && !recorded && (
+        <ScopedNotification variant="warning"><b>Priya S. is also viewing this case</b> (since {fmtTime(new Date(NOW.getTime() - 8 * 60_000))} UTC). If you both record a decision, only the first is saved and the other person is told.</ScopedNotification>
+      )}
       {!recorded && left >= 0 && left < 3600_000 && (
         <ScopedNotification variant="warning">SLA due in {fmtDur(left)}, at {fmtTime(c.slaDueAt)} UTC.</ScopedNotification>
       )}
-      <AgenticCard as="div" className="glance">
-        <AgenticIcon size={32} />
-        <div className="glance-body">
-          <span className="kpi-label">At a glance <span className="ai-label">AI summary</span></span>
-          <p>{c.glance}</p>
-        </div>
-      </AgenticCard>
+      {aiDown ? (
+        <ScopedNotification variant="warning"><b>AI summary unavailable.</b> The summary service didn't respond. The risk score, risk factors and evidence below come from the rules engine and the source systems, so you can still decide.</ScopedNotification>
+      ) : (
+        <AgenticCard as="div" className="glance">
+          <AgenticIcon size={32} />
+          <div className="glance-body">
+            <span className="kpi-label">At a glance <span className="ai-label">AI summary</span>{lowConf && <span className="slds-badge slds-theme_warning fs-lowconf">Low confidence · {Math.round(confidence * 100)}%</span>}</span>
+            {lowConf && !showLowConf
+              ? <p className="small">The model isn't confident about this case, so the summary is hidden. Check the evidence first. <button className="slds-button" onClick={() => setShowLowConf(true)}>Show summary anyway</button></p>
+              : <p>{c.glance}</p>}
+          </div>
+        </AgenticCard>
+      )}
 
       <div className="slds-path fs-path">
         <div className="slds-grid slds-path__track">
@@ -220,12 +241,13 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 <AgenticIcon />
                 <div>
                 <h2>Fraud summary <span className="ai-label">AI summary</span></h2>
-                <p className="sub">Compiled from {usedSources.size} of {SOURCES.length} sources at {fmtTime(c.events[3]?.at ?? c.createdAt)} UTC · model confidence {Math.round(c.confidence * 100)}%</p>
+                <p className="sub">Compiled from {usedSources.size} of {SOURCES.length} sources at {fmtTime(c.events[3]?.at ?? c.createdAt)} UTC · model confidence {Math.round(confidence * 100)}%{lowConf ? ' (low)' : ''}</p>
                 </div>
               </div>
               <button className={`slds-button slds-button_neutral ${editing ? 'slds-is-selected' : ''}`} aria-pressed={editing} onClick={() => setEditing(e => !e)}>{editing ? 'Done adjusting' : 'Adjust score'}</button>
             </header>
 
+            {aiDown && <ScopedNotification variant="warning">The AI's written summary is unavailable. The score and risk factors below come from the rules engine and are still reliable.</ScopedNotification>}
             {editing && (
               <ScopedNotification variant="info">
                 <b>Adjusting the score.</b> Untick a factor you've checked and found doesn't apply, and the score updates. The AI's text isn't edited; to correct it, use 👎 below. Excluded factors are saved with your decision.
@@ -313,6 +335,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
             </header>
             <RadioButtonGroup name="find-src" legend="Filter findings by source" size="small" value={srcFilter} onChange={setSrcFilter}
               options={[{ value: 'all' as SourceId | 'all', label: 'All sources' }, ...SOURCES.map(x => ({ value: x.id as SourceId | 'all', label: x.short }))]} />
+            {aiDown ? <ScopedNotification variant="warning">AI findings are unavailable. Check the {variant === 'B' ? 'Evidence' : 'Source evidence'} card below, which comes straight from the source systems.</ScopedNotification> : (
             <div className="findings">
               <div className="fcol fcol-high">
                 <FindingHead k="substantiation" count={subst.length} />
@@ -363,6 +386,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
                 ) : <p className="muted small">No conflicting evidence.</p>}
               </div>
             </div>
+            )}
           </section>
 
           {variant === 'B' ? (
@@ -426,6 +450,7 @@ function CaseBody({ c, onBack }: { c: FraudCase; onBack: () => void }) {
               </div>
             ) : (
               <>
+                {borderline && <ScopedNotification variant="warning"><b>Borderline score.</b> {borderline} Take a second look at the evidence; if you're unsure, Refer.</ScopedNotification>}
                 <ScopedNotification variant="info">
                   <b>You make the final decision.</b> The AI summarises the evidence. The recommendation comes from the risk score ({c.score}), not from the AI.
                 </ScopedNotification>

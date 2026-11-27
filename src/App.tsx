@@ -6,8 +6,9 @@ import { CaseView } from './views/CaseView'
 import { Observability } from './views/Observability'
 import { AssignmentProvider } from './ops'
 import { DEFAULT_FILTERS, type Filters } from './components/Filters'
-import { RadioButtonGroup, ToastProvider } from './components/slds'
+import { RadioButtonGroup, ToastProvider, Toggle } from './components/slds'
 import { VariantProvider, useVariant } from './variant'
+import { DemoProvider, useDemo } from './demo'
 
 type Route = { view: 'overview' } | { view: 'queue' } | { view: 'observability' } | { view: 'case'; id: string }
 
@@ -47,6 +48,7 @@ export default function App() {
 
   return (
     <VariantProvider>
+    <DemoProvider>
     <ToastProvider>
     <AssignmentProvider>
     <div className="shell">
@@ -97,6 +99,7 @@ export default function App() {
           )}
         </nav>
         <div className="nav-foot">
+          <DemoSwitches />
           <LayoutSwitch />
           <RadioButtonGroup name="theme" legend="Theme" size="small" value={theme} onChange={setTheme}
             options={(['light', 'system', 'dark'] as Theme[]).map(t => ({ value: t, label: t[0].toUpperCase() + t.slice(1) }))} />
@@ -113,6 +116,7 @@ export default function App() {
     </div>
     </AssignmentProvider>
     </ToastProvider>
+    </DemoProvider>
     </VariantProvider>
   )
 }
@@ -133,5 +137,17 @@ function Icon({ d, stroke }: { d: string; stroke?: boolean }) {
     <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
       <path d={d} fill={stroke ? 'none' : 'currentColor'} stroke={stroke ? 'currentColor' : 'none'} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  )
+}
+
+function DemoSwitches() {
+  const { flags, set } = useDemo()
+  return (
+    <details className="fs-demo">
+      <summary className="kpi-label">Demo: edge cases</summary>
+      <Toggle id="demo-ai" checked={flags.aiDown} onChange={v => set('aiDown', v)} label="AI unavailable" />
+      <Toggle id="demo-conf" checked={flags.lowConfidence} onChange={v => set('lowConfidence', v)} label="Low AI confidence" />
+      <Toggle id="demo-viewer" checked={flags.otherViewer} onChange={v => set('otherViewer', v)} label="Someone else viewing" />
+    </details>
   )
 }
