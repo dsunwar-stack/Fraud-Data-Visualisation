@@ -87,14 +87,14 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
       <FilterBar f={f} set={setFilters} showRange counts={counts} />
 
       <section className="kpis" aria-label={`Key metrics, last ${f.range} hours`}>
-        <Kpi label={`Alerts (${f.range}h)`} value={alerts.toLocaleString()} tone={delta != null && delta > 10 ? 'bad' : 'neutral'}
+        <Kpi label={`Alerts (${f.range}h)`} info={`Every alert the fraud rules raised in the last ${f.range} hours, across all risk bands. The line shows alerts per hour; compare with the prior period to spot a spike, which can mean an attack in progress.`} value={alerts.toLocaleString()} tone={delta != null && delta > 10 ? 'bad' : 'neutral'}
           delta={delta == null ? 'No prior period in range' : variant === 'B' ? `${alerts - total(prev!) >= 0 ? '+' : '−'}${Math.abs(alerts - total(prev!)).toLocaleString()} vs prior ${f.range}h (${total(prev!).toLocaleString()})` : `${delta > 0 ? '+' : ''}${delta}% vs prior ${f.range}h`} spark={cur.map(h => h.high + h.medium + h.low)} labels={hourLabels} unit="alerts" />
-        <Kpi label="High-risk alerts" value={String(high)} delta={f.bands.has('high') ? (variant === 'B' ? `of ${alerts.toLocaleString()} alerts` : `${pct(high, alerts)}% of volume`) : 'High band hidden'} tone="bad"
+        <Kpi label="High-risk alerts" info="Alerts scoring 70 or more out of 100. They have a 4-hour SLA and the recommendation is Decline. A rise here usually needs more specialists on the queue." value={String(high)} delta={f.bands.has('high') ? (variant === 'B' ? `of ${alerts.toLocaleString()} alerts` : `${pct(high, alerts)}% of volume`) : 'High band hidden'} tone="bad"
           spark={cur.map(h => h.high)} color={bandVar('high')} labels={hourLabels} unit="high-risk alerts" />
-        <Kpi label="Auto-declined" value={String(auto)} delta={`Score ≥ ${AUTO_DECLINE}`} tone="neutral" spark={cur.map(h => h.autoDeclined)} labels={hourLabels} unit="auto-declined" />
-        <Kpi label={f.includeDecided ? 'Cases' : 'Open cases'} value={String(cases.length)} delta={cases.length ? `Average score ${avgScore}` : 'None match filters'} tone="neutral"
+        <Kpi label="Auto-declined" info="Alerts scoring 85 or more are declined automatically, without a specialist. A sudden rise can mean a fraud attack, or a rule that is too strict and blocking genuine customers." value={String(auto)} delta={`Score ≥ ${AUTO_DECLINE}`} tone="neutral" spark={cur.map(h => h.autoDeclined)} labels={hourLabels} unit="auto-declined" />
+        <Kpi label={f.includeDecided ? 'Cases' : 'Open cases'} info="Cases still waiting for a decision. Average score is the mean risk score of those cases (0–100). The line shows the backlog over time: if it keeps rising, cases are coming in faster than they are decided." value={String(cases.length)} delta={cases.length ? `Average score ${avgScore}` : 'None match filters'} tone="neutral"
           spark={history.map(h => h.open)} labels={endLabels} unit="open cases" />
-        <Kpi label="SLA due < 1h" value={String(slaRisk.length)} delta={`${open.filter(c => c.slaDueAt < NOW).length} already breached`}
+        <Kpi label="SLA due < 1h" info="Open cases whose SLA (the deadline to decide) ends within the next hour. ‘Already breached’ counts cases past their deadline: they need a decision or referral now." value={String(slaRisk.length)} delta={`${open.filter(c => c.slaDueAt < NOW).length} already breached`}
           tone={slaRisk.length ? 'bad' : 'good'} spark={history.map(h => h.slaRisk)} color={bandVar('medium')} labels={endLabels} unit="due < 1h or breached" />
       </section>
 
@@ -225,10 +225,10 @@ export function Overview({ onOpen, filters, setFilters }: { onOpen: (id: string)
 
 const Empty = () => <ScopedNotification>Nothing matches these filters. Clear a filter to see data.</ScopedNotification>
 
-function Kpi({ label, value, delta, tone, spark, color, labels, unit }: { label: string; value: string; delta: string; tone: 'good' | 'bad' | 'neutral'; spark: number[]; color?: string; labels: string[]; unit: string }) {
+function Kpi({ label, value, delta, tone, spark, color, labels, unit, info }: { info?: string; label: string; value: string; delta: string; tone: 'good' | 'bad' | 'neutral'; spark: number[]; color?: string; labels: string[]; unit: string }) {
   return (
     <div className="slds-card card kpi">
-      <span className="kpi-label">{label}</span>
+      <span className="kpi-label">{label}{info && <InfoTip label={label}><span>{info}</span></InfoTip>}</span>
       <span className="kpi-value num">{value}</span>
       <span className={`kpi-delta ${tone}`}>{delta}</span>
       <Sparkline values={spark} color={color} labels={labels} unit={unit} />

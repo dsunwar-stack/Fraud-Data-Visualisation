@@ -115,13 +115,13 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
       })}
 
       <section className="kpis" aria-label="Team status now">
-        <Tile label="SLA breached" value={breached.length} note={`${breached.filter(c => c.band === 'high').length} high risk · was ${hist.breached[0]} 24h ago`} tone="bad"
+        <Tile label="SLA breached" info="Open cases past their SLA, the deadline to decide (4h high risk, 24h medium, 48h low). The line shows how many were breached each hour over the last 24 hours." value={breached.length} note={`${breached.filter(c => c.band === 'high').length} high risk · was ${hist.breached[0]} 24h ago`} tone="bad"
           spark={hist.breached} labels={hourLabels} unit="breached" color={bandVar('high')} />
-        <Tile label="Due within 1 hour" value={due1h.length} note={`${atRisk.length} due within 4 hours`} tone={due1h.length ? 'warn' : 'good'}
+        <Tile label="Due within 1 hour" info="Open cases that will breach their SLA in the next hour unless someone decides or refers them. These are the next to act on." value={due1h.length} note={`${atRisk.length} due within 4 hours`} tone={due1h.length ? 'warn' : 'good'}
           spark={hist.due1h} labels={hourLabels} unit="due within 1h" color={bandVar('medium')} />
-        <Tile label="Unassigned" value={unassigned.length} note={`${unassigned.filter(c => left(c) < 4 * H).length} due within 4 hours`} tone={unassigned.length ? 'warn' : 'good'}
+        <Tile label="Unassigned" info="Open cases nobody owns yet. Assign them from Act now; the suggested owner has the right skill and free capacity." value={unassigned.length} note={`${unassigned.filter(c => left(c) < 4 * H).length} due within 4 hours`} tone={unassigned.length ? 'warn' : 'good'}
           spark={hist.unassigned} labels={hourLabels} unit="unassigned" />
-        <Tile label="Team capacity" value={freeSlots} note={`free slots · ${available.length} of ${SPECIALISTS.length} specialists available`} tone="neutral"
+        <Tile label="Team capacity" info="How many more cases the available specialists can take, based on each person's limit. People on leave or in a meeting aren't counted." value={freeSlots} note={`free slots · ${available.length} of ${SPECIALISTS.length} specialists available`} tone="neutral"
           spark={hist.free} labels={hourLabels} unit="free slots" />
         <Tile label="AI recommendation agreed" value={agreed} note={`of ${decided.length} decided cases · ${decided.length - agreed} overridden`} tone="neutral"
           info="How often specialists decided the same as the AI recommended. Many overrides can mean the model needs review."

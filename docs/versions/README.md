@@ -35,6 +35,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [23](#round-23-one-container-style) | Why don't the cards have consistent borders, based on SLDS 2? | Removed the page header's extra border so it matches the cards; sparklines aligned | [`round-23`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-23) |
 | [24](#round-24-the-team-leads-problem-statement) | The team lead must see SLA breaches, who's working on what, who's busy or on holiday, and assign by skills with a recommendation | On leave with return date; Working on now; a reason under every suggestion | [`round-24`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-24) |
 | [25](#round-25-finding-the-transactional-and-behavioural-data) | "Where are the fraud transactional and behavioural data? I didn't see it." | Sections named after the original terms, open by default; a jump button on the case page; a note in layout A | [`round-25`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-25) |
+| [26](#round-26-explain-every-number) | "Maybe have an info icon to explain what they mean?" (metric tiles) | An ⓘ on every tile on Overview and Observability: what it counts and why it matters | [`round-26`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-26) |
 
 To run any round locally:
 
@@ -577,6 +578,16 @@ Fictional team and synthetic data, seeded separately so the existing cases don't
 - In layout A, a note explains the data is in layout B, with a one-click **Switch to layout B**.
 
 ![Evidence with transactional and behavioural history open](round-25-evidence.png)
+
+---
+
+## Round 26: Explain every number
+
+> **Feedback:** "Maybe have an info icon or something to explain what they mean?" (the metric tiles on Overview)
+
+**What changed:** every metric tile on **Overview** (alerts, high-risk, auto-declined, open cases, SLA due) and **Observability** (SLA breached, due within 1 hour, unassigned, team capacity, AI agreed) has an ⓘ that says **what the number counts** (e.g. "scoring 85 or more", "the deadline to decide") and **why it matters** (e.g. "a sudden rise can mean a fraud attack, or a rule that is too strict").
+
+![Info on the Auto-declined tile](round-26-tile-info.png)
 
 ---
 
