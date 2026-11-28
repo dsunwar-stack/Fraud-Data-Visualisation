@@ -133,13 +133,14 @@ export function Observability({ onOpen }: { onOpen: (id: string) => void }) {
       <section className="grid-2-1 fs-obs-charts">
         <div className="slds-card card">
           <header className="card-h"><div>
-            <h2 className="fs-h-info">Are we keeping up?<InfoTip label="Are we keeping up?"><span>New cases each hour against cases decided. When the line for new cases stays above decided, the backlog grows and SLA breaches follow.</span></InfoTip></h2>
-            <p className="sub">Cases in against cases decided, per hour, last 24 hours. Hover for values.</p>
+            <h2 className="fs-h-info">Are we keeping up?<InfoTip label="Are we keeping up?"><span><b>New cases:</b> cases the fraud scoring system raised for the team each hour. <b>Cases closed:</b> cases a specialist finished with Decline, Refer or Accept. When new cases stay above cases closed, the backlog grows (shaded) and SLA breaches follow.</span></InfoTip></h2>
+            <p className="sub">New cases against cases closed, per hour, last 24 hours. Hover for values.</p>
           </div></header>
-          <TrendChart ariaLabel="Cases in and decided per hour, last 24 hours" labels={hourLabels} xTick={hourTick} unit="cases"
+          <TrendChart ariaLabel="New cases and cases closed per hour, last 24 hours" labels={hourLabels} xTick={hourTick} unit="cases"
             marker={DEGRADED.length ? { index: outageIdx, label: outageLabel } : undefined}
-            series={[{ name: 'Cases in', values: hist.casesIn, color: 'var(--viz-brand)' }, { name: 'Decided', values: hist.decided, color: 'var(--viz-series-2)', dash: true }]} />
-          <p className="small fs-obs-read">Since {fmtTime(hist.hours[outageIdx])} UTC: <b>{hist.casesIn.slice(outageIdx).reduce((a, b) => a + b, 0)} in</b>, <b>{hist.decided.slice(outageIdx).reduce((a, b) => a + b, 0)} decided</b>. The backlog grew by {hist.backlog[23] - hist.backlog[outageIdx - 1]}.</p>
+            gap={DEGRADED.length ? { from: outageIdx, label: 'Backlog growing' } : undefined}
+            series={[{ name: 'New cases', values: hist.casesIn, color: 'var(--viz-brand)' }, { name: 'Cases closed', values: hist.decided, color: 'var(--viz-series-2)', dash: true }]} />
+          <p className="small fs-obs-read">Since {fmtTime(hist.hours[outageIdx])} UTC: <b>{hist.casesIn.slice(outageIdx).reduce((a, b) => a + b, 0)} new</b>, <b>{hist.decided.slice(outageIdx).reduce((a, b) => a + b, 0)} closed</b>. The backlog grew by {hist.backlog[23] - hist.backlog[outageIdx - 1]}.</p>
         </div>
         <div className="slds-card card">
           <header className="card-h"><div>

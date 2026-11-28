@@ -634,7 +634,11 @@ Small counts (for example 1 login against a usual of 0) read "About usual" rathe
 
 Also fixed: on Observability, the **suggested owner's reason** ("Suggested: Payment fraud skill · available · 8 free slots") was clipped at laptop width. It now wraps, so the "why" behind each recommendation is always readable.
 
+**"Are we keeping up?" relabelled** after the question "What do cases in and decided mean?": the lines are now **New cases** and **Cases closed**, the gap after the system degraded is shaded and labelled **Backlog growing**, and the read-out says "48 new, 26 closed". The info popup defines both terms.
+
 ![Compared with usual](round-28-compared-with-usual.png)
+
+![Are we keeping up, relabelled](round-28-keeping-up.png)
 
 ---
 

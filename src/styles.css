@@ -941,3 +941,4 @@ ul.ds-principles { list-style: disc; }
 /* Round 28: say how far from usual, and why a row is flagged */
 .fs-ev-why { margin-top: 2px; font-size: 0.75rem; color: var(--slds-g-color-on-surface-2, #5c5c5c); }
 .fs-ev-x { font-weight: var(--slds-g-font-weight-7, 700); white-space: nowrap; }
+.fs-trend-gap { fill: var(--risk-high); font-weight: var(--slds-g-font-weight-6, 600); }

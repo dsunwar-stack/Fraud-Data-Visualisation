@@ -222,9 +222,12 @@ export function ScoreCell({ score, band }: { score: number; band: Band }) {
 
 // ---------- Trend chart: 1–3 lines over time, one axis, crosshair + tooltip ----------
 export interface TrendSeries { name: string; values: number[]; color: string; dash?: boolean; area?: boolean }
-export function TrendChart({ series, labels, xTick, unit = '', height = 200, threshold, marker, ariaLabel, fmt = (v: number) => v.toLocaleString('en-GB') }: {
+export function TrendChart({ series, labels, xTick, unit = '', height = 200, threshold, marker, gap, ariaLabel, fmt = (v: number) => v.toLocaleString('en-GB') }: {
   series: TrendSeries[]; labels: string[]; xTick: (i: number) => string | null; unit?: string; height?: number
-  threshold?: { value: number; label: string }; marker?: { index: number; label: string }; ariaLabel: string; fmt?: (v: number) => string
+  threshold?: { value: number; label: string }; marker?: { index: number; label: string }
+  // Shade the gap between the first two series from an index onwards (e.g. new cases above cases closed = backlog growing).
+  gap?: { from: number; label: string }
+  ariaLabel: string; fmt?: (v: number) => string
 }) {
   const [ref, w] = useWidth<HTMLDivElement>()
   const [hover, setHover] = useState<number | null>(null)
@@ -267,6 +270,18 @@ export function TrendChart({ series, labels, xTick, unit = '', height = 200, thr
                 <text x={w - 2} y={y(threshold.value) - 4} textAnchor="end" className="axis fs-trend-thr">{threshold.label}</text>
               </g>
             )}
+            {gap && series.length > 1 && (() => {
+              const a = series[0].values, b = series[1].values, idx = Array.from({ length: n - gap.from }, (_, k) => gap.from + k)
+              const top = idx.map(i => `${x(i).toFixed(1)} ${y(Math.max(a[i], b[i])).toFixed(1)}`)
+              const bot = idx.slice().reverse().map(i => `${x(i).toFixed(1)} ${y(b[i]).toFixed(1)}`)
+              const mid = idx[Math.floor(idx.length / 2)]
+              return (
+                <g>
+                  <path d={`M${top.join('L')}L${bot.join('L')}Z`} fill="var(--risk-high)" opacity={0.16} />
+                  <text x={x(mid)} y={y(Math.max(a[mid], b[mid])) - 8} textAnchor="middle" className="axis fs-trend-gap">{gap.label}</text>
+                </g>
+              )
+            })()}
             {series.map(s => (
               <g key={s.name}>
                 {s.area && <path d={`${path(s.values)}L${x(n - 1)} ${y(0)}L${x(0)} ${y(0)}Z`} fill={s.color} opacity={0.12} />}
