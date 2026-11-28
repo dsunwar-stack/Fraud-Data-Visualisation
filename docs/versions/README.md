@@ -632,6 +632,8 @@ Fictional team and synthetic data, seeded separately so the existing cases don't
 
 Small counts (for example 1 login against a usual of 0) read "About usual" rather than a percentage, so noise doesn't look alarming. The flag reason always uses the last 7 days, which is what the flag is about, even when the table shows the 30-day view.
 
+Also fixed: on Observability, the **suggested owner's reason** ("Suggested: Payment fraud skill · available · 8 free slots") was clipped at laptop width. It now wraps, so the "why" behind each recommendation is always readable.
+
 ![Compared with usual](round-28-compared-with-usual.png)
 
 ---
