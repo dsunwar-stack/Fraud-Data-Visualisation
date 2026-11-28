@@ -11,6 +11,20 @@ type Period = 'd7' | 'd30'
 const gbp = (n: number) => '£' + Math.round(n).toLocaleString('en-GB')
 const fmt = (r: MetricRow, v: number) => r.unit === 'gbp' ? gbp(v) : (Math.round(v * 10) / 10).toLocaleString('en-GB')
 const ago = (d: Date) => { const days = Math.round((NOW.getTime() - d.getTime()) / 86_400_000); return days <= 0 ? 'today' : days === 1 ? '1 day ago' : `${days} days ago` }
+// How far a measure is from this customer's usual: one plain figure, so nobody has to do the maths.
+export function vsUsual(r: MetricRow, v: number): { short: string; why: string; distance: number } {
+  if (r.usual === null) return { short: 'New customer', why: 'raised by the fraud scoring system. New customer, so no history to compare', distance: 0 }
+  const u = r.usual
+  if (u === 0) return v > 0 ? { short: 'None usually', why: 'none in the last 3 months', distance: Infinity } : { short: 'Same as usual', why: 'same as usual', distance: 0 }
+  // Small counts (1 login vs 0) aren't news: a percentage would make noise look alarming.
+  if (!r.unusual && r.unit === 'count' && Math.abs(v - u) < 1.5) return { short: 'About usual', why: 'about usual', distance: 0 }
+  const ratio = v / u
+  if (ratio >= 1.1) { const x = ratio < 10 ? Math.round(ratio * 10) / 10 : Math.round(ratio); return { short: `${x}× usual`, why: `${x}× this customer's usual`, distance: Math.log(ratio) } }
+  if (ratio > 1) { const pct = Math.round((ratio - 1) * 100); return { short: `${pct}% above usual`, why: `${pct}% above this customer's usual`, distance: Math.log(ratio) } }
+  if (ratio < 1) { const pct = Math.round((1 - ratio) * 100); return { short: `${pct}% below usual`, why: `${pct}% below this customer's usual`, distance: -Math.log(Math.max(ratio, 0.01)) } }
+  return { short: 'Same as usual', why: 'same as usual', distance: 0 }
+}
+
 const date = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
 
 export interface EvidenceRequest { section: EvidenceSection; key?: string; n: number }
@@ -41,28 +55,37 @@ export function EvidenceCard({ c, degraded, openRequest }: { c: FraudCase; degra
   const periodLabel = period === 'd7' ? 'Last 7 days' : 'Last 30 days (weekly avg)'
 
   const metricTable = (rows: MetricRow[]) => {
+    // Unusual rows first, then the biggest departures from usual, so the strongest evidence is at the top.
     const shown = rows.filter(r => !unusualOnly || r.unusual)
+      .map(r => ({ r, v: r[period], cmp: vsUsual(r, r[period]) }))
+      .sort((x, y) => Number(y.r.unusual) - Number(x.r.unusual) || y.cmp.distance - x.cmp.distance)
     if (!shown.length) return <p className="muted small">Nothing unusual here.</p>
     return (
-      <div className="table-wrap">
-        <table className="slds-table slds-table_cell-buffer slds-table_bordered data fs-ev-table">
-          <thead><tr><th>Measure</th><th className="r">{periodLabel}</th><th className="r">Usual (weekly)</th><th className="r">Change</th><th>Source</th></tr></thead>
-          <tbody>
-            {shown.map(r => {
-              const v = r[period], diff = r.usual === null ? null : v - r.usual
-              return (
-                <tr key={r.key} id={`ev-row-${r.key}`} className={r.unusual ? 'is-unusual' : ''}>
-                  <td><span className="fs-ev-label">{r.label}<InfoTip label={r.label}><span>{r.help}</span></InfoTip></span>{r.unusual && <span className="slds-badge pill pill-high fs-ev-flag">Unusual</span>}</td>
-                  <td className="r num">{fmt(r, v)}</td>
-                  <td className="r num muted">{r.usual === null ? '—' : fmt(r, r.usual)}</td>
-                  <td className={`r num ${r.unusual ? 'bad' : ''}`}>{diff === null ? '—' : `${diff > 0 ? '+' : diff < 0 ? '−' : ''}${fmt(r, Math.abs(diff))}`}</td>
-                  <td><span className="slds-badge tag src">{sourceShort(r.source)}</span></td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+      <>
+        <div className="table-wrap">
+          <table className="slds-table slds-table_cell-buffer slds-table_bordered data fs-ev-table">
+            <thead><tr><th>Measure</th><th className="r">{periodLabel}</th><th className="r">Usual (weekly)</th><th className="r">Change</th><th className="r">Compared with usual</th><th>Source</th></tr></thead>
+            <tbody>
+              {shown.map(({ r, v, cmp }) => {
+                const diff = r.usual === null ? null : v - r.usual
+                return (
+                  <tr key={r.key} id={`ev-row-${r.key}`} className={r.unusual ? 'is-unusual' : ''}>
+                    <td>
+                      <span className="fs-ev-label">{r.label}<InfoTip label={r.label}><span>{r.help}</span></InfoTip></span>{r.unusual && <span className="slds-badge pill pill-high fs-ev-flag">Unusual</span>}
+                      {r.unusual && <div className="fs-ev-why">Why flagged: {r.usual === null ? cmp.why : r.usual === 0 ? `${fmt(r, r.d7)} in the last 7 days, none usually` : `${vsUsual(r, r.d7).why}, over the last 7 days`}</div>}
+                    </td>
+                    <td className="r num">{fmt(r, v)}</td>
+                    <td className="r num muted">{r.usual === null ? 'No history' : fmt(r, r.usual)}</td>
+                    <td className="r num muted">{diff === null ? 'n/a' : `${diff > 0 ? '+' : diff < 0 ? '−' : ''}${fmt(r, Math.abs(diff))}`}</td>
+                    <td className={`r num ${r.unusual ? 'fs-ev-x bad' : 'muted'}`}>{cmp.short}</td>
+                    <td><span className="slds-badge tag src">{sourceShort(r.source)}</span></td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </>
     )
   }
 

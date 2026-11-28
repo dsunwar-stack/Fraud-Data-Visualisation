@@ -37,6 +37,7 @@ All data is synthetic. Feedback is from the product designer reviewing the dashb
 | [25](#round-25-finding-the-transactional-and-behavioural-data) | "Where are the fraud transactional and behavioural data? I didn't see it." | Sections named after the original terms, open by default; a jump button on the case page; a note in layout A | [`round-25`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-25) |
 | [26](#round-26-explain-every-number) | "Maybe have an info icon to explain what they mean?" (metric tiles) | An ⓘ on every tile on Overview and Observability: what it counts and why it matters | [`round-26`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-26) |
 | [27](#round-27-edge-cases-and-failures) | "What if the graph or the AI fails?" … "Edge cases" | AI unavailable, low-confidence summary, borderline score, someone else viewing, capacity warning on bulk assign; demo switches | [`round-27`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-27) |
+| [28](#round-28-compared-with-usual-so-nobody-does-the-maths) | "Calculation should be there, right?" … "Build 1–4 in layout B" | Compared-with-usual column ("23× usual"), why each row is flagged, biggest changes first, blanks explained | [`round-28`](https://github.com/dsunwar-stack/Fraud-Data-Visualisation/tree/round-28) |
 
 To run any round locally:
 
@@ -613,6 +614,25 @@ Fictional team and synthetic data, seeded separately so the existing cases don't
 ![Borderline score](round-27-e3-borderline.png)
 
 ![Capacity warning](round-27-e5-capacity.png)
+
+---
+
+## Round 28: Compared with usual, so nobody does the maths
+
+> **Feedback:** "Calculation should be there, right? Or what will help with their faster decision making?" … "Yes, build 1–4 in layout B."
+
+**Principle:** a number is only useful once you know whether it's normal. Say how far from usual, and say why a row is flagged.
+
+| Change (layout B, Evidence card) | Before | After |
+|---|---|---|
+| **Compared with usual** column | Only "+£19,140", so the specialist still had to judge whether that's a lot | "23× usual", "40% below usual" or "About usual" |
+| **Why flagged** under each unusual row | An "Unusual" badge with no reason | "Why flagged: 23× this customer's usual, over the last 7 days" |
+| **Biggest first** | Rows in a fixed order | Unusual rows first, then by how far they are from usual |
+| **Blanks explained** | "—" for a new customer | "No history" and "New customer", under the existing new-customer notice |
+
+Small counts (for example 1 login against a usual of 0) read "About usual" rather than a percentage, so noise doesn't look alarming. The flag reason always uses the last 7 days, which is what the flag is about, even when the table shows the 30-day view.
+
+![Compared with usual](round-28-compared-with-usual.png)
 
 ---
 

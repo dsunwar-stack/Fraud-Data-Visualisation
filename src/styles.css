@@ -937,3 +937,7 @@ ul.ds-principles { list-style: disc; }
 .fs-demo-summary::before { content: "▸"; display: inline-block; transition: transform .15s; }
 .fs-demo[open] .fs-demo-summary::before { transform: rotate(90deg); }
 .fs-demo-hint { margin: 0; }
+
+/* Round 28: say how far from usual, and why a row is flagged */
+.fs-ev-why { margin-top: 2px; font-size: 0.75rem; color: var(--slds-g-color-on-surface-2, #5c5c5c); }
+.fs-ev-x { font-weight: var(--slds-g-font-weight-7, 700); white-space: nowrap; }
